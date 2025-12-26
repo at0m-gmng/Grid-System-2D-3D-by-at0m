@@ -52,22 +52,13 @@
 </div>
 
 <div>
-
-<style>
-details summary 
-{
-    font-size: 1.6em;
-    font-weight: bold;
-}
-</style>
-
 <details>
-<summary><b>How do I create a new entity?</b></summary>
+<summary style="font-size: 1.6em; font-weight: bold;"><b>How do I create a new entity?</b></summary>
 <p> Create/Inventory/Select the desired data</p>
 </details>
 
 <details>
-<summary><b>How do I set up ItemData?</b></summary>
+<summary style="font-size: 1.6em; font-weight: bold;"><b>How do I set up ItemData?</b></summary>
 <p>
 1) Create data in the "Create/Inventory/ItemData" path.<br>
 2) In the created ItemData, configure Rows and Columns as if your item were rectangular.<br>
@@ -84,7 +75,7 @@ Since our matrix is rectangular, complex objects will have empty cells in additi
 </details>
 
 <details>
-<summary><b>How do I create a new Grid?</b></summary>
+<summary style="font-size: 1.6em; font-weight: bold;"><b>How do I create a new Grid?</b></summary>
 <p> 
 1) Create an InventoryConfig and configure its dimensions and cell prefab.<br>
 2) Now you need to add your new Grid to InventoriesConfig and assign it the desired type.
