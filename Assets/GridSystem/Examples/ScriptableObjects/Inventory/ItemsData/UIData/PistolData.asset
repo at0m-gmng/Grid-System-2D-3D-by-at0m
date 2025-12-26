@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7588dcc497b77154ca0be7a9d907b048, type: 3}
+  m_Name: PistolData
+  m_EditorClassIdentifier: 
+  <Item>k__BackingField:
+    <Grid>k__BackingField:
+      Rows:
+      - Columns: 0200000001000000
+      - Columns: 0100000000000000
+    <Id>k__BackingField: abfc8848c29765749a9044df858176ef
+    <Type>k__BackingField: 2
+    <Level>k__BackingField: 0
+    <UIPrefab>k__BackingField: {fileID: 4057877417496409302, guid: 241024e9f408530478e884d560931f1b, type: 3}
+    <WorldPrefab>k__BackingField: {fileID: 0}
+    <IsRotatable>k__BackingField: 1
+    <IsMergable>k__BackingField: 0
+    <EditorGrid>k__BackingField:
+      _rows: 2
+      _columns: 2
+      _cellSize: 2
+      _grid:
+        Rows:
+        - Columns: 0200000001000000
+        - Columns: 0100000000000000
+  <BaseItemView>k__BackingField:
+    Name: PISTOL
+    AttackSpeed: 1
+    Damage: 2
+    Range: 3
