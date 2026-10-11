@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e41a77ff31030734fba8d8684b6a2e56, type: 3}
   m_Name: PointerInputConfig
   m_EditorClassIdentifier: GridSystem.Runtime::GridSystem.Runtime.Pointer.PointerInputConfig
-  _point: {fileID: -1178915303871233409, guid: 17a33b960dda6e048b82bc5648d9d6e8, type: 3}
-  _press: {fileID: 6212518423043871569, guid: 17a33b960dda6e048b82bc5648d9d6e8, type: 3}
-  _rotate: {fileID: 6674249330058416227, guid: 17a33b960dda6e048b82bc5648d9d6e8, type: 3}
+  _point: {fileID: 5087202230355339226, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}
+  _press: {fileID: -4228819485948658372, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}
+  _rotate: {fileID: -1655632102837748233, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}
