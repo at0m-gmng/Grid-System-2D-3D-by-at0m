@@ -44,7 +44,7 @@
 
 ## 1. Ввод
 
-Используется ассет старого примера `Assets/GridSystem/Examples/Scripts/InputSystem/GameInput.inputactions`. Новый не создаём.
+Используется `Assets/GridSystem/New/Samples/Input/GameInput.inputactions` — ассет старого примера, перенесён с тем же GUID (старая сцена `Examples` продолжает на него ссылаться).
 
 | Map | Action | Тип | Binding | Назначение |
 |---|---|---|---|---|

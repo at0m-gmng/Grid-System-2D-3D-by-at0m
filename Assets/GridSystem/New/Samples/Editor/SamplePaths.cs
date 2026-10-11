@@ -48,7 +48,7 @@ namespace GridSystem.Samples.Editor
         /// <summary>
         /// Input actions of the old example: DragDrop (LMB_Hold, Moved, Rotation) and Control (Inventory, Interaction, SLWorld) maps.
         /// </summary>
-        public const string INPUT_ACTIONS = "Assets/GridSystem/Examples/Scripts/InputSystem/GameInput.inputactions";
+        public const string INPUT_ACTIONS = "Assets/GridSystem/New/Samples/Input/GameInput.inputactions";
 
         /// <summary>
         /// Item sprites of the old example.
