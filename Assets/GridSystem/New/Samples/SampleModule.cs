@@ -23,6 +23,8 @@ namespace GridSystem.Samples
         {
             registrar.RegisterInstance(_data);
             registrar.RegisterInstance(_tooltip);
+            registrar.Register<SampleWindowPresenter>();
+            registrar.Register<SampleAutoSave>();
             registrar.Register<SampleBootstrap>();
             registrar.Register<ItemTooltipPresenter>();
         }

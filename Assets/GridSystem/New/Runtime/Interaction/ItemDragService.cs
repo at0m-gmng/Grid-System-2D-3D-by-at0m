@@ -4,202 +4,174 @@ namespace GridSystem.Runtime.Interaction
     using System.Collections.Generic;
     using System.Linq;
     using Composition;
+    using Core.Inventories;
     using Core.Items;
     using Core.Shapes;
     using Drop;
     using MessagePipe;
     using Messaging;
-    using Pointer;
-    using R3;
     using Surfaces;
     using UnityEngine;
-    using Views;
 
     /// <summary>
-    /// Pointer driven drag and drop between any opened surfaces, including UI and World.
-    /// The dragged item stays in its inventory until a drop handler accepts the drop.
+    /// Drag and drop state machine. Listens to pointer messages, evaluates drop handlers
+    /// only when the target changes and publishes drag messages. Knows nothing about views.
     /// </summary>
-    public sealed class ItemDragService : IItemDragService, IGridInitializable, IDisposable
+    public sealed class ItemDragService : IGridInitializable, IDisposable
     {
-        public ItemDragService(IPointerInput input, ISurfaceLocator locator, IEnumerable<IItemDropHandler> handlers,
-            IPublisher<ItemDragStartedMessage> startedPublisher, IPublisher<ItemDragEndedMessage> endedPublisher,
-            ISubscriber<SurfaceClosedMessage> closedSubscriber)
+        public ItemDragService(ISurfaceLocator locator, IEnumerable<IItemDropHandler> handlers,
+            ISubscriber<PointerButtonMessage> buttonSubscriber, ISubscriber<PointerMovedMessage> movedSubscriber,
+            ISubscriber<RotateRequestedMessage> rotateSubscriber, ISubscriber<SurfaceClosedMessage> closedSubscriber,
+            IPublisher<ItemDragStartedMessage> startedPublisher, IPublisher<ItemDragUpdatedMessage> updatedPublisher,
+            IPublisher<ItemDragEndedMessage> endedPublisher)
         {
-            _input = input;
             _locator = locator;
-            _closedSubscriber = closedSubscriber;
             _handlers = handlers.OrderBy(handler => handler.Order).ToArray();
+            _buttonSubscriber = buttonSubscriber;
+            _movedSubscriber = movedSubscriber;
+            _rotateSubscriber = rotateSubscriber;
+            _closedSubscriber = closedSubscriber;
             _startedPublisher = startedPublisher;
+            _updatedPublisher = updatedPublisher;
             _endedPublisher = endedPublisher;
         }
 
-        private readonly IPointerInput _input;
         private readonly ISurfaceLocator _locator;
         private readonly IItemDropHandler[] _handlers;
-        private readonly IPublisher<ItemDragStartedMessage> _startedPublisher;
-        private readonly IPublisher<ItemDragEndedMessage> _endedPublisher;
+        private readonly ISubscriber<PointerButtonMessage> _buttonSubscriber;
+        private readonly ISubscriber<PointerMovedMessage> _movedSubscriber;
+        private readonly ISubscriber<RotateRequestedMessage> _rotateSubscriber;
         private readonly ISubscriber<SurfaceClosedMessage> _closedSubscriber;
+        private readonly IPublisher<ItemDragStartedMessage> _startedPublisher;
+        private readonly IPublisher<ItemDragUpdatedMessage> _updatedPublisher;
+        private readonly IPublisher<ItemDragEndedMessage> _endedPublisher;
         private IDisposable _subscriptions;
         private GridItem _item;
-        private GridSurfacePresenter _source;
-        private GridSurfacePresenter _owner;
-        private ItemView _preview;
-        private IItemDropHandler _handler;
-        private DropContext _context;
+        private GridInventory _source;
+        private GridSurface _sourceSurface;
+        private GridSurface _surface;
+        private Vector2 _position;
         private int _rotation;
+        private bool _hasTarget;
+        private SurfaceHit _target;
+        private DropContext _context;
+        private IItemDropHandler _handler;
+
+        private bool IsDragging => _item != null;
 
         /// <summary>
-        /// True while an item is dragged.
-        /// </summary>
-        public bool IsDragging { get; private set; }
-
-        /// <summary>
-        /// Subscribes to pointer events.
+        /// Subscribes to pointer and surface messages.
         /// </summary>
         public void Initialize()
         {
-            _subscriptions = Disposable.Combine(
-                _input.Pressed.Subscribe(this, static (_, service) => service.OnPressed()),
-                _input.Released.Subscribe(this, static (_, service) => service.OnReleased()),
-                _input.Rotated.Subscribe(this, static (_, service) => service.OnRotated()),
-                Observable.EveryUpdate().Subscribe(this, static (_, service) => service.OnUpdate()),
+            _subscriptions = DisposableBag.Create(
+                _buttonSubscriber.Subscribe(OnButton),
+                _movedSubscriber.Subscribe(OnMoved),
+                _rotateSubscriber.Subscribe(OnRotate),
                 _closedSubscriber.Subscribe(OnSurfaceClosed));
         }
 
         /// <summary>
-        /// Cancels the current drag without dropping.
-        /// </summary>
-        public void Cancel()
-        {
-            if (IsDragging)
-            {
-                _handler = null;
-                End();
-            }
-        }
-
-        /// <summary>
-        /// Unsubscribes from pointer events.
+        /// Unsubscribes.
         /// </summary>
         public void Dispose() => _subscriptions.Dispose();
 
-        private void OnPressed()
+        private void OnButton(PointerButtonMessage message)
         {
-            if (!IsDragging && _locator.TryPick(_input.Position, out SurfaceHit hit) && hit.Item != null)
+            _position = message.ScreenPosition;
+            if (message.IsPressed)
             {
-                Begin(hit);
+                TryBegin();
+            }
+            else if (IsDragging)
+            {
+                End(_handler != null);
             }
         }
 
-        private void OnReleased()
+        private void OnMoved(PointerMovedMessage message)
         {
+            _position = message.ScreenPosition;
             if (IsDragging)
             {
-                End();
+                Evaluate();
+                PublishUpdate();
             }
         }
 
-        private void OnRotated()
+        private void OnRotate(RotateRequestedMessage message)
         {
             if (IsDragging && _item.Definition.IsRotatable)
             {
                 _rotation = GridShape.NormalizeRotation(_rotation + 1);
-                _preview.RotateTo(_owner.Surface.GetRotation(_rotation));
-                UpdateTarget();
+                _hasTarget = false;
+                Evaluate();
+                PublishUpdate();
             }
         }
 
         private void OnSurfaceClosed(SurfaceClosedMessage message)
         {
-            if (IsDragging && (message.Surface == _owner.Surface || message.Surface == _source.Surface))
+            if (IsDragging && (message.Surface == _surface || message.Surface == _sourceSurface))
             {
-                Cancel();
+                End(false);
             }
         }
 
-        private void OnUpdate()
+        private void TryBegin()
         {
-            if (IsDragging)
+            if (!IsDragging && _locator.TryPick(_position, out SurfaceHit hit) && hit.Item != null)
             {
-                UpdateTarget();
+                _item = hit.Item;
+                _source = hit.Inventory;
+                _sourceSurface = hit.Surface;
+                _surface = hit.Surface;
+                _rotation = hit.Item.Rotation;
+                _hasTarget = false;
+                _startedPublisher.Publish(new ItemDragStartedMessage(_item, _source, _sourceSurface));
+                Evaluate();
+                PublishUpdate();
             }
         }
 
-        private void Begin(in SurfaceHit hit)
+        private void Evaluate()
         {
-            IsDragging = true;
-            _item = hit.Item;
-            _source = hit.Presenter;
-            _rotation = _item.Rotation;
-            _source.SetItemVisible(_item.Id, false);
-            _source.TryGetView(_item.Id, out ItemView view);
-            AttachPreview(_source, view.Pose.position);
-            _startedPublisher.Publish(new ItemDragStartedMessage(_source.Inventory, _item));
-            UpdateTarget();
-        }
-
-        private void UpdateTarget()
-        {
-            Vector2 pointer = _input.Position;
-            bool hasHit = _locator.TryPick(pointer, out SurfaceHit hit);
-            if (hasHit && hit.Presenter != _owner)
+            bool hasHit = _locator.TryPick(_position, out SurfaceHit hit);
+            if (hasHit && (!_hasTarget || IsTargetChanged(hit)))
             {
-                _owner.ReleasePreview(_preview);
-                AttachPreview(hit.Presenter, hit.Presenter.Surface.GetCellPosition(hit.Cell));
-            }
-
-            if (_owner.Surface.TryGetWorldPoint(pointer, out Vector3 point))
-            {
-                _preview.Follow(point);
-            }
-
-            _handler = null;
-            if (hasHit)
-            {
-                _context = new DropContext(_item, _source.Inventory, hit.Presenter.Inventory, hit.Cell, _rotation, hit.Item);
+                _surface = hit.Surface;
+                _target = hit;
+                _context = new DropContext(_item, _source, hit.Inventory, hit.Cell, _rotation, hit.Item);
                 _handler = FindHandler(_context);
             }
+            else if (!hasHit)
+            {
+                _handler = null;
+            }
 
-            _preview.SetPlacementState(_handler != null ? PlacementState.Valid : PlacementState.Invalid);
+            _hasTarget = hasHit;
         }
 
-        private void End()
+        private bool IsTargetChanged(in SurfaceHit hit) => hit.Surface != _target.Surface || hit.Cell != _target.Cell || hit.Item != _target.Item;
+
+        private void PublishUpdate() => _updatedPublisher.Publish(new ItemDragUpdatedMessage(_item, _surface, _position, _rotation, _handler != null));
+
+        private void End(bool isDropped)
         {
-            Pose pose = _preview.Pose;
-            bool isDropped = _handler != null;
-            GridSurfacePresenter owner = _owner;
-            owner.ReleasePreview(_preview);
             if (isDropped)
             {
-                owner.ExpectArrival(_item.Id, pose);
                 _handler.Handle(_context);
-                owner.ClearArrival();
-                _source.SetItemVisible(_item.Id, true);
-            }
-            else if (owner == _source)
-            {
-                _source.ReturnItem(_item, pose);
-            }
-            else
-            {
-                _source.SetItemVisible(_item.Id, true);
             }
 
-            _endedPublisher.Publish(new ItemDragEndedMessage(_source.Inventory, _item, isDropped));
-            IsDragging = false;
+            _endedPublisher.Publish(new ItemDragEndedMessage(_item, _source, _sourceSurface, _surface, isDropped));
             _item = null;
             _source = null;
-            _owner = null;
-            _preview = null;
+            _sourceSurface = null;
+            _surface = null;
             _handler = null;
+            _hasTarget = false;
+            _target = default;
             _context = default;
-        }
-
-        private void AttachPreview(GridSurfacePresenter owner, Vector3 position)
-        {
-            _owner = owner;
-            _preview = owner.RentPreview(_item.Definition);
-            _preview.Snap(new Pose(position, owner.Surface.GetRotation(_rotation)));
         }
 
         private IItemDropHandler FindHandler(in DropContext context)

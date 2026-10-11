@@ -2,26 +2,33 @@ namespace GridSystem.Runtime.Messaging
 {
     using Core.Inventories;
     using Core.Items;
+    using Surfaces;
 
     /// <summary>
     /// Published when the user starts dragging an item.
     /// </summary>
     public readonly struct ItemDragStartedMessage
     {
-        public ItemDragStartedMessage(GridInventory source, GridItem item)
+        public ItemDragStartedMessage(GridItem item, GridInventory source, GridSurface sourceSurface)
         {
-            Source = source;
             Item = item;
+            Source = source;
+            SourceSurface = sourceSurface;
         }
-
-        /// <summary>
-        /// Inventory the item is dragged from.
-        /// </summary>
-        public readonly GridInventory Source;
 
         /// <summary>
         /// Dragged item.
         /// </summary>
         public readonly GridItem Item;
+
+        /// <summary>
+        /// Inventory containing the item.
+        /// </summary>
+        public readonly GridInventory Source;
+
+        /// <summary>
+        /// Surface the item is dragged from.
+        /// </summary>
+        public readonly GridSurface SourceSurface;
     }
 }

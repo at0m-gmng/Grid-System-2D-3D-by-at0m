@@ -2,56 +2,45 @@ namespace GridSystem.Runtime.Pointer
 {
     using System;
     using Composition;
-    using R3;
+    using MessagePipe;
+    using Messaging;
     using UnityEngine;
     using UnityEngine.InputSystem;
 
     /// <summary>
-    /// Pointer source based on Unity Input System actions.
+    /// Translates Unity Input System actions into pointer messages. Replace it to use another input source.
     /// </summary>
-    public sealed class InputSystemPointerInput : IPointerInput, IGridInitializable, IDisposable
+    public sealed class InputSystemPointerInput : IGridInitializable, IDisposable
     {
-        public InputSystemPointerInput(PointerInputConfig config)
+        public InputSystemPointerInput(PointerInputConfig config, IPublisher<PointerMovedMessage> movedPublisher,
+            IPublisher<PointerButtonMessage> buttonPublisher, IPublisher<RotateRequestedMessage> rotatePublisher)
         {
             _config = config;
+            _movedPublisher = movedPublisher;
+            _buttonPublisher = buttonPublisher;
+            _rotatePublisher = rotatePublisher;
+            _onPoint = OnPoint;
             _onPressStarted = OnPressStarted;
             _onPressCanceled = OnPressCanceled;
             _onRotatePerformed = OnRotatePerformed;
         }
 
         private readonly PointerInputConfig _config;
+        private readonly IPublisher<PointerMovedMessage> _movedPublisher;
+        private readonly IPublisher<PointerButtonMessage> _buttonPublisher;
+        private readonly IPublisher<RotateRequestedMessage> _rotatePublisher;
+        private readonly Action<InputAction.CallbackContext> _onPoint;
         private readonly Action<InputAction.CallbackContext> _onPressStarted;
         private readonly Action<InputAction.CallbackContext> _onPressCanceled;
         private readonly Action<InputAction.CallbackContext> _onRotatePerformed;
-        private readonly Subject<Unit> _pressed = new();
-        private readonly Subject<Unit> _released = new();
-        private readonly Subject<Unit> _rotated = new();
-
-        /// <summary>
-        /// Current screen position.
-        /// </summary>
-        public Vector2 Position => _config.Point.ReadValue<Vector2>();
-
-        /// <summary>
-        /// Raised on press.
-        /// </summary>
-        public Observable<Unit> Pressed => _pressed;
-
-        /// <summary>
-        /// Raised on release.
-        /// </summary>
-        public Observable<Unit> Released => _released;
-
-        /// <summary>
-        /// Raised on rotate request.
-        /// </summary>
-        public Observable<Unit> Rotated => _rotated;
+        private Vector2 _position;
 
         /// <summary>
         /// Subscribes and enables actions.
         /// </summary>
         public void Initialize()
         {
+            _config.Point.performed += _onPoint;
             _config.Press.started += _onPressStarted;
             _config.Press.canceled += _onPressCanceled;
             _config.Rotate.performed += _onRotatePerformed;
@@ -65,21 +54,25 @@ namespace GridSystem.Runtime.Pointer
         /// </summary>
         public void Dispose()
         {
+            _config.Point.performed -= _onPoint;
             _config.Press.started -= _onPressStarted;
             _config.Press.canceled -= _onPressCanceled;
             _config.Rotate.performed -= _onRotatePerformed;
             _config.Point.Disable();
             _config.Press.Disable();
             _config.Rotate.Disable();
-            _pressed.Dispose();
-            _released.Dispose();
-            _rotated.Dispose();
         }
 
-        private void OnPressStarted(InputAction.CallbackContext context) => _pressed.OnNext(Unit.Default);
+        private void OnPoint(InputAction.CallbackContext context)
+        {
+            _position = context.ReadValue<Vector2>();
+            _movedPublisher.Publish(new PointerMovedMessage(_position));
+        }
 
-        private void OnPressCanceled(InputAction.CallbackContext context) => _released.OnNext(Unit.Default);
+        private void OnPressStarted(InputAction.CallbackContext context) => _buttonPublisher.Publish(new PointerButtonMessage(_position, true));
 
-        private void OnRotatePerformed(InputAction.CallbackContext context) => _rotated.OnNext(Unit.Default);
+        private void OnPressCanceled(InputAction.CallbackContext context) => _buttonPublisher.Publish(new PointerButtonMessage(_position, false));
+
+        private void OnRotatePerformed(InputAction.CallbackContext context) => _rotatePublisher.Publish(new RotateRequestedMessage());
     }
 }

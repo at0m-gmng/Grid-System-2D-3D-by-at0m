@@ -21,6 +21,7 @@ namespace GridSystem.Core.Inventories
         }
 
         private readonly Dictionary<int, GridItem> _items = new();
+        private readonly List<GridItem> _buffer = new();
         private readonly Subject<GridItem> _added = new();
         private readonly Subject<GridItem> _removed = new();
         private readonly Subject<ItemMovement> _moved = new();
@@ -193,17 +194,20 @@ namespace GridSystem.Core.Inventories
         }
 
         /// <summary>
-        /// Removes every item.
+        /// Removes every item. Events are raised after the inventory is cleared.
         /// </summary>
         public void Clear()
         {
+            _buffer.Clear();
+            _buffer.AddRange(_items.Values);
+            _items.Clear();
             Model.Clear();
-            foreach (GridItem item in _items.Values)
+            for (int i = 0; i < _buffer.Count; i++)
             {
-                _removed.OnNext(item);
+                _removed.OnNext(_buffer[i]);
             }
 
-            _items.Clear();
+            _buffer.Clear();
         }
 
         /// <summary>

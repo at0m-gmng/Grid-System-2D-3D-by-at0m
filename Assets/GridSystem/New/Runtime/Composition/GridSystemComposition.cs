@@ -33,6 +33,7 @@ namespace GridSystem.Runtime.Composition
             registrar.Register<GridItemFactory>();
             registrar.Register<InventoryService>();
             registrar.Register<InventoryPersistence>();
+            registrar.Register<GridSurfacePresenterFactory>();
             registrar.Register<SurfaceService>();
             registrar.Register<MergeDropHandler>();
             registrar.Register<PlaceDropHandler>();

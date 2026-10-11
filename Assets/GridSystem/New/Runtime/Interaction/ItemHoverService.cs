@@ -6,54 +6,83 @@ namespace GridSystem.Runtime.Interaction
     using Core.Items;
     using MessagePipe;
     using Messaging;
-    using Pointer;
-    using R3;
     using Surfaces;
+    using UnityEngine;
 
     /// <summary>
-    /// Publishes hovered item changes while nothing is dragged.
+    /// Publishes hovered item changes while nothing is dragged. Works only on pointer and drag messages.
     /// </summary>
     public sealed class ItemHoverService : IGridInitializable, IDisposable
     {
-        public ItemHoverService(IPointerInput input, ISurfaceLocator locator, IItemDragService dragService, IPublisher<ItemHoverMessage> publisher)
+        public ItemHoverService(ISurfaceLocator locator, ISubscriber<PointerMovedMessage> movedSubscriber,
+            ISubscriber<ItemDragStartedMessage> dragStartedSubscriber, ISubscriber<ItemDragEndedMessage> dragEndedSubscriber,
+            IPublisher<ItemHoverMessage> publisher)
         {
-            _input = input;
             _locator = locator;
-            _dragService = dragService;
+            _movedSubscriber = movedSubscriber;
+            _dragStartedSubscriber = dragStartedSubscriber;
+            _dragEndedSubscriber = dragEndedSubscriber;
             _publisher = publisher;
         }
 
-        private readonly IPointerInput _input;
         private readonly ISurfaceLocator _locator;
-        private readonly IItemDragService _dragService;
+        private readonly ISubscriber<PointerMovedMessage> _movedSubscriber;
+        private readonly ISubscriber<ItemDragStartedMessage> _dragStartedSubscriber;
+        private readonly ISubscriber<ItemDragEndedMessage> _dragEndedSubscriber;
         private readonly IPublisher<ItemHoverMessage> _publisher;
-        private IDisposable _subscription;
+        private IDisposable _subscriptions;
         private GridItem _item;
+        private Vector2 _position;
+        private bool _isDragging;
 
         /// <summary>
-        /// Starts tracking.
+        /// Subscribes to pointer and drag messages.
         /// </summary>
-        public void Initialize() => _subscription = Observable.EveryUpdate().Subscribe(this, static (_, service) => service.OnUpdate());
+        public void Initialize()
+        {
+            _subscriptions = DisposableBag.Create(
+                _movedSubscriber.Subscribe(OnMoved),
+                _dragStartedSubscriber.Subscribe(OnDragStarted),
+                _dragEndedSubscriber.Subscribe(OnDragEnded));
+        }
 
         /// <summary>
-        /// Stops tracking.
+        /// Unsubscribes.
         /// </summary>
-        public void Dispose() => _subscription.Dispose();
+        public void Dispose() => _subscriptions.Dispose();
 
-        private void OnUpdate()
+        private void OnMoved(PointerMovedMessage message)
+        {
+            _position = message.ScreenPosition;
+            Evaluate();
+        }
+
+        private void OnDragStarted(ItemDragStartedMessage message)
+        {
+            _isDragging = true;
+            Evaluate();
+        }
+
+        private void OnDragEnded(ItemDragEndedMessage message)
+        {
+            _isDragging = false;
+            Evaluate();
+        }
+
+        private void Evaluate()
         {
             GridItem item = null;
             GridInventory inventory = null;
-            if (!_dragService.IsDragging && _locator.TryPick(_input.Position, out SurfaceHit hit))
+            if (!_isDragging && _locator.TryPick(_position, out SurfaceHit hit))
             {
                 item = hit.Item;
-                inventory = hit.Presenter.Inventory;
+                inventory = hit.Inventory;
             }
 
             if (item != _item)
             {
                 _item = item;
-                _publisher.Publish(new ItemHoverMessage(inventory, item));
+                _publisher.Publish(new ItemHoverMessage(inventory, item, _position));
             }
         }
     }

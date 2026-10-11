@@ -1,5 +1,6 @@
 namespace GridSystem.Runtime.Surfaces
 {
+    using Core.Inventories;
     using Core.Items;
     using UnityEngine;
 
@@ -8,17 +9,23 @@ namespace GridSystem.Runtime.Surfaces
     /// </summary>
     public readonly struct SurfaceHit
     {
-        public SurfaceHit(GridSurfacePresenter presenter, Vector2Int cell, GridItem item)
+        public SurfaceHit(GridSurface surface, GridInventory inventory, Vector2Int cell, GridItem item)
         {
-            Presenter = presenter;
+            Surface = surface;
+            Inventory = inventory;
             Cell = cell;
             Item = item;
         }
 
         /// <summary>
-        /// Picked surface presenter.
+        /// Picked surface.
         /// </summary>
-        public readonly GridSurfacePresenter Presenter;
+        public readonly GridSurface Surface;
+
+        /// <summary>
+        /// Inventory shown on the surface.
+        /// </summary>
+        public readonly GridInventory Inventory;
 
         /// <summary>
         /// Cell under the point.

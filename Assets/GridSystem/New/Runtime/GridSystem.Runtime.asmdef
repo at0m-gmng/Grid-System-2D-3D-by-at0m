@@ -3,8 +3,8 @@
     "rootNamespace": "GridSystem.Runtime",
     "references": [
         "GridSystem.Core",
-        "R3.Unity",
         "MessagePipe",
+        "UniTask",
         "Unity.InputSystem",
         "UnityEngine.UI",
         "PrimeTween.Runtime"

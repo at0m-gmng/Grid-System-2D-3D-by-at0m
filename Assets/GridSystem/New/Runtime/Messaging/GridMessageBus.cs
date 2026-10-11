@@ -16,10 +16,14 @@ namespace GridSystem.Runtime.Messaging
         {
             BuiltinContainerBuilder builder = new BuiltinContainerBuilder();
             builder.AddMessagePipe();
+            builder.AddMessageBroker<PointerMovedMessage>();
+            builder.AddMessageBroker<PointerButtonMessage>();
+            builder.AddMessageBroker<RotateRequestedMessage>();
             builder.AddMessageBroker<ItemAddedMessage>();
             builder.AddMessageBroker<ItemRemovedMessage>();
             builder.AddMessageBroker<ItemMovedMessage>();
             builder.AddMessageBroker<ItemDragStartedMessage>();
+            builder.AddMessageBroker<ItemDragUpdatedMessage>();
             builder.AddMessageBroker<ItemDragEndedMessage>();
             builder.AddMessageBroker<ItemHoverMessage>();
             builder.AddMessageBroker<ItemsMergedMessage>();
@@ -27,10 +31,14 @@ namespace GridSystem.Runtime.Messaging
             builder.AddMessageBroker<SurfaceClosedMessage>();
 
             IServiceProvider provider = builder.BuildServiceProvider();
+            RegisterBroker<PointerMovedMessage>(registrar, provider);
+            RegisterBroker<PointerButtonMessage>(registrar, provider);
+            RegisterBroker<RotateRequestedMessage>(registrar, provider);
             RegisterBroker<ItemAddedMessage>(registrar, provider);
             RegisterBroker<ItemRemovedMessage>(registrar, provider);
             RegisterBroker<ItemMovedMessage>(registrar, provider);
             RegisterBroker<ItemDragStartedMessage>(registrar, provider);
+            RegisterBroker<ItemDragUpdatedMessage>(registrar, provider);
             RegisterBroker<ItemDragEndedMessage>(registrar, provider);
             RegisterBroker<ItemHoverMessage>(registrar, provider);
             RegisterBroker<ItemsMergedMessage>(registrar, provider);

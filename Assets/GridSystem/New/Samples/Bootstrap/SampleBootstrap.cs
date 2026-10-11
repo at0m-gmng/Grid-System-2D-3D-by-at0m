@@ -10,7 +10,8 @@ namespace GridSystem.Samples.Bootstrap
     using Random = UnityEngine.Random;
 
     /// <summary>
-    /// Creates sample inventories, restores saves, fills empty ones and toggles the main window.
+    /// Creates sample inventories, restores saves, fills empty ones and toggles the main surface.
+    /// Window visibility and saving react to surface messages in separate classes.
     /// </summary>
     public sealed class SampleBootstrap : IGridInitializable, IDisposable
     {
@@ -97,7 +98,6 @@ namespace GridSystem.Samples.Bootstrap
 
         private void SetMainWindowOpened(bool isOpened)
         {
-            _data.MainWindow.SetActive(isOpened);
             if (isOpened)
             {
                 _surfaces.Open(_data.Main.Surface, _main);
@@ -105,7 +105,6 @@ namespace GridSystem.Samples.Bootstrap
             else
             {
                 _surfaces.Close(_data.Main.Surface);
-                _persistence.Save(_main);
             }
         }
     }

@@ -7,21 +7,21 @@ namespace GridSystem.Runtime.Surfaces
     using MessagePipe;
     using Messaging;
     using UnityEngine;
-    using Views;
 
     /// <summary>
     /// Owns surface presenters and picks surfaces by screen point.
     /// </summary>
     public sealed class SurfaceService : ISurfaceService, ISurfaceLocator, IDisposable
     {
-        public SurfaceService(ItemViewPool pool, IPublisher<SurfaceOpenedMessage> openedPublisher, IPublisher<SurfaceClosedMessage> closedPublisher)
+        public SurfaceService(GridSurfacePresenterFactory factory, IPublisher<SurfaceOpenedMessage> openedPublisher,
+            IPublisher<SurfaceClosedMessage> closedPublisher)
         {
-            _pool = pool;
+            _factory = factory;
             _openedPublisher = openedPublisher;
             _closedPublisher = closedPublisher;
         }
 
-        private readonly ItemViewPool _pool;
+        private readonly GridSurfacePresenterFactory _factory;
         private readonly IPublisher<SurfaceOpenedMessage> _openedPublisher;
         private readonly IPublisher<SurfaceClosedMessage> _closedPublisher;
         private readonly List<GridSurfacePresenter> _presenters = new();
@@ -32,7 +32,7 @@ namespace GridSystem.Runtime.Surfaces
         public void Open(GridSurface surface, GridInventory inventory)
         {
             Close(surface);
-            GridSurfacePresenter presenter = new GridSurfacePresenter(surface, inventory, _pool);
+            GridSurfacePresenter presenter = _factory.Create(surface, inventory);
             int index = 0;
             while (index < _presenters.Count && _presenters[index].Surface.Priority >= surface.Priority)
             {
@@ -77,7 +77,7 @@ namespace GridSystem.Runtime.Surfaces
                 {
                     isFound = true;
                     presenter.Inventory.TryGetItemAt(cell, out GridItem item);
-                    hit = new SurfaceHit(presenter, cell, item);
+                    hit = new SurfaceHit(presenter.Surface, presenter.Inventory, cell, item);
                 }
             }
 

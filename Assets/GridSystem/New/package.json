@@ -1,0 +1,22 @@
+{
+    "name": "com.at0m.gridsystem",
+    "version": "2.0.0",
+    "displayName": "Grid System 2D/3D",
+    "description": "Grid inventories and placement of irregularly shaped items on UI and World surfaces. DI agnostic: Zenject, VContainer and Reflex adapters compile automatically when the container is installed.",
+    "unity": "6000.0",
+    "license": "MIT",
+    "author": {
+        "name": "at0m",
+        "url": "https://github.com/at0m-gmng/Grid-System-2D-3D-by-at0m"
+    },
+    "keywords": [
+        "grid",
+        "inventory",
+        "placement",
+        "drag and drop"
+    ],
+    "dependencies": {
+        "com.unity.inputsystem": "1.14.0",
+        "com.unity.ugui": "2.0.0"
+    }
+}

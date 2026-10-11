@@ -5,22 +5,19 @@ namespace GridSystem.Samples.Tooltip
     using MessagePipe;
     using Runtime.Composition;
     using Runtime.Messaging;
-    using Runtime.Pointer;
 
     /// <summary>
     /// Shows tooltip of the hovered item when its definition has a description.
     /// </summary>
     public sealed class ItemTooltipPresenter : IGridInitializable, IDisposable
     {
-        public ItemTooltipPresenter(ItemTooltipView view, IPointerInput input, ISubscriber<ItemHoverMessage> hoverSubscriber)
+        public ItemTooltipPresenter(ItemTooltipView view, ISubscriber<ItemHoverMessage> hoverSubscriber)
         {
             _view = view;
-            _input = input;
             _hoverSubscriber = hoverSubscriber;
         }
 
         private readonly ItemTooltipView _view;
-        private readonly IPointerInput _input;
         private readonly ISubscriber<ItemHoverMessage> _hoverSubscriber;
         private IDisposable _subscription;
 
@@ -42,7 +39,7 @@ namespace GridSystem.Samples.Tooltip
         {
             if (message.Item != null && message.Item.Definition is IItemDescription description)
             {
-                _view.Show(description, _input.Position);
+                _view.Show(description, message.ScreenPosition);
             }
             else
             {

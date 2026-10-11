@@ -8,7 +8,7 @@
 ### Description
 - A Unity plugin for inventories and any other systems that need a grid and irregularly shaped items.
 - Version 2 lives in `Assets/GridSystem/New`. The old implementation in `Assets/GridSystem/Examples` is kept as a reference example.
-- Technology stack: R3, MessagePipe, PrimeTween or DOTween (optional), Unity Input System. Works with Zenject, VContainer or Reflex.
+- Technology stack: MessagePipe, UniTask, R3, Unity Input System, PrimeTween or DOTween (optional). Works with Zenject, VContainer or Reflex from one package.
 
 ### Unity versions
 - Unity 6 or higher.
@@ -17,7 +17,7 @@
 - 2D (Canvas) and 3D surfaces, items move freely between them (UI <-> World).
 - Complex shapes with a pivot cell and 4 precomputed rotations.
 - DI agnostic: one composition description, thin adapters for Zenject, VContainer and Reflex.
-- No allocations in hot paths: flat occupancy matrix, O(1) cell lookup, analytic screen-to-cell conversion (no raycasts), pooled views, struct messages.
+- No allocations in hot paths: flat occupancy matrix, O(1) cell lookup, analytic screen-to-cell conversion (no raycasts), event driven input (no per frame polling), drop handlers re-evaluated only when the target changes, pooled views, struct messages.
 - Extensible: drop handlers chain, custom surfaces, views, motions, highlighters, storages, modules.
 
 #### Road Map
@@ -26,61 +26,83 @@
 
 ## Architecture (v2)
 
-```
-Input (IPointerInput) ──► ItemDragService ──► IItemDropHandler chain (Merge → Place)
-                               │                        │
-                       ISurfaceLocator                  ▼
-                               │                 GridInventory (Core, pure C#)
-                               ▼                        │ R3 Added / Removed / Moved
-                     GridSurfacePresenter ◄─────────────┘
-                               │ pooled ItemView (Motion + Highlighter)
-                               ▼
-                     GridSurface (UIGridSurface / WorldGridSurface)
+Commands that return a result are called through interfaces (`IInventoryService`, `ISurfaceService`, `ISurfaceLocator`, `IInventoryPersistence`).
+Everything that only notifies goes through MessagePipe struct messages. Services do not call each other's views or state.
 
-InventoryService ──MessagePipe──► Item*Message, ItemsMerged, ItemHover, Surface*Message ──► any listener
+```
+InputSystemPointerInput ──► PointerMoved / PointerButton / RotateRequested
+                                         │
+             ┌───────────────────────────┴──────────────────────┐
+             ▼                                                  ▼
+      ItemDragService                                   ItemHoverService ──► ItemHover ──► tooltip
+  (state machine, drop handlers,                           
+   no views) ──► ItemDragStarted / Updated / Ended
+                         │
+                         ▼
+             GridSurfacePresenter (one per opened surface)
+             hides the dragged item, draws preview, animates arrival
+                         ▲
+GridInventory (Core) ── R3 Added / Removed / Moved ──┘
+       │
+InventoryService ──► ItemAdded / ItemRemoved / ItemMoved ──► any listener (saves, quests, UI)
+SurfaceService   ──► SurfaceOpened / SurfaceClosed      ──► windows, auto save, drag cancel
+MergeDropHandler ──► ItemsMerged
 ```
 
 | Assembly | Folder | Purpose |
 |---|---|---|
-| `GridSystem.Core` | `New/Core` | Shapes, occupancy model, items, inventories. No Unity view code. |
-| `GridSystem.Runtime` | `New/Runtime` | Definitions, surfaces, views, pointer, drag & drop, merge, persistence, messaging, composition. |
-| `GridSystem.Integrations.Zenject` | `New/Integrations/Zenject` | Zenject adapter. |
-| `GridSystem.Integrations.VContainer` | `New/Integrations/VContainer` | VContainer adapter. |
-| `GridSystem.Integrations.Reflex` | `New/Integrations/Reflex` | Reflex adapter. |
-| `GridSystem.Editor` | `New/Editor` | Shape editor in the inspector. |
-| `GridSystem.Samples` | `New/Samples` | Sample bootstrap, tooltip, extended item definition. |
+| `GridSystem.Core` | `Core` | Shapes, occupancy model, items, inventories. |
+| `GridSystem.Runtime` | `Runtime` | Definitions, surfaces, views, pointer, drag & drop, merge, persistence, messaging, composition. |
+| `GridSystem.Integrations.Zenject` | `Integrations/Zenject` | Zenject adapter, compiled only with `GRID_SYSTEM_ZENJECT`. |
+| `GridSystem.Integrations.VContainer` | `Integrations/VContainer` | VContainer adapter, compiled only with `GRID_SYSTEM_VCONTAINER`. |
+| `GridSystem.Integrations.Reflex` | `Integrations/Reflex` | Reflex adapter, compiled only with `GRID_SYSTEM_REFLEX`. |
+| `GridSystem.Editor` | `Editor` | Shape editor in the inspector. |
+| `GridSystem.Samples` | `Samples` | Sample module, not auto referenced. |
 
 Namespaces follow folders (`GridSystem.Runtime.Surfaces`, ...).
+
+## Installation
+
+One package contains everything. Adapters of containers that are not installed are not compiled.
+
+1. Dependencies (install first):
+   - [UniTask](https://github.com/Cysharp/UniTask) `https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask`
+   - [MessagePipe](https://github.com/Cysharp/MessagePipe) `https://github.com/Cysharp/MessagePipe.git?path=src/MessagePipe.Unity/Assets/Plugins/MessagePipe`
+   - [R3](https://github.com/Cysharp/R3): `R3` via NuGetForUnity and `https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity`
+   - Input System and uGUI are resolved automatically.
+2. Package: `https://github.com/at0m-gmng/Grid-System-2D-3D-by-at0m.git?path=Assets/GridSystem/New#v2.0.0` or the `.unitypackage` from Releases.
+3. One of the containers: Zenject (Extenject), VContainer or Reflex.
 
 ### Scripting defines
 
 | Define | Set by | Enables |
 |---|---|---|
-| `GRID_SYSTEM_PRIMETWEEN` | automatically (asmdef version define of `com.kyrylokuzyk.primetween`) | `PrimeTweenItemMotion` (allocation free, recommended) |
-| `DOTWEEN` | DOTween setup, Player Settings → Scripting Define Symbols | `DOTweenItemMotion` (enable DOTween recycling to avoid allocations) |
-| `GRID_SYSTEM_ZENJECT` | automatically for `com.svermeulen.extenject`, add manually if Zenject is in Assets | Zenject adapter |
-| `GRID_SYSTEM_VCONTAINER` | automatically for `jp.hadashikick.vcontainer` | VContainer adapter |
-| `GRID_SYSTEM_REFLEX` | automatically for `com.gustavopsantos.reflex` | Reflex adapter |
+| `GRID_SYSTEM_ZENJECT` | automatically for UPM `com.svermeulen.extenject`; add manually if Zenject is imported into Assets | Zenject adapter |
+| `GRID_SYSTEM_VCONTAINER` | automatically for UPM `jp.hadashikick.vcontainer`; add manually otherwise | VContainer adapter |
+| `GRID_SYSTEM_REFLEX` | automatically for UPM `com.gustavopsantos.reflex`; add manually otherwise | Reflex adapter |
+| `GRID_SYSTEM_PRIMETWEEN` | automatically for `com.kyrylokuzyk.primetween` | `PrimeTweenItemMotion` (allocation free, recommended) |
+| `DOTWEEN` | DOTween setup utility | `DOTweenItemMotion` (enable DOTween recycling to avoid allocations) |
 
-Without any tween use `InstantItemMotion`.
+Manual defines: Project Settings → Player → Scripting Define Symbols. Without tweens use `InstantItemMotion`.
 
 ### Setup
 
-1. Create assets (`Create/Grid System/...`): `Item Definition` for every item, `Item Definition Catalog`, `Merge Rules`, `Pointer Input Config` (Point: Vector2 pointer position, Press: button, Rotate: button), `Settings` referencing all of them, `Grid Definition` for every grid size, `Item View Catalog` per surface kind (UI, World).
-2. Item shape: set Width/Height, LMB toggles a cell, RMB sets the pivot cell. The pivot is the placement anchor and rotation center.
+1. Create assets (`Create/Grid System/...`): `Item Definition` for every item, `Item Definition Catalog`, `Merge Rules`, `Pointer Input Config` (Point: Value/Vector2 pointer position, Press: Button, Rotate: Button), `Settings` referencing them, `Grid Definition` for every grid size, `Item View Catalog` per surface kind (UI, World).
+2. Item shape: Width/Height, LMB toggles a cell, RMB sets the pivot cell (placement anchor and rotation center).
 3. Item view prefab:
-   - UI: root `RectTransform` with `UIItemView`, a body child with the image, `GraphicItemHighlighter` and a motion component. Size and pivot are calculated from the shape automatically.
-   - World: root with `WorldItemView`, model child centered on its bounds (1 unit per cell), `RendererItemHighlighter` and a motion component.
-4. Surfaces: `UIGridSurface` (grid `RectTransform`, event camera or none for Overlay) or `WorldGridSurface` (transform is the grid center on local XZ, camera). Assign items root, cells root, cell prefab, cell size, spacing and `Item View Catalog`. Overlapping surfaces are picked by `Priority` (put UI above World).
-5. Scene composition: add `GridSystemContext` (settings, inactive pool root, modules) and one adapter:
-   - Zenject: `ZenjectGridInstaller` in the SceneContext installers, or `Container.InstallGridSystem(context)`.
+   - UI: root `RectTransform` with `UIItemView`, a body child with the image, `GraphicItemHighlighter`, a motion component. Size and pivot are calculated from the shape.
+   - World: root with `WorldItemView`, model child centered on its bounds (1 unit per cell), `RendererItemHighlighter`, a motion component.
+4. Surfaces: `UIGridSurface` (grid `RectTransform`, event camera or none for Overlay) or `WorldGridSurface` (transform is the grid center on local XZ, camera). Assign items root, cells root, cell prefab, cell size, spacing, `Item View Catalog`. Overlapping surfaces are picked by `Priority` (UI above World).
+5. Scene: `GridSystemContext` (settings, inactive pool root, modules) and one adapter:
+   - Zenject: `ZenjectGridInstaller` in SceneContext installers, or `Container.InstallGridSystem(context)`.
    - VContainer: `GridSystemLifetimeScope`, or `builder.InstallGridSystem(context)` in your scope.
    - Reflex: `ReflexGridInstaller` on the scene `ContainerScope` object (or its child), or `builder.InstallGridSystem(context)`.
-6. Game code: inject `IInventoryService` (create inventories), `ISurfaceService` (open/close on surfaces), `IInventoryPersistence` (save/load), `IGridItemFactory`, subscribe to messages via `ISubscriber<T>`.
+6. Game code: call `IInventoryService`, `ISurfaceService`, `IInventoryPersistence`, `IGridItemFactory`; listen with `ISubscriber<T>` (all messages are in `GridSystem.Runtime.Messaging`).
 
 ### Extension points
-- `GridModule` – scene module registering your services through `IGridRegistrar` (works for every container).
+- `GridModule` – registers your services through `IGridRegistrar` for every container.
 - `IItemDropHandler` – custom drop logic (stacking, swapping, equipment slots); lower `Order` runs first.
+- Pointer source – replace `InputSystemPointerInput` with any publisher of pointer messages.
 - `ItemDefinition` – inherit to add game data (see `SampleItemDefinition`).
 - `GridSurface`, `ItemView`, `ItemMotion`, `ItemHighlighter`, `ISaveStorage` – replaceable building blocks.
 
