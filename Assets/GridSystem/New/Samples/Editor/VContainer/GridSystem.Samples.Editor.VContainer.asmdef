@@ -1,0 +1,29 @@
+{
+    "name": "GridSystem.Samples.Editor.VContainer",
+    "rootNamespace": "GridSystem.Samples.Editor.VContainer",
+    "references": [
+        "GridSystem.Runtime",
+        "GridSystem.Samples.Editor",
+        "GridSystem.Integrations.VContainer",
+        "VContainer"
+    ],
+    "defineConstraints": [
+        "GRID_SYSTEM_SAMPLES_VCONTAINER"
+    ],
+    "versionDefines": [
+        {
+            "name": "jp.hadashikick.vcontainer",
+            "expression": "",
+            "define": "GRID_SYSTEM_SAMPLES_VCONTAINER"
+        }
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "noEngineReferences": false
+}

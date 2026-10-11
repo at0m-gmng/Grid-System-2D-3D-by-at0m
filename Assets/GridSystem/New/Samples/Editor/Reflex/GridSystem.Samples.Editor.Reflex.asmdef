@@ -1,0 +1,29 @@
+{
+    "name": "GridSystem.Samples.Editor.Reflex",
+    "rootNamespace": "GridSystem.Samples.Editor.Reflex",
+    "references": [
+        "GridSystem.Runtime",
+        "GridSystem.Samples.Editor",
+        "GridSystem.Integrations.Reflex",
+        "Reflex"
+    ],
+    "defineConstraints": [
+        "GRID_SYSTEM_SAMPLES_REFLEX"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.gustavopsantos.reflex",
+            "expression": "",
+            "define": "GRID_SYSTEM_SAMPLES_REFLEX"
+        }
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "noEngineReferences": false
+}
