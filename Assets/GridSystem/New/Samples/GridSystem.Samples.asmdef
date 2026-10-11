@@ -7,8 +7,7 @@
         "MessagePipe",
         "UniTask",
         "Unity.InputSystem",
-        "UnityEngine.UI",
-        "Unity.TextMeshPro"
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

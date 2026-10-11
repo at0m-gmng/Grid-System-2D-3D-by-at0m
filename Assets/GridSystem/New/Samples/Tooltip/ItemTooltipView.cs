@@ -1,15 +1,15 @@
 namespace GridSystem.Samples.Tooltip
 {
     using Definitions;
-    using TMPro;
     using UnityEngine;
+    using UnityEngine.UI;
 
     /// <summary>
-    /// Passive tooltip widget.
+    /// Passive tooltip widget. Texts are formatted only when the hovered item changes.
     /// </summary>
     public sealed class ItemTooltipView : MonoBehaviour
     {
-        private const string VALUE_FORMAT = "{0:2}";
+        private const string VALUE_FORMAT = "0.##";
 
         [SerializeField]
         private GameObject _root;
@@ -18,26 +18,26 @@ namespace GridSystem.Samples.Tooltip
         private RectTransform _panel;
 
         [SerializeField]
-        private TMP_Text _name;
+        private Text _name;
 
         [SerializeField]
-        private TMP_Text _damage;
+        private Text _damage;
 
         [SerializeField]
-        private TMP_Text _attackSpeed;
+        private Text _attackSpeed;
 
         [SerializeField]
-        private TMP_Text _range;
+        private Text _range;
 
         /// <summary>
         /// Shows description near the screen point.
         /// </summary>
         public void Show(IItemDescription description, Vector2 screenPosition)
         {
-            _name.SetText(description.DisplayName);
-            _damage.SetText(VALUE_FORMAT, description.Damage);
-            _attackSpeed.SetText(VALUE_FORMAT, description.AttackSpeed);
-            _range.SetText(VALUE_FORMAT, description.Range);
+            _name.text = description.DisplayName;
+            _damage.text = description.Damage.ToString(VALUE_FORMAT);
+            _attackSpeed.text = description.AttackSpeed.ToString(VALUE_FORMAT);
+            _range.text = description.Range.ToString(VALUE_FORMAT);
             _panel.position = screenPosition;
             _root.SetActive(true);
         }

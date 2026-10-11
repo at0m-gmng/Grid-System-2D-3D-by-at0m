@@ -7,7 +7,6 @@
         "GridSystem.Samples",
         "Unity.InputSystem",
         "UnityEngine.UI",
-        "Unity.TextMeshPro",
         "PrimeTween.Runtime"
     ],
     "defineConstraints": [],
