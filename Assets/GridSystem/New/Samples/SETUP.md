@@ -1,15 +1,6 @@
 # Ручная настройка сцены примера
 
-## Автоматически
-`Tools → Grid System → Samples`:
-- `Create Content` — создаёт или обновляет все ассеты и префабы из шагов 1–3 в `Content/`.
-- `Create Scene → Reflex | Zenject | VContainer` — создаёт контент, новую сцену из шагов 4–6 с выбранным DI и сохраняет её в `Content/Scenes/GridSystem_<DI>.unity`. Пункт есть только для установленных DI. Для Reflex при отсутствии создаётся `Assets/Resources/ReflexSettings`.
-
-Перед первым запуском: `Window → TextMeshPro → Import TMP Essential Resources` (шрифт описания предмета). Генератор перезаписывает префабы и ассеты в `Content/`, ручные правки в них не сохраняются.
-
-Ниже — то же самое руками, с описанием каждого объекта и компонента.
-
-## Вручную
+Перед первым запуском: `Window → TextMeshPro → Import TMP Essential Resources` (шрифт описания предмета).
 
 Сцена повторяет старый пример (`Examples`): те же имена объектов, тот же `GameInput`, клавиши `I` / `E` / `C`.
 Состав: UI-инвентарь `MainInventory` (6×4, `I`), сундук `OthersInventories` (4×4, `E`), «рука» `OutsideParent` (6×2, всегда открыта, внизу экрана), 3D-сетка `WorldPrefab` (10×10, `C`), панель описания `InventoryItemView`. Drag&drop между всеми (включая UI ↔ 3D), поворот, merge, сохранения.
