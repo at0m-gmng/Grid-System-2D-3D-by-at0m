@@ -22,6 +22,7 @@ namespace GridSystem.Runtime.Messaging
             builder.AddMessageBroker<ItemAddedMessage>();
             builder.AddMessageBroker<ItemRemovedMessage>();
             builder.AddMessageBroker<ItemMovedMessage>();
+            builder.AddMessageBroker<InventoryDestroyedMessage>();
             builder.AddMessageBroker<ItemDragStartedMessage>();
             builder.AddMessageBroker<ItemDragUpdatedMessage>();
             builder.AddMessageBroker<ItemDragEndedMessage>();
@@ -37,6 +38,7 @@ namespace GridSystem.Runtime.Messaging
             RegisterBroker<ItemAddedMessage>(registrar, provider);
             RegisterBroker<ItemRemovedMessage>(registrar, provider);
             RegisterBroker<ItemMovedMessage>(registrar, provider);
+            RegisterBroker<InventoryDestroyedMessage>(registrar, provider);
             RegisterBroker<ItemDragStartedMessage>(registrar, provider);
             RegisterBroker<ItemDragUpdatedMessage>(registrar, provider);
             RegisterBroker<ItemDragEndedMessage>(registrar, provider);

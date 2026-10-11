@@ -22,6 +22,7 @@ namespace GridSystem.Runtime.Interaction
         public ItemDragService(ISurfaceLocator locator, IEnumerable<IItemDropHandler> handlers,
             ISubscriber<PointerButtonMessage> buttonSubscriber, ISubscriber<PointerMovedMessage> movedSubscriber,
             ISubscriber<RotateRequestedMessage> rotateSubscriber, ISubscriber<SurfaceClosedMessage> closedSubscriber,
+            ISubscriber<ItemRemovedMessage> removedSubscriber,
             IPublisher<ItemDragStartedMessage> startedPublisher, IPublisher<ItemDragUpdatedMessage> updatedPublisher,
             IPublisher<ItemDragEndedMessage> endedPublisher)
         {
@@ -31,6 +32,7 @@ namespace GridSystem.Runtime.Interaction
             _movedSubscriber = movedSubscriber;
             _rotateSubscriber = rotateSubscriber;
             _closedSubscriber = closedSubscriber;
+            _removedSubscriber = removedSubscriber;
             _startedPublisher = startedPublisher;
             _updatedPublisher = updatedPublisher;
             _endedPublisher = endedPublisher;
@@ -42,6 +44,7 @@ namespace GridSystem.Runtime.Interaction
         private readonly ISubscriber<PointerMovedMessage> _movedSubscriber;
         private readonly ISubscriber<RotateRequestedMessage> _rotateSubscriber;
         private readonly ISubscriber<SurfaceClosedMessage> _closedSubscriber;
+        private readonly ISubscriber<ItemRemovedMessage> _removedSubscriber;
         private readonly IPublisher<ItemDragStartedMessage> _startedPublisher;
         private readonly IPublisher<ItemDragUpdatedMessage> _updatedPublisher;
         private readonly IPublisher<ItemDragEndedMessage> _endedPublisher;
@@ -68,7 +71,8 @@ namespace GridSystem.Runtime.Interaction
                 _buttonSubscriber.Subscribe(OnButton),
                 _movedSubscriber.Subscribe(OnMoved),
                 _rotateSubscriber.Subscribe(OnRotate),
-                _closedSubscriber.Subscribe(OnSurfaceClosed));
+                _closedSubscriber.Subscribe(OnSurfaceClosed),
+                _removedSubscriber.Subscribe(OnItemRemoved));
         }
 
         /// <summary>
@@ -118,6 +122,14 @@ namespace GridSystem.Runtime.Interaction
             }
         }
 
+        private void OnItemRemoved(ItemRemovedMessage message)
+        {
+            if (IsDragging && message.Item == _item)
+            {
+                End(false);
+            }
+        }
+
         private void TryBegin()
         {
             if (!IsDragging && _locator.TryPick(_position, out SurfaceHit hit) && hit.Item != null)
@@ -158,12 +170,12 @@ namespace GridSystem.Runtime.Interaction
 
         private void End(bool isDropped)
         {
-            if (isDropped)
-            {
-                _handler.Handle(_context);
-            }
-
-            _endedPublisher.Publish(new ItemDragEndedMessage(_item, _source, _sourceSurface, _surface, isDropped));
+            GridItem item = _item;
+            GridInventory source = _source;
+            GridSurface sourceSurface = _sourceSurface;
+            GridSurface surface = _surface;
+            IItemDropHandler handler = _handler;
+            DropContext context = _context;
             _item = null;
             _source = null;
             _sourceSurface = null;
@@ -172,6 +184,12 @@ namespace GridSystem.Runtime.Interaction
             _hasTarget = false;
             _target = default;
             _context = default;
+            if (isDropped)
+            {
+                handler.Handle(context);
+            }
+
+            _endedPublisher.Publish(new ItemDragEndedMessage(item, source, sourceSurface, surface, isDropped));
         }
 
         private IItemDropHandler FindHandler(in DropContext context)

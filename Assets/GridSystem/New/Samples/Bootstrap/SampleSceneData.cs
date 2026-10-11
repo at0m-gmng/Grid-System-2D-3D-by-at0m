@@ -72,12 +72,12 @@ namespace GridSystem.Samples.Bootstrap
         public bool IsMainWindowOpened => _isMainWindowOpened;
 
         /// <summary>
-        /// Items placed into empty world inventory.
+        /// Items placed into the world inventory on the first launch.
         /// </summary>
         public SampleStartItem[] WorldStartItems => _worldStartItems;
 
         /// <summary>
-        /// Definitions randomly spawned into empty hand.
+        /// Definitions spawned into the hand on the first launch, without repeats.
         /// </summary>
         public ItemDefinition[] HandSpawnPool => _handSpawnPool;
 

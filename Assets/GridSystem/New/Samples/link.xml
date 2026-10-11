@@ -1,0 +1,3 @@
+<linker>
+    <assembly fullname="GridSystem.Samples" preserve="all"/>
+</linker>

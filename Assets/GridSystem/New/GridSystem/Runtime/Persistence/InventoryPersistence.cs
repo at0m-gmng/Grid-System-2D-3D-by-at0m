@@ -38,13 +38,14 @@ namespace GridSystem.Runtime.Persistence
         }
 
         /// <summary>
-        /// Adds stored items into the inventory. Returns false when nothing is stored.
+        /// Replaces inventory content with stored items. Returns false and keeps content when nothing is stored.
         /// </summary>
         public bool TryLoad(GridInventory inventory)
         {
             bool result = _storage.TryRead(inventory.Key, out string json);
             if (result)
             {
+                inventory.Clear();
                 _snapshot.Items.Clear();
                 JsonUtility.FromJsonOverwrite(json, _snapshot);
                 for (int i = 0; i < _snapshot.Items.Count; i++)

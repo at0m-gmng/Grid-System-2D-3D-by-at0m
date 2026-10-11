@@ -13,7 +13,7 @@ namespace GridSystem.Runtime.Persistence
         public void Save(GridInventory inventory);
 
         /// <summary>
-        /// Adds stored items into the inventory. Returns false when nothing is stored.
+        /// Replaces inventory content with stored items. Returns false and keeps content when nothing is stored.
         /// </summary>
         public bool TryLoad(GridInventory inventory);
 

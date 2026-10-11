@@ -2,6 +2,7 @@ namespace GridSystem.Runtime.Surfaces
 {
     using System;
     using System.Collections.Generic;
+    using Composition;
     using Core.Inventories;
     using Core.Items;
     using MessagePipe;
@@ -11,19 +12,22 @@ namespace GridSystem.Runtime.Surfaces
     /// <summary>
     /// Owns surface presenters and picks surfaces by screen point.
     /// </summary>
-    internal sealed class SurfaceService : ISurfaceService, ISurfaceLocator, IDisposable
+    internal sealed class SurfaceService : ISurfaceService, ISurfaceLocator, IGridInitializable, IDisposable
     {
         public SurfaceService(GridSurfacePresenterFactory factory, IPublisher<SurfaceOpenedMessage> openedPublisher,
-            IPublisher<SurfaceClosedMessage> closedPublisher)
+            IPublisher<SurfaceClosedMessage> closedPublisher, ISubscriber<InventoryDestroyedMessage> destroyedSubscriber)
         {
             _factory = factory;
             _openedPublisher = openedPublisher;
             _closedPublisher = closedPublisher;
+            _destroyedSubscriber = destroyedSubscriber;
         }
 
         private readonly GridSurfacePresenterFactory _factory;
         private readonly IPublisher<SurfaceOpenedMessage> _openedPublisher;
         private readonly IPublisher<SurfaceClosedMessage> _closedPublisher;
+        private readonly ISubscriber<InventoryDestroyedMessage> _destroyedSubscriber;
+        private IDisposable _subscription;
         private readonly List<GridSurfacePresenter> _presenters = new();
 
         /// <summary>
@@ -85,16 +89,33 @@ namespace GridSystem.Runtime.Surfaces
         }
 
         /// <summary>
+        /// Subscribes to inventory destruction.
+        /// </summary>
+        public void Initialize() => _subscription = _destroyedSubscriber.Subscribe(OnInventoryDestroyed);
+
+        /// <summary>
         /// Unbinds every presenter. Views are destroyed with the scene.
         /// </summary>
         public void Dispose()
         {
+            _subscription.Dispose();
             for (int i = 0; i < _presenters.Count; i++)
             {
                 _presenters[i].Unbind();
             }
 
             _presenters.Clear();
+        }
+
+        private void OnInventoryDestroyed(InventoryDestroyedMessage message)
+        {
+            for (int i = _presenters.Count - 1; i >= 0; i--)
+            {
+                if (_presenters[i].Inventory == message.Inventory)
+                {
+                    Close(_presenters[i].Surface);
+                }
+            }
         }
 
         private int IndexOf(GridSurface surface)

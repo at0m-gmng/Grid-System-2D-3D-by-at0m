@@ -6,11 +6,12 @@ namespace GridSystem.Samples.Bootstrap
     using Runtime.Inventories;
     using Runtime.Persistence;
     using Runtime.Surfaces;
+    using UnityEngine;
     using UnityEngine.InputSystem;
     using Random = UnityEngine.Random;
 
     /// <summary>
-    /// Creates sample inventories, restores saves, fills empty ones and toggles the main surface.
+    /// Creates sample inventories, restores saves, fills hand and world on the first launch and toggles the main surface.
     /// Window visibility and saving react to surface messages in separate classes.
     /// </summary>
     public sealed class SampleBootstrap : IGridInitializable, IDisposable
@@ -41,11 +42,20 @@ namespace GridSystem.Samples.Bootstrap
         /// </summary>
         public void Initialize()
         {
-            _main = Create(_data.Main);
-            _hand = Create(_data.Hand);
-            _world = Create(_data.World);
-            FillWorld();
-            FillHand();
+            _main = _inventories.Create(_data.Main.Definition, _data.Main.Key);
+            _hand = _inventories.Create(_data.Hand.Definition, _data.Hand.Key);
+            _world = _inventories.Create(_data.World.Definition, _data.World.Key);
+            _persistence.TryLoad(_main);
+            if (!_persistence.TryLoad(_hand))
+            {
+                FillHand();
+            }
+
+            if (!_persistence.TryLoad(_world))
+            {
+                FillWorld();
+            }
+
             _surfaces.Open(_data.Hand.Surface, _hand);
             _surfaces.Open(_data.World.Surface, _world);
             SetMainWindowOpened(_data.IsMainWindowOpened);
@@ -64,33 +74,23 @@ namespace GridSystem.Samples.Bootstrap
             _persistence.Save(_world);
         }
 
-        private GridInventory Create(SampleInventory sample)
-        {
-            GridInventory inventory = _inventories.Create(sample.Definition, sample.Key);
-            _persistence.TryLoad(inventory);
-            return inventory;
-        }
-
         private void FillWorld()
         {
-            if (_world.Count == 0)
+            for (int i = 0; i < _data.WorldStartItems.Length; i++)
             {
-                for (int i = 0; i < _data.WorldStartItems.Length; i++)
-                {
-                    SampleStartItem item = _data.WorldStartItems[i];
-                    _world.TryAdd(_factory.Create(item.Definition), item.Origin, item.Rotation);
-                }
+                SampleStartItem item = _data.WorldStartItems[i];
+                _world.TryAdd(_factory.Create(item.Definition), item.Origin, item.Rotation);
             }
         }
 
         private void FillHand()
         {
-            if (_hand.Count == 0)
+            int poolLength = _data.HandSpawnPool.Length;
+            int count = Mathf.Min(_data.HandSpawnCount, poolLength);
+            int start = Random.Range(0, poolLength);
+            for (int i = 0; i < count; i++)
             {
-                for (int i = 0; i < _data.HandSpawnCount; i++)
-                {
-                    _hand.TryAdd(_factory.Create(_data.HandSpawnPool[Random.Range(0, _data.HandSpawnPool.Length)]));
-                }
+                _hand.TryAdd(_factory.Create(_data.HandSpawnPool[(start + i) % poolLength]));
             }
         }
 

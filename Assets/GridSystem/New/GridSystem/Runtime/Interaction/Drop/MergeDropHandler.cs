@@ -28,13 +28,15 @@ namespace GridSystem.Runtime.Interaction.Drop
         public int Order => DropHandlerOrder.MERGE;
 
         /// <summary>
-        /// Checks recipe and that the result fits into cells of both ingredients.
+        /// Checks that both ingredients are still placed, the recipe exists and the result fits into their cells.
         /// </summary>
         public bool CanHandle(in DropContext context)
         {
             GridItem target = context.TargetItem;
             bool result = target != null
                 && target != context.Item
+                && context.Item.InventoryId == context.Source.Id
+                && target.InventoryId == context.Target.Id
                 && _rules.TryGetResult(context.Item.Definition, target.Definition, out IGridItemDefinition definition)
                 && context.Target.CanPlace(definition, target.Origin, target.Rotation, context.Item.Id, target.Id);
             return result;

@@ -11,9 +11,10 @@ namespace GridSystem.Runtime.Interaction.Drop
         public int Order => DropHandlerOrder.PLACE;
 
         /// <summary>
-        /// Checks that the item fits ignoring its own cells.
+        /// Checks that the item is still in the source and fits ignoring its own cells.
         /// </summary>
-        public bool CanHandle(in DropContext context) => context.Target.CanPlace(context.Item, context.Cell, context.Rotation);
+        public bool CanHandle(in DropContext context)
+            => context.Item.InventoryId == context.Source.Id && context.Target.CanPlace(context.Item, context.Cell, context.Rotation);
 
         /// <summary>
         /// Moves or transfers the item.

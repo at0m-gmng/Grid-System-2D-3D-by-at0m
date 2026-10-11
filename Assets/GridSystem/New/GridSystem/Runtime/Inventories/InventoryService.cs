@@ -15,16 +15,18 @@ namespace GridSystem.Runtime.Inventories
     public sealed class InventoryService : IInventoryService, IDisposable
     {
         public InventoryService(IPublisher<ItemAddedMessage> addedPublisher, IPublisher<ItemRemovedMessage> removedPublisher,
-            IPublisher<ItemMovedMessage> movedPublisher)
+            IPublisher<ItemMovedMessage> movedPublisher, IPublisher<InventoryDestroyedMessage> destroyedPublisher)
         {
             _addedPublisher = addedPublisher;
             _removedPublisher = removedPublisher;
             _movedPublisher = movedPublisher;
+            _destroyedPublisher = destroyedPublisher;
         }
 
         private readonly IPublisher<ItemAddedMessage> _addedPublisher;
         private readonly IPublisher<ItemRemovedMessage> _removedPublisher;
         private readonly IPublisher<ItemMovedMessage> _movedPublisher;
+        private readonly IPublisher<InventoryDestroyedMessage> _destroyedPublisher;
         private readonly SequentialIdProvider _ids = new();
         private readonly Dictionary<int, InventoryEntry> _inventories = new();
 
@@ -43,12 +45,13 @@ namespace GridSystem.Runtime.Inventories
         }
 
         /// <summary>
-        /// Clears and forgets the inventory.
+        /// Closes its surfaces, clears and forgets the inventory.
         /// </summary>
         public void Destroy(GridInventory inventory)
         {
             if (_inventories.Remove(inventory.Id, out InventoryEntry entry))
             {
+                _destroyedPublisher.Publish(new InventoryDestroyedMessage(inventory));
                 inventory.Clear();
                 entry.Dispose();
             }

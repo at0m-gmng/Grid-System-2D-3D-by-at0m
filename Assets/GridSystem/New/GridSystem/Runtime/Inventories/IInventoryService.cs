@@ -14,7 +14,7 @@ namespace GridSystem.Runtime.Inventories
         public GridInventory Create(GridDefinition definition, string key);
 
         /// <summary>
-        /// Clears and forgets the inventory.
+        /// Closes its surfaces, clears and forgets the inventory.
         /// </summary>
         public void Destroy(GridInventory inventory);
     }

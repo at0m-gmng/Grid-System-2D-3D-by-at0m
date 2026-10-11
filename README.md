@@ -51,13 +51,14 @@ MergeDropHandler ──► ItemsMerged
 
 | Package | Folder | Assemblies |
 |---|---|---|
-| `com.at0m.gridsystem` (core, DI agnostic) | `New/GridSystem` | `GridSystem.Core`, `GridSystem.Runtime`, `GridSystem.Editor`, `GridSystem.Samples` (not auto referenced) |
+| `com.at0m.gridsystem` (core, DI agnostic) | `New/GridSystem` | `GridSystem.Core`, `GridSystem.Runtime`, `GridSystem.Editor` |
 | `com.at0m.gridsystem.zenject` | `New/Integrations/Zenject` | `GridSystem.Integrations.Zenject` |
 | `com.at0m.gridsystem.vcontainer` | `New/Integrations/VContainer` | `GridSystem.Integrations.VContainer` |
 | `com.at0m.gridsystem.reflex` | `New/Integrations/Reflex` | `GridSystem.Integrations.Reflex` |
 
 The core package does not reference any container. Every integration package depends on the core and on its own container only.
-A project installs the core and exactly one integration. Namespaces follow folders (`GridSystem.Runtime.Surfaces`, ...).
+A project installs the core and exactly one integration. Samples (`New/Samples`, `GridSystem.Samples`) are not part of any package and are never imported with the plugin.
+Namespaces follow folders (`GridSystem.Runtime.Surfaces`, ...).
 
 ## Installation
 
