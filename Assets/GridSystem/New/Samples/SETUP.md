@@ -5,7 +5,7 @@
 - `Create Content` — создаёт или обновляет все ассеты и префабы из шагов 1–3 в `Content/`.
 - `Create Scene → Reflex | Zenject | VContainer` — создаёт контент, новую сцену из шагов 4–6 с выбранным DI и сохраняет её в `Content/Scenes/GridSystem_<DI>.unity`. Пункт есть только для установленных DI. Для Reflex при отсутствии создаётся `Assets/Resources/ReflexSettings`.
 
-Генератор перезаписывает префабы и ассеты в `Content/`, ручные правки в них не сохраняются.
+Перед первым запуском: `Window → TextMeshPro → Import TMP Essential Resources` (шрифт тултипа). Генератор перезаписывает префабы и ассеты в `Content/`, ручные правки в них не сохраняются.
 
 Ниже — то же самое руками, с описанием каждого объекта и компонента.
 
@@ -167,10 +167,10 @@ Canvas               Canvas (Screen Space - Overlay), CanvasScaler (Scale With S
 │     └─ Items
 └─ Tooltip           ItemTooltipView                                                   ← последний ребёнок Canvas
    └─ Panel          Image (фон, Raycast Target выкл), pivot (0, 1), Size (220, 130)
-      ├─ Name        Text (Legacy), Font LegacyRuntime, Size 22, Color white
-      ├─ Damage      Text (Legacy), Font LegacyRuntime, Size 22, Color white
-      ├─ AttackSpeed Text (Legacy), Font LegacyRuntime, Size 22, Color white
-      └─ Range       Text (Legacy), Font LegacyRuntime, Size 22, Color white
+      ├─ Name        TextMeshPro - Text (UI)
+      ├─ Damage      TextMeshPro - Text (UI)
+      ├─ AttackSpeed TextMeshPro - Text (UI)
+      └─ Range       TextMeshPro - Text (UI)
 ```
 1. `Cells` выше `Items` в иерархии — предметы рисуются поверх ячеек. Scale у `Cells`/`Items` = 1.
 2. `MainGrid` → `UIGridSurface`: `Rect` = `MainGrid`, `Event Camera` = пусто (Overlay), `Views` = `UIItemViews`, `Items Root` = `MainGrid/Items`, `Cells Root` = `MainGrid/Cells`, `Cell Prefab` = `UI_Cell`, `Cell Size` = `(80, 80)`, `Spacing` = `(4, 4)`, `Priority` = `10`.

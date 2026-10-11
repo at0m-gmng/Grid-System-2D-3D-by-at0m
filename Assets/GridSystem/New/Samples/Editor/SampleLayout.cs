@@ -135,12 +135,7 @@ namespace GridSystem.Samples.Editor
         /// <summary>
         /// Tooltip font size.
         /// </summary>
-        public const int TOOLTIP_FONT_SIZE = 22;
-
-        /// <summary>
-        /// Built-in font of legacy UI Text.
-        /// </summary>
-        public const string BUILT_IN_FONT = "LegacyRuntime.ttf";
+        public const float TOOLTIP_FONT_SIZE = 22f;
 
         /// <summary>
         /// Window background color.

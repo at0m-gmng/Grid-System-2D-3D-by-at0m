@@ -2,6 +2,7 @@ namespace GridSystem.Samples.Editor
 {
     using Runtime.Composition;
     using Runtime.Surfaces;
+    using TMPro;
     using Tooltip;
     using UnityEditor;
     using UnityEngine;
@@ -187,24 +188,21 @@ namespace GridSystem.Samples.Editor
             layout.padding = new RectOffset(SampleLayout.TOOLTIP_PADDING, SampleLayout.TOOLTIP_PADDING, SampleLayout.TOOLTIP_PADDING,
                 SampleLayout.TOOLTIP_PADDING);
             ItemTooltipView view = root.gameObject.AddComponent<ItemTooltipView>();
-            Font font = Resources.GetBuiltinResource<Font>(SampleLayout.BUILT_IN_FONT);
             new SerializedObject(view)
                 .SetObject(ROOT_FIELD, panel.gameObject)
                 .SetObject(PANEL_FIELD, panel)
-                .SetObject(NAME_FIELD, CreateText(NAME_TEXT, panel, layer, font))
-                .SetObject(DAMAGE_FIELD, CreateText(DAMAGE_TEXT, panel, layer, font))
-                .SetObject(ATTACK_SPEED_FIELD, CreateText(ATTACK_SPEED_TEXT, panel, layer, font))
-                .SetObject(RANGE_FIELD, CreateText(RANGE_TEXT, panel, layer, font))
+                .SetObject(NAME_FIELD, CreateText(NAME_TEXT, panel, layer))
+                .SetObject(DAMAGE_FIELD, CreateText(DAMAGE_TEXT, panel, layer))
+                .SetObject(ATTACK_SPEED_FIELD, CreateText(ATTACK_SPEED_TEXT, panel, layer))
+                .SetObject(RANGE_FIELD, CreateText(RANGE_TEXT, panel, layer))
                 .Apply();
             return view;
         }
 
-        private static Text CreateText(string name, Transform parent, int layer, Font font)
+        private static TMP_Text CreateText(string name, Transform parent, int layer)
         {
-            Text text = CreateUI(name, parent, layer).gameObject.AddComponent<Text>();
-            text.font = font;
+            TextMeshProUGUI text = CreateUI(name, parent, layer).gameObject.AddComponent<TextMeshProUGUI>();
             text.fontSize = SampleLayout.TOOLTIP_FONT_SIZE;
-            text.color = Color.white;
             text.raycastTarget = false;
             return text;
         }
