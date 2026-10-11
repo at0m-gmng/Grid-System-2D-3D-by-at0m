@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b828f5caede55b4b8213f6a42457701, type: 3}
+  m_Name: WorldItemViews
+  m_EditorClassIdentifier: GridSystem.Runtime::GridSystem.Runtime.Views.ItemViewCatalog
+  _entries:
+  - Definition: {fileID: 11400000, guid: 11cf50cfc8e0a7b4f8afdf3b522ebdc6, type: 2}
+    Prefab: {fileID: 3070124248269712925, guid: 5a260867421ded643881e764dc5aa1e7, type: 3}
+  - Definition: {fileID: 11400000, guid: d88d13b904f5adf4eb723439485e4831, type: 2}
+    Prefab: {fileID: 4942717583103484938, guid: 285175714830312428ea4094253a6905, type: 3}
+  - Definition: {fileID: 11400000, guid: 500a646d66e7f00449b6cd3f7f2b30a0, type: 2}
+    Prefab: {fileID: 449429585263591150, guid: 7decb15e145addb4fbae3d68af83248e, type: 3}
+  - Definition: {fileID: 11400000, guid: 9d55858c8107b414098fc49f9d1e9f78, type: 2}
+    Prefab: {fileID: 8016521663551579027, guid: 99fbb4f92b38d3541b75587d9116a421, type: 3}
+  - Definition: {fileID: 11400000, guid: 92f24d917feeed64ca193f4488d711f7, type: 2}
+    Prefab: {fileID: 8441472688004810237, guid: 644bcf09b7477f54ebe4539c248bf570, type: 3}

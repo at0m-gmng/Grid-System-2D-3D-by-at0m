@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c90018c6cd5ef1d4c888757e504775a9, type: 3}
+  m_Name: GridSystemSettings
+  m_EditorClassIdentifier: GridSystem.Runtime::GridSystem.Runtime.Settings.GridSystemSettings
+  _items: {fileID: 11400000, guid: 915aaebb67991d949a2fc2f70d7ee924, type: 2}
+  _mergeRules: {fileID: 11400000, guid: af41da0e9dab20345bfd0fe40e4a9529, type: 2}
+  _input: {fileID: 11400000, guid: a078f463d2df5ed44bd8dc1940182eaf, type: 2}
