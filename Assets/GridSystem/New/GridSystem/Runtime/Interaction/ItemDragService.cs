@@ -148,7 +148,7 @@ namespace GridSystem.Runtime.Interaction
 
         private void Evaluate()
         {
-            bool hasHit = _locator.TryPick(_position, out SurfaceHit hit);
+            bool hasHit = _locator.TryPick(_position, out SurfaceHit hit) && hit.Surface.CanDisplay(_item.Definition);
             if (hasHit && (!_hasTarget || IsTargetChanged(hit)))
             {
                 _surface = hit.Surface;

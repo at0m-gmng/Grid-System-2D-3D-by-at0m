@@ -1,6 +1,7 @@
 namespace GridSystem.Runtime.Surfaces
 {
     using System.Collections.Generic;
+    using Core.Items;
     using UnityEngine;
     using Views;
 
@@ -105,6 +106,11 @@ namespace GridSystem.Runtime.Surfaces
                 }
             }
         }
+
+        /// <summary>
+        /// Returns true when the surface has a view for the definition.
+        /// </summary>
+        public bool CanDisplay(IGridItemDefinition definition) => _views.Contains(definition);
 
         /// <summary>
         /// Converts screen point to a cell inside the grid.

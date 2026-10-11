@@ -25,6 +25,11 @@ namespace GridSystem.Runtime.Views
         /// </summary>
         public ItemView GetPrefab(IGridItemDefinition definition) => _lookup[definition];
 
+        /// <summary>
+        /// Returns true when the definition has a view prefab.
+        /// </summary>
+        public bool Contains(IGridItemDefinition definition) => _lookup.ContainsKey(definition);
+
         private void OnEnable() => BuildLookup();
 
 #if UNITY_EDITOR
