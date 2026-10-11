@@ -7,7 +7,7 @@ namespace GridSystem.Samples.Bootstrap
     using Runtime.Surfaces;
 
     /// <summary>
-    /// Shows the main window while its surface is opened.
+    /// Shows window roots while their surfaces are opened.
     /// </summary>
     public sealed class SampleWindowPresenter : IGridInitializable, IDisposable
     {
@@ -27,11 +27,16 @@ namespace GridSystem.Samples.Bootstrap
         private IDisposable _subscriptions;
 
         /// <summary>
-        /// Syncs window state and subscribes to surface messages.
+        /// Syncs window roots and subscribes to surface messages.
         /// </summary>
         public void Initialize()
         {
-            _data.MainWindow.SetActive(_surfaces.IsOpen(_data.Main.Surface));
+            for (int i = 0; i < _data.Windows.Length; i++)
+            {
+                SampleWindow window = _data.Windows[i];
+                window.Root.SetActive(_surfaces.IsOpen(window.Inventory.Surface));
+            }
+
             _subscriptions = DisposableBag.Create(
                 _openedSubscriber.Subscribe(OnOpened),
                 _closedSubscriber.Subscribe(OnClosed));
@@ -42,19 +47,18 @@ namespace GridSystem.Samples.Bootstrap
         /// </summary>
         public void Dispose() => _subscriptions.Dispose();
 
-        private void OnOpened(SurfaceOpenedMessage message)
-        {
-            if (message.Surface == _data.Main.Surface)
-            {
-                _data.MainWindow.SetActive(true);
-            }
-        }
+        private void OnOpened(SurfaceOpenedMessage message) => SetVisible(message.Surface, true);
 
-        private void OnClosed(SurfaceClosedMessage message)
+        private void OnClosed(SurfaceClosedMessage message) => SetVisible(message.Surface, false);
+
+        private void SetVisible(GridSurface surface, bool isVisible)
         {
-            if (message.Surface == _data.Main.Surface)
+            for (int i = 0; i < _data.Windows.Length; i++)
             {
-                _data.MainWindow.SetActive(false);
+                if (_data.Windows[i].Inventory.Surface == surface)
+                {
+                    _data.Windows[i].Root.SetActive(isVisible);
+                }
             }
         }
     }

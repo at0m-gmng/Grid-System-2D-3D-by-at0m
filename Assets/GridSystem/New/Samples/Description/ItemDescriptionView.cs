@@ -1,21 +1,18 @@
-namespace GridSystem.Samples.Tooltip
+namespace GridSystem.Samples.Description
 {
     using Definitions;
     using TMPro;
     using UnityEngine;
 
     /// <summary>
-    /// Passive tooltip widget.
+    /// Passive description popup of the hovered item.
     /// </summary>
-    public sealed class ItemTooltipView : MonoBehaviour
+    public sealed class ItemDescriptionView : MonoBehaviour
     {
         private const string VALUE_FORMAT = "{0:2}";
 
         [SerializeField]
         private GameObject _root;
-
-        [SerializeField]
-        private RectTransform _panel;
 
         [SerializeField]
         private TMP_Text _name;
@@ -30,20 +27,19 @@ namespace GridSystem.Samples.Tooltip
         private TMP_Text _range;
 
         /// <summary>
-        /// Shows description near the screen point.
+        /// Shows item values. Texts are formatted without allocations.
         /// </summary>
-        public void Show(IItemDescription description, Vector2 screenPosition)
+        public void Show(IItemDescription description)
         {
             _name.SetText(description.DisplayName);
             _damage.SetText(VALUE_FORMAT, description.Damage);
             _attackSpeed.SetText(VALUE_FORMAT, description.AttackSpeed);
             _range.SetText(VALUE_FORMAT, description.Range);
-            _panel.position = screenPosition;
             _root.SetActive(true);
         }
 
         /// <summary>
-        /// Hides the tooltip.
+        /// Hides the popup.
         /// </summary>
         public void Hide() => _root.SetActive(false);
     }

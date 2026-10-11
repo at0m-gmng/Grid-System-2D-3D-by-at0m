@@ -7,12 +7,11 @@ namespace GridSystem.Samples.Bootstrap
     using Runtime.Persistence;
     using Runtime.Surfaces;
     using UnityEngine;
-    using UnityEngine.InputSystem;
     using Random = UnityEngine.Random;
 
     /// <summary>
-    /// Creates sample inventories, restores saves, fills hand and world on the first launch and toggles the main surface.
-    /// Window visibility and saving react to surface messages in separate classes.
+    /// Creates sample inventories, restores saves, fills inventories on the first launch and binds window toggles.
+    /// Window visibility and saving on close react to surface messages in separate classes.
     /// </summary>
     public sealed class SampleBootstrap : IGridInitializable, IDisposable
     {
@@ -24,7 +23,7 @@ namespace GridSystem.Samples.Bootstrap
             _surfaces = surfaces;
             _persistence = persistence;
             _factory = factory;
-            _onToggle = OnToggle;
+            _windows = new SampleWindowController[data.Windows.Length];
         }
 
         private readonly SampleSceneData _data;
@@ -32,54 +31,53 @@ namespace GridSystem.Samples.Bootstrap
         private readonly ISurfaceService _surfaces;
         private readonly IInventoryPersistence _persistence;
         private readonly IGridItemFactory _factory;
-        private readonly Action<InputAction.CallbackContext> _onToggle;
-        private GridInventory _main;
+        private readonly SampleWindowController[] _windows;
         private GridInventory _hand;
-        private GridInventory _world;
 
         /// <summary>
         /// Builds sample state.
         /// </summary>
         public void Initialize()
         {
-            _main = _inventories.Create(_data.Main.Definition, _data.Main.Key);
             _hand = _inventories.Create(_data.Hand.Definition, _data.Hand.Key);
-            _world = _inventories.Create(_data.World.Definition, _data.World.Key);
-            _persistence.TryLoad(_main);
             if (!_persistence.TryLoad(_hand))
             {
                 FillHand();
             }
 
-            if (!_persistence.TryLoad(_world))
-            {
-                FillWorld();
-            }
-
             _surfaces.Open(_data.Hand.Surface, _hand);
-            _surfaces.Open(_data.World.Surface, _world);
-            SetMainWindowOpened(_data.IsMainWindowOpened);
-            _data.ToggleMainWindow.performed += _onToggle;
-            _data.ToggleMainWindow.Enable();
+            for (int i = 0; i < _windows.Length; i++)
+            {
+                SampleWindow window = _data.Windows[i];
+                GridInventory inventory = _inventories.Create(window.Inventory.Definition, window.Inventory.Key);
+                if (!_persistence.TryLoad(inventory))
+                {
+                    Fill(inventory, window.StartItems);
+                }
+
+                _windows[i] = new SampleWindowController(window, inventory, _surfaces);
+                _windows[i].Bind();
+            }
         }
 
         /// <summary>
-        /// Saves inventories and unsubscribes.
+        /// Saves inventories and unbinds toggles.
         /// </summary>
         public void Dispose()
         {
-            _data.ToggleMainWindow.performed -= _onToggle;
-            _persistence.Save(_main);
             _persistence.Save(_hand);
-            _persistence.Save(_world);
+            for (int i = 0; i < _windows.Length; i++)
+            {
+                _windows[i].Unbind();
+                _persistence.Save(_windows[i].Inventory);
+            }
         }
 
-        private void FillWorld()
+        private void Fill(GridInventory inventory, SampleStartItem[] items)
         {
-            for (int i = 0; i < _data.WorldStartItems.Length; i++)
+            for (int i = 0; i < items.Length; i++)
             {
-                SampleStartItem item = _data.WorldStartItems[i];
-                _world.TryAdd(_factory.Create(item.Definition), item.Origin, item.Rotation);
+                inventory.TryAdd(_factory.Create(items[i].Definition), items[i].Origin, items[i].Rotation);
             }
         }
 
@@ -91,20 +89,6 @@ namespace GridSystem.Samples.Bootstrap
             for (int i = 0; i < count; i++)
             {
                 _hand.TryAdd(_factory.Create(_data.HandSpawnPool[(start + i) % poolLength]));
-            }
-        }
-
-        private void OnToggle(InputAction.CallbackContext context) => SetMainWindowOpened(!_surfaces.IsOpen(_data.Main.Surface));
-
-        private void SetMainWindowOpened(bool isOpened)
-        {
-            if (isOpened)
-            {
-                _surfaces.Open(_data.Main.Surface, _main);
-            }
-            else
-            {
-                _surfaces.Close(_data.Main.Surface);
             }
         }
     }

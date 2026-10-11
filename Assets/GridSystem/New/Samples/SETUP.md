@@ -5,13 +5,28 @@
 - `Create Content` — создаёт или обновляет все ассеты и префабы из шагов 1–3 в `Content/`.
 - `Create Scene → Reflex | Zenject | VContainer` — создаёт контент, новую сцену из шагов 4–6 с выбранным DI и сохраняет её в `Content/Scenes/GridSystem_<DI>.unity`. Пункт есть только для установленных DI. Для Reflex при отсутствии создаётся `Assets/Resources/ReflexSettings`.
 
-Перед первым запуском: `Window → TextMeshPro → Import TMP Essential Resources` (шрифт тултипа). Генератор перезаписывает префабы и ассеты в `Content/`, ручные правки в них не сохраняются.
+Перед первым запуском: `Window → TextMeshPro → Import TMP Essential Resources` (шрифт описания предмета). Генератор перезаписывает префабы и ассеты в `Content/`, ручные правки в них не сохраняются.
 
 Ниже — то же самое руками, с описанием каждого объекта и компонента.
 
 ## Вручную
 
-Инструкция собирает демо-сцену v2: UI-инвентарь (Main) с открытием по клавише, UI-«рука» (Hand) со стартовыми предметами, 3D-сетка (World), drag&drop между всеми тремя (включая UI ↔ 3D), поворот, merge, тултип, сохранения.
+Сцена повторяет старый пример (`Examples`): те же имена объектов, тот же `GameInput`, клавиши `I` / `E` / `C`.
+Состав: UI-инвентарь `MainInventory` (6×4, `I`), сундук `OthersInventories` (4×4, `E`), «рука» `OutsideParent` (6×2, всегда открыта, внизу экрана), 3D-сетка `WorldPrefab` (10×10, `C`), панель описания `InventoryItemView`. Drag&drop между всеми (включая UI ↔ 3D), поворот, merge, сохранения.
+
+Соответствие старой сцене:
+
+| Старое | Новое |
+|---|---|
+| `SceneContext` + `GameInstaller` + конфиги | `GridSystem` (`GridSystemContext` + `SampleModule`) + объект DI |
+| `InteractionSystem` (3× `ExampleInteractionSystem`) | `SampleModule → Data → Windows` (3 окна с `Toggle`) |
+| `WindowsSystem` (`GameObjectContext`, `RootWindowInstaller`, `InventoriesView`, ...) | `WindowsSystem` (только `Canvas` + `CanvasScaler`) |
+| `MainInventory` / `OthersInventories` / `OutsideParent` | те же имена, внутри `Grid` с `UIGridSurface` |
+| `TempParent` | не нужен: превью drag живёт на поверхности |
+| `PoolParent` | `PoolParent` в корне сцены |
+| `InventoryItemView` / `DescriptionView` | `InventoryItemView` (`ItemDescriptionView`) |
+| `ExampleSelectableSpawnSystem` | `SampleModule → Data → Hand Spawn Pool / Count` |
+| `WorldPrefab` (`GameObjectContext`, `RootWorldInstaller`, `WorldGridView`, `MeshCollider`) | `WorldPrefab` (`WorldGridSurface`, коллайдер не нужен) |
 Шаги 0–5 общие для всех DI, шаг 6 — отдельно для Reflex, Zenject и VContainer. Каждая DI-сцена — копия общей сцены с другим объектом DI.
 
 Все новые ассеты кладём в `Assets/GridSystem/New/Samples/Content/` (дальше — `Content/`).
@@ -29,19 +44,20 @@
 
 ## 1. Ввод
 
-1. `Content/Input` → ПКМ → `Create → Input Actions` → `GridSystemInput`.
-2. Открыть, создать Action Map `Grid`:
+Используется ассет старого примера `Assets/GridSystem/Examples/Scripts/InputSystem/GameInput.inputactions`. Новый не создаём.
 
-| Action | Action Type | Control Type | Binding |
-|---|---|---|---|
-| `Point` | Value | Vector2 | `<Pointer>/position` |
-| `Press` | Button | — | `<Mouse>/leftButton`, `<Touchscreen>/primaryTouch/press` |
-| `Rotate` | Button | — | `<Keyboard>/r`, `<Mouse>/rightButton` |
-| `ToggleInventory` | Button | — | `<Keyboard>/i` |
+| Map | Action | Тип | Binding | Назначение |
+|---|---|---|---|---|
+| `DragDrop` | `Moved` | Value / Vector2 | `<Mouse>/position` | позиция указателя |
+| `DragDrop` | `LMB_Hold` | Button, Hold | `<Mouse>/leftButton` | захват/отпускание (`started` / `canceled`) |
+| `DragDrop` | `Rotation` | Button | `<Keyboard>/r` | поворот при drag |
+| `Control` | `Inventory` | Button | `<Keyboard>/i` | окно `MainInventory` |
+| `Control` | `Interaction` | Button | `<Keyboard>/e` | окно `OthersInventories` (сундук) |
+| `Control` | `SLWorld` | Button | `<Keyboard>/c` | 3D-сетка `WorldPrefab` |
 
-3. `Save Asset`. Под ассетом появятся вложенные `InputActionReference` для каждого действия.
-4. `Content/Input` → `Create → Grid System → Pointer Input Config` → `PointerInputConfig`:
-   - `Point` = `Grid/Point`, `Press` = `Grid/Press`, `Rotate` = `Grid/Rotate`.
+1. `InputActionReference` для каждого действия — вложенные ассеты под `GameInput` (раскрыть стрелкой в Project).
+2. `Content/Input` → `Create → Grid System → Pointer Input Config` → `PointerInputConfig`:
+   - `Point` = `DragDrop/Moved`, `Press` = `DragDrop/LMB_Hold`, `Rotate` = `DragDrop/Rotation`.
 
 ---
 
@@ -81,6 +97,7 @@
 | Ассет | Width | Height |
 |---|---|---|
 | `MainGrid` | 6 | 4 |
+| `ChestGrid` | 4 | 4 |
 | `HandGrid` | 6 | 2 |
 | `WorldGrid` | 10 | 10 |
 
@@ -139,66 +156,108 @@ World_Wall           Transform, WorldItemView, PrimeTweenItemMotion, RendererIte
 
 ## 4. Сцена (общая часть)
 
-`Content/Scenes` → новая сцена `GridSystem_Common` (потом копируется под каждый DI).
+`Content/Scenes` → новая пустая сцена `GridSystem_Common` (потом копируется под каждый DI). Объекты по умолчанию (`Main Camera`, `Directional Light`) удалить — они создаются ниже внутри `Environment`.
 
-### 4.1 Камера и свет
-1. `Main Camera`: Position `(0, 12, -9)`, Rotation `(55, 0, 0)`.
-2. `Directional Light` по умолчанию.
-
-### 4.2 3D-сетка
+Итоговая иерархия:
 ```
-WorldGrid            WorldGridSurface         Position (0, 0, 0)
-├─ Cells
-└─ Items
-```
-`WorldGridSurface`: `Views` = `WorldItemViews`, `Items Root` = `Items`, `Cells Root` = `Cells`, `Cell Prefab` = `World_Cell`, `Cell Size` = `(1, 1)`, `Spacing` = `(0.05, 0.05)`, `Priority` = `0`, `Camera` = `Main Camera`.
-Сетка лежит в локальной плоскости XZ объекта, объект — её центр.
-
-### 4.3 Canvas
-```
-Canvas               Canvas (Screen Space - Overlay), CanvasScaler (Scale With Screen Size 1920×1080, Match 0.5)
-├─ MainWindow        Image (фон), anchors center, Size (560, 420), Position (0, 60)   ← неактивен на старте не обязательно
-│  └─ MainGrid       UIGridSurface, anchors center, pivot center, Position (0, -20)
-│     ├─ Cells       anchors stretch, offsets 0
-│     └─ Items       anchors stretch, offsets 0
-├─ HandPanel         Image (фон), anchors bottom-center, Size (560, 200), Position (0, 120)
-│  └─ HandGrid       UIGridSurface, anchors center, pivot center
+Environment
+├─ Main Camera
+├─ Directional Light
+└─ WorldPrefab               WorldGridSurface
+   ├─ Cells
+   └─ Items
+WindowsSystem                Canvas, CanvasScaler
+├─ MainInventory             Image (фон окна)
+│  └─ Grid                   UIGridSurface
 │     ├─ Cells
 │     └─ Items
-└─ Tooltip           ItemTooltipView                                                   ← последний ребёнок Canvas
-   └─ Panel          Image (фон, Raycast Target выкл), pivot (0, 1), Size (220, 130)
-      ├─ Name        TextMeshPro - Text (UI)
-      ├─ Damage      TextMeshPro - Text (UI)
-      ├─ AttackSpeed TextMeshPro - Text (UI)
-      └─ Range       TextMeshPro - Text (UI)
+├─ OthersInventories         Image (фон окна)
+│  └─ Grid                   UIGridSurface
+│     ├─ Cells
+│     └─ Items
+├─ OutsideParent             Image (фон окна)
+│  └─ Grid                   UIGridSurface
+│     ├─ Cells
+│     └─ Items
+└─ InventoryItemView         ItemDescriptionView
+   └─ Popup                  Image, VerticalLayoutGroup
+      ├─ DataContainer       ├─ Label "Name:"          └─ Value
+      ├─ DataContainer       ├─ Label "Damage:"        └─ Value
+      ├─ DataContainer       ├─ Label "Attack Speed:"  └─ Value
+      └─ DataContainer       ├─ Label "Range:"         └─ Value
+PoolParent                   (выключен)
+GridSystem                   GridSystemContext, SampleModule
 ```
-1. `Cells` выше `Items` в иерархии — предметы рисуются поверх ячеек. Scale у `Cells`/`Items` = 1.
-2. `MainGrid` → `UIGridSurface`: `Rect` = `MainGrid`, `Event Camera` = пусто (Overlay), `Views` = `UIItemViews`, `Items Root` = `MainGrid/Items`, `Cells Root` = `MainGrid/Cells`, `Cell Prefab` = `UI_Cell`, `Cell Size` = `(80, 80)`, `Spacing` = `(4, 4)`, `Priority` = `10`.
-3. `HandGrid` → `UIGridSurface`: то же, но свои `Items`/`Cells`, `Priority` = `10`.
-4. Размер `MainGrid`/`HandGrid` выставляется сам по размеру сетки.
-5. `Tooltip` → `ItemTooltipView`: `Root` = `Panel`, `Panel` = `Panel`, `Name`/`Damage`/`Attack Speed`/`Range` = тексты.
-6. EventSystem для работы плагина не нужен (пикинг математический, без рейкастов). Нужен только если в сцене есть кнопки.
+Все UI-объекты — слой `UI`.
 
-`UIGridSurface` с priority 10 перекрывает 3D-сетку под UI: клик по инвентарю не попадёт в мир.
+### 4.1 Environment
+1. Пустой `Environment` в корне, Position `(0, 0, 0)`.
+2. `Main Camera` (дочерний): Tag `MainCamera`, `Camera`, `AudioListener`, Position `(0, 12, -9)`, Rotation `(55, 0, 0)`.
+3. `Directional Light` (дочерний): `Light` Type `Directional`, Rotation `(50, -30, 0)`.
 
-### 4.4 Пул
-Пустой объект `Pool` в корне, выключенный (`SetActive(false)`). Сюда возвращаются вьюхи.
+### 4.2 WorldPrefab (3D-сетка)
+1. Пустой `WorldPrefab` в `Environment`, Position `(0, 0, 0)`. Дочерние пустые `Cells`, `Items`.
+2. `WorldGridSurface`: `Views` = `WorldItemViews`, `Items Root` = `Items`, `Cell Prefab` = `World_Cell`, `Cells Root` = `Cells`, `Cell Size` = `(1, 1)`, `Spacing` = `(0.05, 0.05)`, `Priority` = `0`, `Camera` = `Main Camera`.
+3. Сетка лежит в локальной плоскости XZ объекта, объект — её центр. `MeshCollider` не нужен: пикинг — пересечение луча с плоскостью.
+4. Объект одновременно корень окна `World`: выключается/включается по `C`.
 
-### 4.5 Grid System
-```
-GridSystem           GridSystemContext, SampleModule
-```
-1. `GridSystemContext`: `Settings` = `GridSystemSettings`, `Pool Root` = `Pool`, `Modules` = [`SampleModule` с этого же объекта].
-2. `SampleModule` → `Data`:
-   - `Main`: Key `Main`, Definition `MainGrid`, Surface `MainGrid` (UIGridSurface).
-   - `Hand`: Key `Hand`, Definition `HandGrid`, Surface `HandGrid`.
-   - `World`: Key `World`, Definition `WorldGrid`, Surface `WorldGrid`.
-   - `Main Window` = `MainWindow`, `Toggle Main Window` = `Grid/ToggleInventory`, `Is Main Window Opened` = выкл.
-   - `World Start Items`: `LaserTower (2, 2) rot 0`, `Wall (5, 5) rot 0`, `LaserTower (7, 3) rot 0`.
-   - `Hand Spawn Pool` = Katana, Bullet, Pistol; `Hand Spawn Count` = 3.
-3. `SampleModule` → `Tooltip` = `Tooltip`.
+### 4.3 WindowsSystem (Canvas)
+1. `GameObject → UI → Canvas`, переименовать в `WindowsSystem`. `EventSystem`, созданный вместе с ним, можно удалить — плагину он не нужен (пикинг математический), только для кнопок.
+2. `Canvas`: `Render Mode` = `Screen Space - Overlay`.
+3. `CanvasScaler`: `UI Scale Mode` = `Scale With Screen Size`, `Reference Resolution` = `1920 × 1080`, `Match` = `0.5`.
+4. `GraphicRaycaster` можно удалить.
 
-Окно `MainWindow` включается/выключается само по открытию поверхности, начальное состояние в сцене неважно.
+### 4.4 Окна MainInventory / OthersInventories / OutsideParent
+Размер окна = размер сетки + 40 по каждой оси. Размер сетки = `клеток × 84 − 4`.
+
+| Окно | Anchors (min = max) | Pos X, Y | Width × Height |
+|---|---|---|---|
+| `MainInventory` | `(0.5, 0.5)` | `-330, 40` | `540 × 372` |
+| `OthersInventories` | `(0.5, 0.5)` | `330, 40` | `372 × 372` |
+| `OutsideParent` | `(0.5, 0)` | `0, 150` | `540 × 204` |
+
+Для каждого окна:
+1. `GameObject → UI → Image` в `WindowsSystem`, имя из таблицы, `RectTransform` из таблицы, pivot `(0.5, 0.5)`.
+2. `Image`: Color `(0.1, 0.1, 0.12, 0.85)`, `Raycast Target` выкл.
+3. Дочерний пустой UI-объект `Grid`: anchors `(0.5, 0.5)`–`(0.5, 0.5)`, pivot `(0.5, 0.5)`, Position `(0, 0)`. Размер выставит `UIGridSurface` сам.
+4. В `Grid` дочерние `Cells` и `Items`: anchors `(0, 0)`–`(1, 1)`, Left/Right/Top/Bottom = 0, Scale 1. `Cells` выше `Items` — предметы рисуются поверх ячеек.
+5. `Grid` → `UIGridSurface`: `Views` = `UIItemViews`, `Items Root` = `Grid/Items`, `Cell Prefab` = `UI_Cell`, `Cells Root` = `Grid/Cells`, `Cell Size` = `(80, 80)`, `Spacing` = `(4, 4)`, `Priority` = `10`, `Rect` = `Grid`, `Event Camera` = пусто (Overlay).
+
+`Priority` 10 у UI выше 0 у мира: клик по окну не уходит в 3D-сетку под ним.
+`MainInventory` и `OthersInventories` включаются/выключаются сами по открытию поверхности, начальное active в сцене неважно. `OutsideParent` открыт всегда.
+
+### 4.5 InventoryItemView (описание предмета)
+1. Пустой UI-объект `InventoryItemView` в `WindowsSystem` (последним ребёнком — рисуется поверх окон): anchors `(0, 0)`–`(1, 1)`, offsets 0. Без `Image` — не перекрывает ввод.
+2. Дочерний `Popup`: anchors `(0.5, 1)`–`(0.5, 1)`, pivot `(0.5, 1)`, Position `(0, -20)`, Size `500 × 250`.
+   - `Image`: Color `(0.464, 0.464, 0.464, 1)`, `Raycast Target` выкл.
+   - `VerticalLayoutGroup`: Padding 20 со всех сторон, `Control Child Size` и `Child Force Expand` — Width и Height вкл.
+3. В `Popup` 4 пустых UI-объекта `DataContainer`. В каждом:
+   - `Label`: anchors `(0, 0)`–`(0.5, 1)`, offsets 0, `TextMeshPro - Text (UI)`: текст `Name:` / `Damage:` / `Attack Speed:` / `Range:`, Font Size 24, Color `(0.196, 0.196, 0.196, 1)`, `Raycast Target` выкл.
+   - `Value`: anchors `(0.5, 0)`–`(1, 1)`, offsets 0, `TextMeshPro - Text (UI)` с теми же настройками, текст пустой.
+4. `InventoryItemView` → `ItemDescriptionView`: `Root` = `Popup`, `Name` / `Damage` / `Attack Speed` / `Range` = `Value` соответствующей строки.
+
+`Popup` выключается на старте и показывается при наведении на предмет.
+
+### 4.6 PoolParent
+Пустой объект `PoolParent` в корне сцены, выключен. Сюда возвращаются вьюхи из пула.
+
+### 4.7 GridSystem
+Пустой объект `GridSystem` в корне, компоненты `GridSystemContext` и `SampleModule`.
+
+1. `GridSystemContext`: `Settings` = `GridSystemSettings`, `Pool Root` = `PoolParent`, `Modules` = [`SampleModule` с этого же объекта].
+2. `SampleModule` → `Description` = `InventoryItemView`.
+3. `SampleModule` → `Data`:
+   - `Hand`: Key `Hand`, Definition `HandGrid`, Surface = `OutsideParent/Grid`.
+   - `Hand Spawn Pool` = Katana, Bullet, Pistol; `Hand Spawn Count` = 3 (без повторов, только при первом запуске).
+   - `Windows` — 3 элемента:
+
+| # | Inventory: Key / Definition / Surface | Root | Toggle | Is Opened On Start | Start Items (Definition, Origin, Rotation) |
+|---|---|---|---|---|---|
+| 0 | `Main` / `MainGrid` / `MainInventory/Grid` | `MainInventory` | `Control/Inventory` | выкл | — |
+| 1 | `Chest` / `ChestGrid` / `OthersInventories/Grid` | `OthersInventories` | `Control/Interaction` | выкл | Katana `(0, 1)` 0; Katana `(1, 1)` 0; Bullet `(3, 0)` 0 |
+| 2 | `World` / `WorldGrid` / `WorldPrefab` | `WorldPrefab` | `Control/SLWorld` | выкл | LaserTower `(2, 2)` 0; Wall `(5, 5)` 0; LaserTower `(7, 3)` 0 |
+
+`Start Items` ставятся только когда нет сохранения. Сохранение окна — при его закрытии и при выходе из Play Mode.
 
 ---
 
@@ -232,19 +291,23 @@ GridSystem           GridSystemContext, SampleModule
 ---
 
 ## 7. Проверка в Play Mode
-1. В руке 3 разных предмета, на 3D-сетке башни и стена.
-2. Перетаскивание внутри руки: превью зелёное — можно, красное — нельзя. `R`/ПКМ во время drag — поворот.
-3. `I` — открыть Main, перенести предмет из руки в Main и обратно.
-4. Перенести предмет из UI на 3D-сетку: над сеткой превью становится 3D-моделью, после отпускания предмет в мире. И обратно.
-5. Бросить Katana на Katana → Bullet; Bullet на Bullet → Pistol; LaserTower на LaserTower → Wall.
-6. Навести на предмет — тултип с параметрами.
-7. Закрыть Main (`I`) или выйти из Play Mode, снова запустить — раскладка восстановлена.
+1. Внизу открыта рука `OutsideParent` с 3 разными предметами. Остальные окна закрыты.
+2. Перетаскивание внутри руки: превью зелёное — можно, красное — нельзя. `R` во время drag — поворот.
+3. `I` — открыть `MainInventory`, перенести предмет из руки и обратно.
+4. `E` — открыть сундук: две Katana и Bullet. Перенести в руку или Main.
+5. `C` — показать 3D-сетку с башнями и стеной. Перенести предмет из UI на сетку и обратно: над сеткой превью становится 3D-моделью.
+6. Katana на Katana → Bullet; Bullet на Bullet → Pistol; LaserTower на LaserTower → Wall.
+7. Навести на предмет — вверху экрана `Popup` с параметрами.
+8. Закрыть окно или выйти из Play Mode, снова запустить — раскладка восстановлена.
 
 ## 8. Частые ошибки
 | Симптом | Причина |
 |---|---|
 | `KeyNotFoundException` в `ItemViewCatalog.GetPrefab` | Предмет (или результат merge) не добавлен в каталог вьюх поверхности, на которой он появляется |
 | Ничего не реагирует на мышь | В `PointerInputConfig` не назначены действия, `Point` не `Value/Vector2`, `Active Input Handling` без Input System |
+| `I` / `E` / `C` не работают | В `Windows[i].Toggle` не назначено действие `Control/...` |
+| Окно не появляется | `Root` окна не тот объект или `Surface` указывает на `Grid` другого окна |
+| Описание пустое или не исчезает | В `ItemDescriptionView` поля указывают на `Label`, а не на `Value`; `Root` не `Popup` |
 | UI-предмет смещён относительно клеток | У корня вьюхи anchors stretch, или `Body` не растянут на весь корень |
 | 3D-модель смещена | Модель не отцентрована по габаритам формы или масштаб не 1 юнит на клетку |
 | 3D-ячейки стоят вертикально | Поворот `(90, 0, 0)` задан корню `World_Cell`, а не дочернему Quad |

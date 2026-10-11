@@ -3,7 +3,6 @@ namespace GridSystem.Samples.Bootstrap
     using System;
     using Runtime.Definitions;
     using UnityEngine;
-    using UnityEngine.InputSystem;
 
     /// <summary>
     /// Scene references and settings of the sample.
@@ -11,70 +10,24 @@ namespace GridSystem.Samples.Bootstrap
     [Serializable]
     public sealed class SampleSceneData
     {
-        [Header("Inventories")]
-        [SerializeField]
-        private SampleInventory _main;
-
+        [Header("Always opened inventory with spawned items")]
         [SerializeField]
         private SampleInventory _hand;
 
         [SerializeField]
-        private SampleInventory _world;
-
-        [Header("Main window")]
-        [SerializeField]
-        private GameObject _mainWindow;
-
-        [SerializeField]
-        private InputActionReference _toggleMainWindow;
-
-        [SerializeField]
-        private bool _isMainWindowOpened;
-
-        [Header("Content")]
-        [SerializeField]
-        private SampleStartItem[] _worldStartItems;
-
-        [SerializeField]
-        private ItemDefinition[] _handSpawnPool;
+        private ItemDefinition[] _handSpawnPool = Array.Empty<ItemDefinition>();
 
         [SerializeField, Min(0)]
-        private int _handSpawnCount = 3;
+        private int _handSpawnCount;
+
+        [Header("Inventories toggled by input")]
+        [SerializeField]
+        private SampleWindow[] _windows = Array.Empty<SampleWindow>();
 
         /// <summary>
-        /// Toggleable main inventory.
-        /// </summary>
-        public SampleInventory Main => _main;
-
-        /// <summary>
-        /// Always visible hand inventory with spawned items.
+        /// Always opened inventory.
         /// </summary>
         public SampleInventory Hand => _hand;
-
-        /// <summary>
-        /// World grid inventory.
-        /// </summary>
-        public SampleInventory World => _world;
-
-        /// <summary>
-        /// Root of the main inventory window.
-        /// </summary>
-        public GameObject MainWindow => _mainWindow;
-
-        /// <summary>
-        /// Action toggling the main window.
-        /// </summary>
-        public InputAction ToggleMainWindow => _toggleMainWindow.action;
-
-        /// <summary>
-        /// Main window state on start.
-        /// </summary>
-        public bool IsMainWindowOpened => _isMainWindowOpened;
-
-        /// <summary>
-        /// Items placed into the world inventory on the first launch.
-        /// </summary>
-        public SampleStartItem[] WorldStartItems => _worldStartItems;
 
         /// <summary>
         /// Definitions spawned into the hand on the first launch, without repeats.
@@ -85,5 +38,10 @@ namespace GridSystem.Samples.Bootstrap
         /// Amount of spawned hand items.
         /// </summary>
         public int HandSpawnCount => _handSpawnCount;
+
+        /// <summary>
+        /// Inventories toggled by input.
+        /// </summary>
+        public SampleWindow[] Windows => _windows;
     }
 }

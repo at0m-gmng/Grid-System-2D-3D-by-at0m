@@ -19,9 +19,19 @@ namespace GridSystem.Samples.Editor
         public GridSystemSettings Settings;
 
         /// <summary>
-        /// Main window toggle action.
+        /// Main inventory toggle action.
         /// </summary>
-        public InputActionReference ToggleInventory;
+        public InputActionReference ToggleMain;
+
+        /// <summary>
+        /// Chest inventory toggle action.
+        /// </summary>
+        public InputActionReference ToggleChest;
+
+        /// <summary>
+        /// World inventory toggle action.
+        /// </summary>
+        public InputActionReference ToggleWorld;
 
         /// <summary>
         /// Item definitions by name.
@@ -32,6 +42,11 @@ namespace GridSystem.Samples.Editor
         /// Main inventory size.
         /// </summary>
         public GridDefinition MainGrid;
+
+        /// <summary>
+        /// Chest inventory size.
+        /// </summary>
+        public GridDefinition ChestGrid;
 
         /// <summary>
         /// Hand inventory size.

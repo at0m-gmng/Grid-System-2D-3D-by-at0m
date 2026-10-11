@@ -38,6 +38,11 @@ namespace GridSystem.Samples.Editor
         public const string MAIN = "Main";
 
         /// <summary>
+        /// Chest inventory name and save key.
+        /// </summary>
+        public const string CHEST = "Chest";
+
+        /// <summary>
         /// Hand inventory name and save key.
         /// </summary>
         public const string HAND = "Hand";
@@ -75,6 +80,11 @@ namespace GridSystem.Samples.Editor
         public static readonly Vector2Int MainSize = new Vector2Int(6, 4);
 
         /// <summary>
+        /// Chest inventory size.
+        /// </summary>
+        public static readonly Vector2Int ChestSize = new Vector2Int(4, 4);
+
+        /// <summary>
         /// Hand inventory size.
         /// </summary>
         public static readonly Vector2Int HandSize = new Vector2Int(6, 2);
@@ -93,6 +103,16 @@ namespace GridSystem.Samples.Editor
         /// Amount of spawned hand items.
         /// </summary>
         public const int HAND_SPAWN_COUNT = 3;
+
+        /// <summary>
+        /// Chest start items: item name and pivot cell.
+        /// </summary>
+        public static readonly (string Name, Vector2Int Origin)[] ChestStartItems =
+        {
+            (KATANA, new Vector2Int(0, 1)),
+            (KATANA, new Vector2Int(1, 1)),
+            (BULLET, new Vector2Int(3, 0))
+        };
 
         /// <summary>
         /// World start items: item name and pivot cell.

@@ -56,6 +56,7 @@ namespace GridSystem.Samples.Editor
             new SerializedObject(catalog).SetObjects(ITEMS_FIELD, items).Apply();
             MergeRules mergeRules = CreateMergeRules(content);
             content.MainGrid = CreateGrid(SampleSpecs.MAIN, SampleSpecs.MainSize);
+            content.ChestGrid = CreateGrid(SampleSpecs.CHEST, SampleSpecs.ChestSize);
             content.HandGrid = CreateGrid(SampleSpecs.HAND, SampleSpecs.HandSize);
             content.WorldGrid = CreateGrid(SampleSpecs.WORLD, SampleSpecs.WorldSize);
             content.Settings = SampleAssets.LoadOrCreate<GridSystemSettings>(SamplePaths.CONTENT, SETTINGS_NAME);

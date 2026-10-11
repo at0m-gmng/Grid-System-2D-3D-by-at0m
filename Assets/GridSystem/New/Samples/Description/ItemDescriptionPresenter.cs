@@ -1,4 +1,4 @@
-namespace GridSystem.Samples.Tooltip
+namespace GridSystem.Samples.Description
 {
     using System;
     using Definitions;
@@ -7,22 +7,22 @@ namespace GridSystem.Samples.Tooltip
     using Runtime.Messaging;
 
     /// <summary>
-    /// Shows tooltip of the hovered item when its definition has a description.
+    /// Shows description of the hovered item when its definition has one.
     /// </summary>
-    public sealed class ItemTooltipPresenter : IGridInitializable, IDisposable
+    public sealed class ItemDescriptionPresenter : IGridInitializable, IDisposable
     {
-        public ItemTooltipPresenter(ItemTooltipView view, ISubscriber<ItemHoverMessage> hoverSubscriber)
+        public ItemDescriptionPresenter(ItemDescriptionView view, ISubscriber<ItemHoverMessage> hoverSubscriber)
         {
             _view = view;
             _hoverSubscriber = hoverSubscriber;
         }
 
-        private readonly ItemTooltipView _view;
+        private readonly ItemDescriptionView _view;
         private readonly ISubscriber<ItemHoverMessage> _hoverSubscriber;
         private IDisposable _subscription;
 
         /// <summary>
-        /// Subscribes to hover changes.
+        /// Hides the popup and subscribes to hover changes.
         /// </summary>
         public void Initialize()
         {
@@ -39,7 +39,7 @@ namespace GridSystem.Samples.Tooltip
         {
             if (message.Item != null && message.Item.Definition is IItemDescription description)
             {
-                _view.Show(description, message.ScreenPosition);
+                _view.Show(description);
             }
             else
             {

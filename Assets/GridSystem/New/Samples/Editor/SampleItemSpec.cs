@@ -35,7 +35,7 @@ namespace GridSystem.Samples.Editor
         public readonly string Name;
 
         /// <summary>
-        /// Tooltip name.
+        /// Description name.
         /// </summary>
         public readonly string DisplayName;
 
@@ -45,17 +45,17 @@ namespace GridSystem.Samples.Editor
         public readonly string[] Shape;
 
         /// <summary>
-        /// Tooltip damage.
+        /// Description damage.
         /// </summary>
         public readonly float Damage;
 
         /// <summary>
-        /// Tooltip attack speed.
+        /// Description attack speed.
         /// </summary>
         public readonly float AttackSpeed;
 
         /// <summary>
-        /// Tooltip range.
+        /// Description range.
         /// </summary>
         public readonly float Range;
 

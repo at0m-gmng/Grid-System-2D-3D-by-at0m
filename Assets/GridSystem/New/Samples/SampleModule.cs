@@ -1,8 +1,8 @@
 namespace GridSystem.Samples
 {
     using Bootstrap;
+    using Description;
     using Runtime.Composition;
-    using Tooltip;
     using UnityEngine;
 
     /// <summary>
@@ -14,7 +14,7 @@ namespace GridSystem.Samples
         private SampleSceneData _data;
 
         [SerializeField]
-        private ItemTooltipView _tooltip;
+        private ItemDescriptionView _description;
 
         /// <summary>
         /// Adds sample bindings.
@@ -22,11 +22,11 @@ namespace GridSystem.Samples
         public override void Install(IGridRegistrar registrar)
         {
             registrar.RegisterInstance(_data);
-            registrar.RegisterInstance(_tooltip);
+            registrar.RegisterInstance(_description);
             registrar.Register<SampleWindowPresenter>();
             registrar.Register<SampleAutoSave>();
             registrar.Register<SampleBootstrap>();
-            registrar.Register<ItemTooltipPresenter>();
+            registrar.Register<ItemDescriptionPresenter>();
         }
     }
 }

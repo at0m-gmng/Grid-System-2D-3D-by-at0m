@@ -4,6 +4,7 @@ namespace GridSystem.Samples.Editor
 
     /// <summary>
     /// Transform, size and color values of generated prefabs and scene objects.
+    /// The scene mirrors the old example: Environment, WindowsSystem, MainInventory, OthersInventories, OutsideParent, InventoryItemView.
     /// </summary>
     public static class SampleLayout
     {
@@ -18,9 +19,19 @@ namespace GridSystem.Samples.Editor
         public static readonly Vector2 BottomCenter = new Vector2(0.5f, 0f);
 
         /// <summary>
-        /// Pivot at the top left corner.
+        /// Anchor and pivot at the top center.
         /// </summary>
-        public static readonly Vector2 TopLeft = new Vector2(0f, 1f);
+        public static readonly Vector2 TopCenter = new Vector2(0.5f, 1f);
+
+        /// <summary>
+        /// Left half anchor maximum.
+        /// </summary>
+        public static readonly Vector2 LeftHalfMax = new Vector2(0.5f, 1f);
+
+        /// <summary>
+        /// Right half anchor minimum.
+        /// </summary>
+        public static readonly Vector2 RightHalfMin = new Vector2(0.5f, 0f);
 
         /// <summary>
         /// UI cell size.
@@ -31,6 +42,11 @@ namespace GridSystem.Samples.Editor
         /// UI cell spacing.
         /// </summary>
         public static readonly Vector2 UISpacing = new Vector2(4f, 4f);
+
+        /// <summary>
+        /// Window padding around the grid.
+        /// </summary>
+        public static readonly Vector2 WindowPadding = new Vector2(40f, 40f);
 
         /// <summary>
         /// World cell size.
@@ -98,44 +114,39 @@ namespace GridSystem.Samples.Editor
         public const float SCALER_MATCH = 0.5f;
 
         /// <summary>
-        /// Main window size.
+        /// Main inventory window position.
         /// </summary>
-        public static readonly Vector2 MainWindowSize = new Vector2(560f, 420f);
+        public static readonly Vector2 MainPosition = new Vector2(-330f, 40f);
 
         /// <summary>
-        /// Main window position.
+        /// Chest inventory window position.
         /// </summary>
-        public static readonly Vector2 MainWindowPosition = new Vector2(0f, 60f);
-
-        /// <summary>
-        /// Main grid position inside the window.
-        /// </summary>
-        public static readonly Vector2 MainGridPosition = new Vector2(0f, -20f);
-
-        /// <summary>
-        /// Hand panel size.
-        /// </summary>
-        public static readonly Vector2 HandPanelSize = new Vector2(560f, 200f);
+        public static readonly Vector2 ChestPosition = new Vector2(330f, 40f);
 
         /// <summary>
         /// Hand panel position from the bottom edge.
         /// </summary>
-        public static readonly Vector2 HandPanelPosition = new Vector2(0f, 120f);
+        public static readonly Vector2 HandPosition = new Vector2(0f, 150f);
 
         /// <summary>
-        /// Tooltip panel size.
+        /// Description popup position from the top edge.
         /// </summary>
-        public static readonly Vector2 TooltipSize = new Vector2(220f, 130f);
+        public static readonly Vector2 DescriptionPosition = new Vector2(0f, -20f);
 
         /// <summary>
-        /// Tooltip padding.
+        /// Description popup size.
         /// </summary>
-        public const int TOOLTIP_PADDING = 10;
+        public static readonly Vector2 DescriptionSize = new Vector2(500f, 250f);
 
         /// <summary>
-        /// Tooltip font size.
+        /// Description popup padding.
         /// </summary>
-        public const float TOOLTIP_FONT_SIZE = 22f;
+        public const int DESCRIPTION_PADDING = 20;
+
+        /// <summary>
+        /// Description font size.
+        /// </summary>
+        public const float DESCRIPTION_FONT_SIZE = 24f;
 
         /// <summary>
         /// Window background color.
@@ -143,9 +154,14 @@ namespace GridSystem.Samples.Editor
         public static readonly Color WindowColor = new Color(0.1f, 0.1f, 0.12f, 0.85f);
 
         /// <summary>
-        /// Tooltip background color.
+        /// Description background color of the old example.
         /// </summary>
-        public static readonly Color TooltipColor = new Color(0f, 0f, 0f, 0.8f);
+        public static readonly Color DescriptionColor = new Color(0.4641509f, 0.4641509f, 0.4641509f, 1f);
+
+        /// <summary>
+        /// Description text color of the old example.
+        /// </summary>
+        public static readonly Color DescriptionTextColor = new Color(0.19607843f, 0.19607843f, 0.19607843f, 1f);
 
         /// <summary>
         /// Name of the UI layer.

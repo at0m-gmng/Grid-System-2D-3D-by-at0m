@@ -11,7 +11,7 @@ namespace GridSystem.Samples.Editor
         public const string CONTENT = "Assets/GridSystem/New/Samples/Content";
 
         /// <summary>
-        /// Input assets folder.
+        /// Pointer input config folder.
         /// </summary>
         public const string INPUT = CONTENT + "/Input";
 
@@ -44,6 +44,11 @@ namespace GridSystem.Samples.Editor
         /// Scenes folder.
         /// </summary>
         public const string SCENES = CONTENT + "/Scenes";
+
+        /// <summary>
+        /// Input actions of the old example: DragDrop (LMB_Hold, Moved, Rotation) and Control (Inventory, Interaction, SLWorld) maps.
+        /// </summary>
+        public const string INPUT_ACTIONS = "Assets/GridSystem/Examples/Scripts/InputSystem/GameInput.inputactions";
 
         /// <summary>
         /// Item sprites of the old example.
