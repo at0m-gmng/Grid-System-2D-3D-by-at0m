@@ -1,0 +1,68 @@
+namespace GridSystem.Runtime.Persistence
+{
+    using Core.Inventories;
+    using Core.Items;
+    using Definitions;
+    using Inventories;
+    using UnityEngine;
+
+    /// <summary>
+    /// JSON inventory persistence. Unknown or not fitting items are skipped on load.
+    /// </summary>
+    public sealed class InventoryPersistence : IInventoryPersistence
+    {
+        public InventoryPersistence(ISaveStorage storage, ItemDefinitionCatalog catalog, IGridItemFactory factory)
+        {
+            _storage = storage;
+            _catalog = catalog;
+            _factory = factory;
+        }
+
+        private readonly ISaveStorage _storage;
+        private readonly ItemDefinitionCatalog _catalog;
+        private readonly IGridItemFactory _factory;
+        private readonly InventorySnapshot _snapshot = new();
+
+        /// <summary>
+        /// Stores current content.
+        /// </summary>
+        public void Save(GridInventory inventory)
+        {
+            _snapshot.Items.Clear();
+            foreach (GridItem item in inventory.Items)
+            {
+                _snapshot.Items.Add(new ItemSnapshot(item.Definition.Id, item.Origin, item.Rotation));
+            }
+
+            _storage.Write(inventory.Key, JsonUtility.ToJson(_snapshot));
+        }
+
+        /// <summary>
+        /// Adds stored items into the inventory. Returns false when nothing is stored.
+        /// </summary>
+        public bool TryLoad(GridInventory inventory)
+        {
+            bool result = _storage.TryRead(inventory.Key, out string json);
+            if (result)
+            {
+                _snapshot.Items.Clear();
+                JsonUtility.FromJsonOverwrite(json, _snapshot);
+                for (int i = 0; i < _snapshot.Items.Count; i++)
+                {
+                    ItemSnapshot snapshot = _snapshot.Items[i];
+                    if (_catalog.TryGet(snapshot.DefinitionId, out ItemDefinition definition))
+                    {
+                        inventory.TryAdd(_factory.Create(definition), snapshot.Origin, snapshot.Rotation);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Removes stored content.
+        /// </summary>
+        public void Delete(GridInventory inventory) => _storage.Delete(inventory.Key);
+    }
+}

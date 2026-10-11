@@ -1,0 +1,26 @@
+{
+    "name": "GridSystem.Integrations.VContainer",
+    "rootNamespace": "GridSystem.Integrations.VContainer",
+    "references": [
+        "GridSystem.Core",
+        "GridSystem.Runtime",
+        "VContainer"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "GRID_SYSTEM_VCONTAINER"
+    ],
+    "versionDefines": [
+        {
+            "name": "jp.hadashikick.vcontainer",
+            "expression": "",
+            "define": "GRID_SYSTEM_VCONTAINER"
+        }
+    ],
+    "noEngineReferences": false
+}

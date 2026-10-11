@@ -6,26 +6,83 @@
 </div>
 
 ### Description
-- A small plugin for Unity that allows you to implement an inventory or any other system that requires a grid and the placement of irregularly shaped objects.
-- Technology stack: Zenject, UniRx, UniTask, DOTween (optional, but recommended).
+- A Unity plugin for inventories and any other systems that need a grid and irregularly shaped items.
+- Version 2 lives in `Assets/GridSystem/New`. The old implementation in `Assets/GridSystem/Examples` is kept as a reference example.
+- Technology stack: R3, MessagePipe, PrimeTween or DOTween (optional), Unity Input System. Works with Zenject, VContainer or Reflex.
 
 ### Unity versions
-- Latest release requires Unity 6  or higher.
+- Unity 6 or higher.
 
-#### Advantage
-- Support for 2D and 3D spaces.
-- Support for complex shapes.
-- Support for complex shapes.
-- The ability to expand and customize solutions.
-
-#### Disadvantages
-- Currently, it is completely dependent on Zenject.
-- There is no support for the corresponding system. Currently, it is not possible to move an element from 3D to 2D and from 2D to 3D. However, this can be implemented.
+#### Advantages
+- 2D (Canvas) and 3D surfaces, items move freely between them (UI <-> World).
+- Complex shapes with a pivot cell and 4 precomputed rotations.
+- DI agnostic: one composition description, thin adapters for Zenject, VContainer and Reflex.
+- No allocations in hot paths: flat occupancy matrix, O(1) cell lookup, analytic screen-to-cell conversion (no raycasts), pooled views, struct messages.
+- Extensible: drop handlers chain, custom surfaces, views, motions, highlighters, storages, modules.
 
 #### Road Map
-- Add support for VContainer.
-- Add the ability to expand the Grid.
-- The ability to move elements from 3D to 2D and from 2D to 3D.
+- Grid expansion at runtime.
+- Addressables item view provider.
+
+## Architecture (v2)
+
+```
+Input (IPointerInput) ──► ItemDragService ──► IItemDropHandler chain (Merge → Place)
+                               │                        │
+                       ISurfaceLocator                  ▼
+                               │                 GridInventory (Core, pure C#)
+                               ▼                        │ R3 Added / Removed / Moved
+                     GridSurfacePresenter ◄─────────────┘
+                               │ pooled ItemView (Motion + Highlighter)
+                               ▼
+                     GridSurface (UIGridSurface / WorldGridSurface)
+
+InventoryService ──MessagePipe──► Item*Message, ItemsMerged, ItemHover, Surface*Message ──► any listener
+```
+
+| Assembly | Folder | Purpose |
+|---|---|---|
+| `GridSystem.Core` | `New/Core` | Shapes, occupancy model, items, inventories. No Unity view code. |
+| `GridSystem.Runtime` | `New/Runtime` | Definitions, surfaces, views, pointer, drag & drop, merge, persistence, messaging, composition. |
+| `GridSystem.Integrations.Zenject` | `New/Integrations/Zenject` | Zenject adapter. |
+| `GridSystem.Integrations.VContainer` | `New/Integrations/VContainer` | VContainer adapter. |
+| `GridSystem.Integrations.Reflex` | `New/Integrations/Reflex` | Reflex adapter. |
+| `GridSystem.Editor` | `New/Editor` | Shape editor in the inspector. |
+| `GridSystem.Samples` | `New/Samples` | Sample bootstrap, tooltip, extended item definition. |
+
+Namespaces follow folders (`GridSystem.Runtime.Surfaces`, ...).
+
+### Scripting defines
+
+| Define | Set by | Enables |
+|---|---|---|
+| `GRID_SYSTEM_PRIMETWEEN` | automatically (asmdef version define of `com.kyrylokuzyk.primetween`) | `PrimeTweenItemMotion` (allocation free, recommended) |
+| `DOTWEEN` | DOTween setup, Player Settings → Scripting Define Symbols | `DOTweenItemMotion` (enable DOTween recycling to avoid allocations) |
+| `GRID_SYSTEM_ZENJECT` | automatically for `com.svermeulen.extenject`, add manually if Zenject is in Assets | Zenject adapter |
+| `GRID_SYSTEM_VCONTAINER` | automatically for `jp.hadashikick.vcontainer` | VContainer adapter |
+| `GRID_SYSTEM_REFLEX` | automatically for `com.gustavopsantos.reflex` | Reflex adapter |
+
+Without any tween use `InstantItemMotion`.
+
+### Setup
+
+1. Create assets (`Create/Grid System/...`): `Item Definition` for every item, `Item Definition Catalog`, `Merge Rules`, `Pointer Input Config` (Point: Vector2 pointer position, Press: button, Rotate: button), `Settings` referencing all of them, `Grid Definition` for every grid size, `Item View Catalog` per surface kind (UI, World).
+2. Item shape: set Width/Height, LMB toggles a cell, RMB sets the pivot cell. The pivot is the placement anchor and rotation center.
+3. Item view prefab:
+   - UI: root `RectTransform` with `UIItemView`, a body child with the image, `GraphicItemHighlighter` and a motion component. Size and pivot are calculated from the shape automatically.
+   - World: root with `WorldItemView`, model child centered on its bounds (1 unit per cell), `RendererItemHighlighter` and a motion component.
+4. Surfaces: `UIGridSurface` (grid `RectTransform`, event camera or none for Overlay) or `WorldGridSurface` (transform is the grid center on local XZ, camera). Assign items root, cells root, cell prefab, cell size, spacing and `Item View Catalog`. Overlapping surfaces are picked by `Priority` (put UI above World).
+5. Scene composition: add `GridSystemContext` (settings, inactive pool root, modules) and one adapter:
+   - Zenject: `ZenjectGridInstaller` in the SceneContext installers, or `Container.InstallGridSystem(context)`.
+   - VContainer: `GridSystemLifetimeScope`, or `builder.InstallGridSystem(context)` in your scope.
+   - Reflex: `ReflexGridInstaller` on the scene `ContainerScope` object (or its child), or `builder.InstallGridSystem(context)`.
+6. Game code: inject `IInventoryService` (create inventories), `ISurfaceService` (open/close on surfaces), `IInventoryPersistence` (save/load), `IGridItemFactory`, subscribe to messages via `ISubscriber<T>`.
+
+### Extension points
+- `GridModule` – scene module registering your services through `IGridRegistrar` (works for every container).
+- `IItemDropHandler` – custom drop logic (stacking, swapping, equipment slots); lower `Order` runs first.
+- `ItemDefinition` – inherit to add game data (see `SampleItemDefinition`).
+- `GridSurface`, `ItemView`, `ItemMotion`, `ItemHighlighter`, `ISaveStorage` – replaceable building blocks.
 
 <div align="center">
 

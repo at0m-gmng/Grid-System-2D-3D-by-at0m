@@ -1,0 +1,27 @@
+{
+    "name": "GridSystem.Runtime",
+    "rootNamespace": "GridSystem.Runtime",
+    "references": [
+        "GridSystem.Core",
+        "R3.Unity",
+        "MessagePipe",
+        "Unity.InputSystem",
+        "UnityEngine.UI",
+        "PrimeTween.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.kyrylokuzyk.primetween",
+            "expression": "",
+            "define": "GRID_SYSTEM_PRIMETWEEN"
+        }
+    ],
+    "noEngineReferences": false
+}

@@ -1,0 +1,26 @@
+{
+    "name": "GridSystem.Integrations.Reflex",
+    "rootNamespace": "GridSystem.Integrations.Reflex",
+    "references": [
+        "GridSystem.Core",
+        "GridSystem.Runtime",
+        "Reflex"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "GRID_SYSTEM_REFLEX"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.gustavopsantos.reflex",
+            "expression": "",
+            "define": "GRID_SYSTEM_REFLEX"
+        }
+    ],
+    "noEngineReferences": false
+}

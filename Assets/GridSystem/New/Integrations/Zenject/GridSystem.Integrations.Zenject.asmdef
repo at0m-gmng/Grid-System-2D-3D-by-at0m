@@ -1,0 +1,26 @@
+{
+    "name": "GridSystem.Integrations.Zenject",
+    "rootNamespace": "GridSystem.Integrations.Zenject",
+    "references": [
+        "GridSystem.Core",
+        "GridSystem.Runtime",
+        "Zenject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "GRID_SYSTEM_ZENJECT"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.svermeulen.extenject",
+            "expression": "",
+            "define": "GRID_SYSTEM_ZENJECT"
+        }
+    ],
+    "noEngineReferences": false
+}

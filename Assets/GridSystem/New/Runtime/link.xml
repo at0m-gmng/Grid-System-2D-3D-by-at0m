@@ -1,0 +1,8 @@
+<linker>
+    <assembly fullname="GridSystem.Core" preserve="all" ignoreIfMissing="1"/>
+    <assembly fullname="GridSystem.Runtime" preserve="all" ignoreIfMissing="1"/>
+    <assembly fullname="GridSystem.Samples" preserve="all" ignoreIfMissing="1"/>
+    <assembly fullname="GridSystem.Integrations.Zenject" preserve="all" ignoreIfMissing="1"/>
+    <assembly fullname="GridSystem.Integrations.VContainer" preserve="all" ignoreIfMissing="1"/>
+    <assembly fullname="GridSystem.Integrations.Reflex" preserve="all" ignoreIfMissing="1"/>
+</linker>
