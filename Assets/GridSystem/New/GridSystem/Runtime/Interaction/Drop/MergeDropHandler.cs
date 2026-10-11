@@ -1,7 +1,6 @@
 namespace GridSystem.Runtime.Interaction.Drop
 {
     using Core.Items;
-    using Definitions;
     using Inventories;
     using MessagePipe;
     using Merge;
@@ -12,14 +11,14 @@ namespace GridSystem.Runtime.Interaction.Drop
     /// </summary>
     public sealed class MergeDropHandler : IItemDropHandler
     {
-        public MergeDropHandler(MergeRules rules, IGridItemFactory factory, IPublisher<ItemsMergedMessage> publisher)
+        public MergeDropHandler(IMergeRules rules, IGridItemFactory factory, IPublisher<ItemsMergedMessage> publisher)
         {
             _rules = rules;
             _factory = factory;
             _publisher = publisher;
         }
 
-        private readonly MergeRules _rules;
+        private readonly IMergeRules _rules;
         private readonly IGridItemFactory _factory;
         private readonly IPublisher<ItemsMergedMessage> _publisher;
 
@@ -36,7 +35,7 @@ namespace GridSystem.Runtime.Interaction.Drop
             GridItem target = context.TargetItem;
             bool result = target != null
                 && target != context.Item
-                && _rules.TryGetResult(context.Item.Definition, target.Definition, out ItemDefinition definition)
+                && _rules.TryGetResult(context.Item.Definition, target.Definition, out IGridItemDefinition definition)
                 && context.Target.CanPlace(definition, target.Origin, target.Rotation, context.Item.Id, target.Id);
             return result;
         }
@@ -47,7 +46,7 @@ namespace GridSystem.Runtime.Interaction.Drop
         public void Handle(in DropContext context)
         {
             GridItem target = context.TargetItem;
-            _rules.TryGetResult(context.Item.Definition, target.Definition, out ItemDefinition definition);
+            _rules.TryGetResult(context.Item.Definition, target.Definition, out IGridItemDefinition definition);
             GridItem result = _factory.Create(definition);
             context.Source.TryRemove(context.Item);
             context.Target.TryRemove(target);

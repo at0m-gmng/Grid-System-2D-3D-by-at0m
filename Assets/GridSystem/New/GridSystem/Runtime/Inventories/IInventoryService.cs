@@ -14,11 +14,6 @@ namespace GridSystem.Runtime.Inventories
         public GridInventory Create(GridDefinition definition, string key);
 
         /// <summary>
-        /// Finds inventory by runtime id.
-        /// </summary>
-        public bool TryGet(int id, out GridInventory inventory);
-
-        /// <summary>
         /// Clears and forgets the inventory.
         /// </summary>
         public void Destroy(GridInventory inventory);

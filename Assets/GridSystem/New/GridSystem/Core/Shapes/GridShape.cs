@@ -42,11 +42,6 @@ namespace GridSystem.Core.Shapes
         public Vector2Int Pivot { get; }
 
         /// <summary>
-        /// Amount of filled cells.
-        /// </summary>
-        public int CellCount => _rotations[0].Length;
-
-        /// <summary>
         /// Converts any rotation value to range [0, 3].
         /// </summary>
         public static int NormalizeRotation(int rotation) => rotation & ROTATION_MASK;

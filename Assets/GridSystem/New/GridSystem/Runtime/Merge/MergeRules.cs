@@ -10,7 +10,7 @@ namespace GridSystem.Runtime.Merge
     /// Pairs of definitions producing a new definition when one item is dropped onto another.
     /// </summary>
     [CreateAssetMenu(menuName = MENU_NAME, fileName = FILE_NAME)]
-    public sealed class MergeRules : ScriptableObject
+    public sealed class MergeRules : ScriptableObject, IMergeRules
     {
         private const string MENU_NAME = "Grid System/Merge Rules";
         private const string FILE_NAME = "MergeRules";
@@ -18,12 +18,12 @@ namespace GridSystem.Runtime.Merge
         [SerializeField]
         private MergeRule[] _rules = Array.Empty<MergeRule>();
 
-        private readonly Dictionary<(IGridItemDefinition, IGridItemDefinition), ItemDefinition> _lookup = new();
+        private readonly Dictionary<(IGridItemDefinition, IGridItemDefinition), IGridItemDefinition> _lookup = new();
 
         /// <summary>
         /// Finds merge result for the pair in any order.
         /// </summary>
-        public bool TryGetResult(IGridItemDefinition first, IGridItemDefinition second, out ItemDefinition result)
+        public bool TryGetResult(IGridItemDefinition first, IGridItemDefinition second, out IGridItemDefinition result)
             => _lookup.TryGetValue((first, second), out result);
 
         private void OnEnable() => BuildLookup();

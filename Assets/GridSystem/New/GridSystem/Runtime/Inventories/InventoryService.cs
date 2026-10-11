@@ -43,16 +43,6 @@ namespace GridSystem.Runtime.Inventories
         }
 
         /// <summary>
-        /// Finds inventory by runtime id.
-        /// </summary>
-        public bool TryGet(int id, out GridInventory inventory)
-        {
-            bool result = _inventories.TryGetValue(id, out InventoryEntry entry);
-            inventory = entry.Inventory;
-            return result;
-        }
-
-        /// <summary>
         /// Clears and forgets the inventory.
         /// </summary>
         public void Destroy(GridInventory inventory)

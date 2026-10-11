@@ -85,7 +85,7 @@ namespace GridSystem.Runtime.Interaction
             }
             else if (IsDragging)
             {
-                End(_handler != null);
+                End(_handler != null && _handler.CanHandle(_context));
             }
         }
 

@@ -18,17 +18,6 @@ namespace GridSystem.Runtime.Interaction.Drop
         /// <summary>
         /// Moves or transfers the item.
         /// </summary>
-        public void Handle(in DropContext context)
-        {
-            if (context.Source == context.Target)
-            {
-                context.Target.TryMove(context.Item, context.Cell, context.Rotation);
-            }
-            else
-            {
-                context.Source.TryRemove(context.Item);
-                context.Target.TryAdd(context.Item, context.Cell, context.Rotation);
-            }
-        }
+        public void Handle(in DropContext context) => context.Source.TryTransfer(context.Item, context.Target, context.Cell, context.Rotation);
     }
 }

@@ -5,6 +5,7 @@ namespace GridSystem.Core.Model
 
     /// <summary>
     /// Flat occupancy matrix. Every cell stores the owner item id or <see cref="EMPTY"/>.
+    /// Read only outside of the core, mutated only by <see cref="Inventories.GridInventory"/>.
     /// </summary>
     public sealed class GridModel
     {
@@ -60,7 +61,7 @@ namespace GridSystem.Core.Model
         /// <summary>
         /// Writes owner id into shape cells without validation.
         /// </summary>
-        public void Fill(ReadOnlySpan<Vector2Int> cells, Vector2Int origin, int owner)
+        internal void Fill(ReadOnlySpan<Vector2Int> cells, Vector2Int origin, int owner)
         {
             for (int i = 0; i < cells.Length; i++)
             {
@@ -72,7 +73,7 @@ namespace GridSystem.Core.Model
         /// <summary>
         /// Frees every cell.
         /// </summary>
-        public void Clear() => Array.Clear(_cells, 0, _cells.Length);
+        internal void Clear() => Array.Clear(_cells, 0, _cells.Length);
 
         private static bool IsAvailable(int owner, int ignoredA, int ignoredB) => owner == EMPTY || owner == ignoredA || owner == ignoredB;
     }

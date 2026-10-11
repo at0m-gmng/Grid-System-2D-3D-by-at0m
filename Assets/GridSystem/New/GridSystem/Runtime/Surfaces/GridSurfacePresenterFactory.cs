@@ -8,7 +8,7 @@ namespace GridSystem.Runtime.Surfaces
     /// <summary>
     /// Creates presenters with their message channels.
     /// </summary>
-    public sealed class GridSurfacePresenterFactory
+    internal sealed class GridSurfacePresenterFactory
     {
         public GridSurfacePresenterFactory(ItemViewPool pool, ISubscriber<ItemDragStartedMessage> startedSubscriber,
             ISubscriber<ItemDragUpdatedMessage> updatedSubscriber, ISubscriber<ItemDragEndedMessage> endedSubscriber)

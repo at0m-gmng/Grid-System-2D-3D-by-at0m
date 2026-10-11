@@ -11,7 +11,7 @@ namespace GridSystem.Runtime.Persistence
     /// </summary>
     public sealed class InventoryPersistence : IInventoryPersistence
     {
-        public InventoryPersistence(ISaveStorage storage, ItemDefinitionCatalog catalog, IGridItemFactory factory)
+        public InventoryPersistence(ISaveStorage storage, IItemDefinitionCatalog catalog, IGridItemFactory factory)
         {
             _storage = storage;
             _catalog = catalog;
@@ -19,7 +19,7 @@ namespace GridSystem.Runtime.Persistence
         }
 
         private readonly ISaveStorage _storage;
-        private readonly ItemDefinitionCatalog _catalog;
+        private readonly IItemDefinitionCatalog _catalog;
         private readonly IGridItemFactory _factory;
         private readonly InventorySnapshot _snapshot = new();
 
@@ -50,7 +50,7 @@ namespace GridSystem.Runtime.Persistence
                 for (int i = 0; i < _snapshot.Items.Count; i++)
                 {
                     ItemSnapshot snapshot = _snapshot.Items[i];
-                    if (_catalog.TryGet(snapshot.DefinitionId, out ItemDefinition definition))
+                    if (_catalog.TryGet(snapshot.DefinitionId, out IGridItemDefinition definition))
                     {
                         inventory.TryAdd(_factory.Create(definition), snapshot.Origin, snapshot.Rotation);
                     }

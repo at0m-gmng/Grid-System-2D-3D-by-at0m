@@ -11,7 +11,7 @@ namespace GridSystem.Runtime.Surfaces
     /// <summary>
     /// Owns surface presenters and picks surfaces by screen point.
     /// </summary>
-    public sealed class SurfaceService : ISurfaceService, ISurfaceLocator, IDisposable
+    internal sealed class SurfaceService : ISurfaceService, ISurfaceLocator, IDisposable
     {
         public SurfaceService(GridSurfacePresenterFactory factory, IPublisher<SurfaceOpenedMessage> openedPublisher,
             IPublisher<SurfaceClosedMessage> closedPublisher)

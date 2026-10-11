@@ -20,11 +20,6 @@ namespace GridSystem.Runtime.Views
         [SerializeField]
         private GameObject _body;
 
-        /// <summary>
-        /// Shown item definition.
-        /// </summary>
-        public IGridItemDefinition Definition { get; private set; }
-
         internal ItemView Prefab { get; set; }
 
         /// <summary>
@@ -44,7 +39,6 @@ namespace GridSystem.Runtime.Views
         /// </summary>
         public void Setup(IGridItemDefinition definition, GridSurface surface)
         {
-            Definition = definition;
             OnSetup(definition, surface);
             SetPlacementState(PlacementState.Normal);
             SetVisible(true);
@@ -80,11 +74,7 @@ namespace GridSystem.Runtime.Views
         /// </summary>
         public void SetVisible(bool isVisible) => _body.SetActive(isVisible);
 
-        internal void Release()
-        {
-            _motion.Stop();
-            Definition = null;
-        }
+        internal void Release() => _motion.Stop();
 
         /// <summary>
         /// Adapts view geometry to the shape and the surface cell size.

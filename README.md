@@ -105,7 +105,8 @@ Without tweens use `InstantItemMotion`.
 - `IItemDropHandler` – custom drop logic (stacking, swapping, equipment slots); lower `Order` runs first.
 - Pointer source – replace `InputSystemPointerInput` with any publisher of pointer messages.
 - `ItemDefinition` – inherit to add game data (see `SampleItemDefinition`).
-- `GridSurface`, `ItemView`, `ItemMotion`, `ItemHighlighter`, `ISaveStorage` – replaceable building blocks.
+- `IItemDefinitionCatalog`, `IMergeRules`, `ISaveStorage` – data sources (ScriptableObject implementations are provided).
+- `GridSurface`, `ItemView`, `ItemMotion`, `ItemHighlighter` – replaceable view building blocks.
 
 <div align="center">
 

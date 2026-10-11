@@ -25,6 +25,11 @@ namespace GridSystem.Core.Items
         public IGridItemDefinition Definition { get; }
 
         /// <summary>
+        /// Id of the inventory containing the item or <see cref="Model.GridModel.EMPTY"/> when the item is not placed.
+        /// </summary>
+        public int InventoryId { get; internal set; }
+
+        /// <summary>
         /// Cell of the pivot inside the owning inventory.
         /// </summary>
         public Vector2Int Origin { get; internal set; }

@@ -1,8 +1,10 @@
 namespace GridSystem.Runtime.Composition
 {
+    using Definitions;
     using Interaction;
     using Interaction.Drop;
     using Inventories;
+    using Merge;
     using Messaging;
     using Persistence;
     using Pointer;
@@ -21,9 +23,8 @@ namespace GridSystem.Runtime.Composition
         /// </summary>
         public static void Install(IGridRegistrar registrar, GridSystemSettings settings, Transform poolRoot)
         {
-            registrar.RegisterInstance(settings);
-            registrar.RegisterInstance(settings.Items);
-            registrar.RegisterInstance(settings.MergeRules);
+            registrar.RegisterInstance<IItemDefinitionCatalog>(settings.Items);
+            registrar.RegisterInstance<IMergeRules>(settings.MergeRules);
             registrar.RegisterInstance(settings.Input);
             registrar.RegisterInstance(new ItemViewPool(poolRoot));
             GridMessageBus.Install(registrar);

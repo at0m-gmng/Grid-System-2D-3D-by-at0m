@@ -27,7 +27,7 @@ namespace GridSystem.Core.Inventories
         private readonly Subject<ItemMovement> _moved = new();
 
         /// <summary>
-        /// Runtime unique identifier.
+        /// Runtime unique identifier, greater than zero.
         /// </summary>
         public int Id { get; }
 
@@ -65,11 +65,6 @@ namespace GridSystem.Core.Inventories
         /// Placed items count.
         /// </summary>
         public int Count => _items.Count;
-
-        /// <summary>
-        /// Returns true when the item is placed in this inventory.
-        /// </summary>
-        public bool Contains(GridItem item) => _items.ContainsKey(item.Id);
 
         /// <summary>
         /// Finds placed item by id.
@@ -128,15 +123,16 @@ namespace GridSystem.Core.Inventories
         }
 
         /// <summary>
-        /// Places a new item at the given position.
+        /// Places an item that is not placed in any inventory.
         /// </summary>
         public bool TryAdd(GridItem item, Vector2Int origin, int rotation)
         {
             int resolvedRotation = ResolveRotation(item.Definition, rotation);
-            bool result = !_items.ContainsKey(item.Id)
+            bool result = item.InventoryId == GridModel.EMPTY
                 && Model.CanPlace(item.Definition.Shape.GetCells(resolvedRotation), origin, GridModel.EMPTY, GridModel.EMPTY);
             if (result)
             {
+                item.InventoryId = Id;
                 item.Origin = origin;
                 item.Rotation = resolvedRotation;
                 Model.Fill(item.Cells, origin, item.Id);
@@ -148,7 +144,7 @@ namespace GridSystem.Core.Inventories
         }
 
         /// <summary>
-        /// Places a new item at the first free position.
+        /// Places an item that is not placed in any inventory at the first free position.
         /// </summary>
         public bool TryAdd(GridItem item)
         {
@@ -162,7 +158,7 @@ namespace GridSystem.Core.Inventories
         public bool TryMove(GridItem item, Vector2Int origin, int rotation)
         {
             int resolvedRotation = ResolveRotation(item.Definition, rotation);
-            bool result = _items.ContainsKey(item.Id)
+            bool result = item.InventoryId == Id
                 && Model.CanPlace(item.Definition.Shape.GetCells(resolvedRotation), origin, item.Id, GridModel.EMPTY);
             if (result)
             {
@@ -183,11 +179,37 @@ namespace GridSystem.Core.Inventories
         /// </summary>
         public bool TryRemove(GridItem item)
         {
-            bool result = _items.Remove(item.Id);
+            bool result = item.InventoryId == Id;
             if (result)
             {
+                _items.Remove(item.Id);
                 Model.Fill(item.Cells, item.Origin, GridModel.EMPTY);
+                item.InventoryId = GridModel.EMPTY;
                 _removed.OnNext(item);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Moves a placed item into the target inventory. Nothing changes when it does not fit.
+        /// Same inventory target performs <see cref="TryMove"/>.
+        /// </summary>
+        public bool TryTransfer(GridItem item, GridInventory target, Vector2Int origin, int rotation)
+        {
+            bool result;
+            if (target == this)
+            {
+                result = TryMove(item, origin, rotation);
+            }
+            else
+            {
+                result = item.InventoryId == Id && target.CanPlace(item.Definition, origin, rotation, GridModel.EMPTY, GridModel.EMPTY);
+                if (result)
+                {
+                    TryRemove(item);
+                    target.TryAdd(item, origin, rotation);
+                }
             }
 
             return result;
@@ -202,6 +224,11 @@ namespace GridSystem.Core.Inventories
             _buffer.AddRange(_items.Values);
             _items.Clear();
             Model.Clear();
+            for (int i = 0; i < _buffer.Count; i++)
+            {
+                _buffer[i].InventoryId = GridModel.EMPTY;
+            }
+
             for (int i = 0; i < _buffer.Count; i++)
             {
                 _removed.OnNext(_buffer[i]);

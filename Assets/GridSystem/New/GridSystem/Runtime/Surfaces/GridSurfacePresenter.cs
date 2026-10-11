@@ -14,7 +14,7 @@ namespace GridSystem.Runtime.Surfaces
     /// Keeps item views of one surface in sync with one inventory and draws the drag preview on this surface.
     /// Reacts only to inventory events and drag messages, nobody calls it directly.
     /// </summary>
-    public sealed class GridSurfacePresenter : IDisposable
+    internal sealed class GridSurfacePresenter : IDisposable
     {
         public GridSurfacePresenter(GridSurface surface, GridInventory inventory, ItemViewPool pool,
             ISubscriber<ItemDragStartedMessage> startedSubscriber, ISubscriber<ItemDragUpdatedMessage> updatedSubscriber,
@@ -133,26 +133,24 @@ namespace GridSystem.Runtime.Surfaces
 
         private void UpdatePreview(in ItemDragUpdatedMessage message)
         {
-            bool hasPoint = Surface.TryGetWorldPoint(message.ScreenPosition, out Vector3 point);
-            if (_preview == null)
+            if (Surface.TryGetWorldPoint(message.ScreenPosition, out Vector3 point))
             {
-                _preview = RentView(message.Item.Definition);
-                _previewRotation = message.Rotation;
-                _preview.Snap(new Pose(point, Surface.GetRotation(message.Rotation)));
-            }
+                if (_preview == null)
+                {
+                    _preview = RentView(message.Item.Definition);
+                    _previewRotation = message.Rotation;
+                    _preview.Snap(new Pose(point, Surface.GetRotation(message.Rotation)));
+                }
 
-            if (_previewRotation != message.Rotation)
-            {
-                _previewRotation = message.Rotation;
-                _preview.RotateTo(Surface.GetRotation(message.Rotation));
-            }
+                if (_previewRotation != message.Rotation)
+                {
+                    _previewRotation = message.Rotation;
+                    _preview.RotateTo(Surface.GetRotation(message.Rotation));
+                }
 
-            if (hasPoint)
-            {
                 _preview.Follow(point);
+                _preview.SetPlacementState(message.IsValid ? PlacementState.Valid : PlacementState.Invalid);
             }
-
-            _preview.SetPlacementState(message.IsValid ? PlacementState.Valid : PlacementState.Invalid);
         }
 
         private void ReleasePreview()
