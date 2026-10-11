@@ -1,0 +1,3 @@
+<linker>
+    <assembly fullname="GridSystem.Integrations.Reflex" preserve="all"/>
+</linker>

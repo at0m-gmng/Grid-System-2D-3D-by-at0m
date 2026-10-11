@@ -1,0 +1,5 @@
+<linker>
+    <assembly fullname="GridSystem.Core" preserve="all"/>
+    <assembly fullname="GridSystem.Runtime" preserve="all"/>
+    <assembly fullname="GridSystem.Samples" preserve="all" ignoreIfMissing="1"/>
+</linker>

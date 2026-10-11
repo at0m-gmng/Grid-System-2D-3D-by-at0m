@@ -12,15 +12,7 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [
-        "GRID_SYSTEM_VCONTAINER"
-    ],
-    "versionDefines": [
-        {
-            "name": "jp.hadashikick.vcontainer",
-            "expression": "",
-            "define": "GRID_SYSTEM_VCONTAINER"
-        }
-    ],
+    "defineConstraints": [],
+    "versionDefines": [],
     "noEngineReferences": false
 }

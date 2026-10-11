@@ -12,15 +12,7 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [
-        "GRID_SYSTEM_REFLEX"
-    ],
-    "versionDefines": [
-        {
-            "name": "com.gustavopsantos.reflex",
-            "expression": "",
-            "define": "GRID_SYSTEM_REFLEX"
-        }
-    ],
+    "defineConstraints": [],
+    "versionDefines": [],
     "noEngineReferences": false
 }

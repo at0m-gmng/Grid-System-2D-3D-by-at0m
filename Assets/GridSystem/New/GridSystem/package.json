@@ -2,7 +2,7 @@
     "name": "com.at0m.gridsystem",
     "version": "2.0.0",
     "displayName": "Grid System 2D/3D",
-    "description": "Grid inventories and placement of irregularly shaped items on UI and World surfaces. DI agnostic: Zenject, VContainer and Reflex adapters compile automatically when the container is installed.",
+    "description": "Core of Grid System 2D/3D: grid inventories and placement of irregularly shaped items on UI and World surfaces. DI agnostic, install one integration package: com.at0m.gridsystem.zenject, com.at0m.gridsystem.vcontainer or com.at0m.gridsystem.reflex.",
     "unity": "6000.0",
     "license": "MIT",
     "author": {

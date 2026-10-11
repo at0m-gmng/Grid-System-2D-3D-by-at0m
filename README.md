@@ -8,7 +8,7 @@
 ### Description
 - A Unity plugin for inventories and any other systems that need a grid and irregularly shaped items.
 - Version 2 lives in `Assets/GridSystem/New`. The old implementation in `Assets/GridSystem/Examples` is kept as a reference example.
-- Technology stack: MessagePipe, UniTask, R3, Unity Input System, PrimeTween or DOTween (optional). Works with Zenject, VContainer or Reflex from one package.
+- Technology stack: MessagePipe, UniTask, R3, Unity Input System, PrimeTween or DOTween (optional). DI agnostic core plus one integration package: Zenject, VContainer or Reflex.
 
 ### Unity versions
 - Unity 6 or higher.
@@ -16,7 +16,7 @@
 #### Advantages
 - 2D (Canvas) and 3D surfaces, items move freely between them (UI <-> World).
 - Complex shapes with a pivot cell and 4 precomputed rotations.
-- DI agnostic: one composition description, thin adapters for Zenject, VContainer and Reflex.
+- DI agnostic core: one composition description, separate integration packages for Zenject, VContainer and Reflex.
 - No allocations in hot paths: flat occupancy matrix, O(1) cell lookup, analytic screen-to-cell conversion (no raycasts), event driven input (no per frame polling), drop handlers re-evaluated only when the target changes, pooled views, struct messages.
 - Extensible: drop handlers chain, custom surfaces, views, motions, highlighters, storages, modules.
 
@@ -49,41 +49,42 @@ SurfaceService   ──► SurfaceOpened / SurfaceClosed      ──► windows,
 MergeDropHandler ──► ItemsMerged
 ```
 
-| Assembly | Folder | Purpose |
+| Package | Folder | Assemblies |
 |---|---|---|
-| `GridSystem.Core` | `Core` | Shapes, occupancy model, items, inventories. |
-| `GridSystem.Runtime` | `Runtime` | Definitions, surfaces, views, pointer, drag & drop, merge, persistence, messaging, composition. |
-| `GridSystem.Integrations.Zenject` | `Integrations/Zenject` | Zenject adapter, compiled only with `GRID_SYSTEM_ZENJECT`. |
-| `GridSystem.Integrations.VContainer` | `Integrations/VContainer` | VContainer adapter, compiled only with `GRID_SYSTEM_VCONTAINER`. |
-| `GridSystem.Integrations.Reflex` | `Integrations/Reflex` | Reflex adapter, compiled only with `GRID_SYSTEM_REFLEX`. |
-| `GridSystem.Editor` | `Editor` | Shape editor in the inspector. |
-| `GridSystem.Samples` | `Samples` | Sample module, not auto referenced. |
+| `com.at0m.gridsystem` (core, DI agnostic) | `New/GridSystem` | `GridSystem.Core`, `GridSystem.Runtime`, `GridSystem.Editor`, `GridSystem.Samples` (not auto referenced) |
+| `com.at0m.gridsystem.zenject` | `New/Integrations/Zenject` | `GridSystem.Integrations.Zenject` |
+| `com.at0m.gridsystem.vcontainer` | `New/Integrations/VContainer` | `GridSystem.Integrations.VContainer` |
+| `com.at0m.gridsystem.reflex` | `New/Integrations/Reflex` | `GridSystem.Integrations.Reflex` |
 
-Namespaces follow folders (`GridSystem.Runtime.Surfaces`, ...).
+The core package does not reference any container. Every integration package depends on the core and on its own container only.
+A project installs the core and exactly one integration. Namespaces follow folders (`GridSystem.Runtime.Surfaces`, ...).
 
 ## Installation
 
-One package contains everything. Adapters of containers that are not installed are not compiled.
-
-1. Dependencies (install first):
+1. Dependencies:
    - [UniTask](https://github.com/Cysharp/UniTask) `https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask`
    - [MessagePipe](https://github.com/Cysharp/MessagePipe) `https://github.com/Cysharp/MessagePipe.git?path=src/MessagePipe.Unity/Assets/Plugins/MessagePipe`
    - [R3](https://github.com/Cysharp/R3): `R3` via NuGetForUnity and `https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity`
+   - Your container: Zenject (Extenject), VContainer or Reflex.
    - Input System and uGUI are resolved automatically.
-2. Package: `https://github.com/at0m-gmng/Grid-System-2D-3D-by-at0m.git?path=Assets/GridSystem/New#v2.0.0` or the `.unitypackage` from Releases.
-3. One of the containers: Zenject (Extenject), VContainer or Reflex.
+2. Core: `https://github.com/at0m-gmng/Grid-System-2D-3D-by-at0m.git?path=Assets/GridSystem/New/GridSystem#v2.0.0`
+3. One integration:
+   - Zenject: `...?path=Assets/GridSystem/New/Integrations/Zenject#v2.0.0`
+   - VContainer: `...?path=Assets/GridSystem/New/Integrations/VContainer#v2.0.0`
+   - Reflex: `...?path=Assets/GridSystem/New/Integrations/Reflex#v2.0.0`
+
+Install the core before the integration: UPM does not resolve git dependencies, the integration's dependency on `com.at0m.gridsystem` is satisfied by the installed core.
+
+Releases (`.unitypackage`): export `New/GridSystem` + one `New/Integrations/<Container>` folder, three files per version: `GridSystem-Zenject`, `GridSystem-VContainer`, `GridSystem-Reflex`.
 
 ### Scripting defines
 
 | Define | Set by | Enables |
 |---|---|---|
-| `GRID_SYSTEM_ZENJECT` | automatically for UPM `com.svermeulen.extenject`; add manually if Zenject is imported into Assets | Zenject adapter |
-| `GRID_SYSTEM_VCONTAINER` | automatically for UPM `jp.hadashikick.vcontainer`; add manually otherwise | VContainer adapter |
-| `GRID_SYSTEM_REFLEX` | automatically for UPM `com.gustavopsantos.reflex`; add manually otherwise | Reflex adapter |
 | `GRID_SYSTEM_PRIMETWEEN` | automatically for `com.kyrylokuzyk.primetween` | `PrimeTweenItemMotion` (allocation free, recommended) |
 | `DOTWEEN` | DOTween setup utility | `DOTweenItemMotion` (enable DOTween recycling to avoid allocations) |
 
-Manual defines: Project Settings → Player → Scripting Define Symbols. Without tweens use `InstantItemMotion`.
+Without tweens use `InstantItemMotion`.
 
 ### Setup
 

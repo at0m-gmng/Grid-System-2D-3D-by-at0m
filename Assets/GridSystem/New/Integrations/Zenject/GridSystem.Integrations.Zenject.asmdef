@@ -12,15 +12,7 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [
-        "GRID_SYSTEM_ZENJECT"
-    ],
-    "versionDefines": [
-        {
-            "name": "com.svermeulen.extenject",
-            "expression": "",
-            "define": "GRID_SYSTEM_ZENJECT"
-        }
-    ],
+    "defineConstraints": [],
+    "versionDefines": [],
     "noEngineReferences": false
 }

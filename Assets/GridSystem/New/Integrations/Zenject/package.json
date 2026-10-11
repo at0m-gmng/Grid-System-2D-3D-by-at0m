@@ -1,0 +1,20 @@
+{
+    "name": "com.at0m.gridsystem.zenject",
+    "version": "2.0.0",
+    "displayName": "Grid System 2D/3D - Zenject (Extenject)",
+    "description": "Zenject (Extenject) integration of Grid System 2D/3D. Installs the grid system into a Zenject (Extenject) container.",
+    "unity": "6000.0",
+    "license": "MIT",
+    "author": {
+        "name": "at0m",
+        "url": "https://github.com/at0m-gmng/Grid-System-2D-3D-by-at0m"
+    },
+    "keywords": [
+        "grid",
+        "inventory",
+        "zenject"
+    ],
+    "dependencies": {
+        "com.at0m.gridsystem": "2.0.0"
+    }
+}
