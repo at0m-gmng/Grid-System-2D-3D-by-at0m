@@ -1,4 +1,4 @@
-# Ручная настройка примера Grid System
+# Ручная настройка сцен примера Grid System
 
 Пример повторяет старую сцену `Examples/Scenes/TestInventoryScene`: те же объекты (`Environment`, `WorldPrefab`, `WindowsSystem`, `MainInventory`, `OthersInventories`, `OutsideParent`, `InventoryItemView`, `PoolParent`, `SceneContext/GameInstaller`), те же клавиши.
 
@@ -13,215 +13,40 @@
 `OutsideParent` — «рука» 6×2 внизу экрана, открыта всегда. При первом запуске в неё кладутся 3 разных предмета.
 Предмет на такой же предмет → merge. При наведении на предмет показывается `InventoryItemView` с параметрами. Раскладка сохраняется в PlayerPrefs.
 
-Шаги 0–4 общие. Шаг 5 — сцена, общая для всех DI. Шаг 6 — объект DI, единственное отличие сцен Reflex / Zenject / VContainer. Шаг 7 — если начинаешь с копии старой сцены.
+Гайд описывает только сцены: иерархию объектов и компоненты на них. Создание данных (определения предметов, сетки, каталоги, настройки) и префабов (ячейки, вьюхи предметов) сюда не входит.
+
+Раздел 1 — итоговая иерархия. Раздел 2 — общая часть сцены. Раздел 3 — объект DI, единственное отличие сцен Reflex / Zenject / VContainer. Раздел 4 — если начинаешь с копии старой сцены.
 
 Обозначения:
-- `Content/` = `Assets/GridSystem/New/Samples/Content/`.
 - Поля называются так, как их показывает Inspector.
 - RectTransform: `Anchors Min–Max`, `Pivot`, `Pos X, Pos Y`, `Width × Height`. «stretch» = Anchors `(0, 0)–(1, 1)`, Left / Top / Right / Bottom = 0.
 
 ---
 
-## 0. Предусловия
+## 0. Перед началом
 
-1. Установлены пакеты: UniTask, MessagePipe, R3 (NuGet `R3` + `R3.Unity`), Input System, PrimeTween, TextMeshPro, нужный DI (Reflex / Extenject / VContainer).
-2. `Project Settings → Player → Active Input Handling` = `Input System Package (New)` или `Both`.
-3. `Window → TextMeshPro → Import TMP Essential Resources` (один раз на проект).
-4. Built-in Render Pipeline → свойство цвета материалов `_Color`. Для URP/HDRP — `_BaseColor` (шаг 3.4).
-5. Мешают старые сохранения → `Edit → Clear All PlayerPrefs`.
+1. `Project Settings → Player → Active Input Handling` = `Input System Package (New)` или `Both`.
+2. `Window → TextMeshPro → Import TMP Essential Resources` (тексты описания предмета).
+3. В проекте уже есть ассеты, которые назначаются в поля компонентов сцены:
 
----
-
-## 1. Папки и ассеты из `Examples`
-
-`Examples` будет удалён, поэтому всё нужное из него копируем в `Content/`.
-
-1. Создать папки:
-   - `Content/Art/Textures`, `Content/Art/Materials`;
-   - `Content/Input`, `Content/Definitions`, `Content/Grids`, `Content/Catalogs`;
-   - `Content/Prefabs/UI`, `Content/Prefabs/World`;
-   - `Content/Scenes`.
-2. Скопировать (`Ctrl+D` в Project, затем перетащить копию в новую папку):
-
-| Откуда | Куда | Используется |
+| Ассет | Тип | Где используется |
 |---|---|---|
-| `Examples/Textures/Grid/GridBackground_2.psd` | `Content/Art/Textures` | спрайт UI-ячейки (как у старого `GridCell`) |
-| `Examples/Textures/Items/Katana.psd`, `Ammo.psd`, `Pistol.psd`, `Grenade.psd`, `Money.psd` | `Content/Art/Textures` | спрайты UI-предметов |
-| `Examples/Materials/GridCellMaterial.mat` | `Content/Art/Materials` | 3D-ячейка |
-| `Examples/Materials/GridItemMaterial.mat` | `Content/Art/Materials` | 3D-предметы |
+| `GridSystemSettings` | `GridSystemSettings` | `GridSystem → GridSystemContext → Settings` |
+| `MainGrid` (6×4), `ChestGrid` (4×4), `HandGrid` (6×2), `WorldGrid` (10×10) | `GridDefinition` | `SampleModule → Data` |
+| `Katana`, `Bullet`, `Pistol`, `LaserTower`, `Wall` | `SampleItemDefinition` | `SampleModule → Data` (рука, стартовые предметы) |
+| `UIItemViews`, `WorldItemViews` | `ItemViewCatalog` | поле `Views` UI- и 3D-поверхностей |
+| `UI_Cell`, `World_Cell` | префаб | поле `Cell Prefab` UI- и 3D-поверхностей |
+| `GameInput` (`Samples/Input/GameInput.inputactions`) | Input Actions | `SampleModule → Data → Windows → Toggle` |
 
-3. Ввод: `Assets/GridSystem/New/Samples/Input/GameInput.inputactions` — старый ассет, уже перенесён. Ничего не копировать.
-
----
-
-## 2. Данные
-
-### 2.1 Ввод — `Content/Input/PointerInputConfig`
-`Create → Grid System → Pointer Input Config`.
-
-| Поле | Значение (вложенные ассеты под `GameInput`, раскрыть стрелкой) | Binding |
-|---|---|---|
-| `Point` | `DragDrop/Moved` | `<Mouse>/position`, Value / Vector2 |
-| `Press` | `DragDrop/LMB_Hold` | `<Mouse>/leftButton`, Hold (используются `started` / `canceled`) |
-| `Rotate` | `DragDrop/Rotation` | `<Keyboard>/r` |
-
-Действия `Control/Inventory` (I), `Control/Interaction` (E), `Control/SLWorld` (C) назначаются в сцене (шаг 5.7).
-
-### 2.2 Предметы — `Content/Definitions/<Item>`
-`Create → Grid System → Samples → Sample Item Definition`, по одному ассету на предмет.
-
-Редактор формы:
-- задать `Width` / `Height`;
-- ЛКМ по клетке — занята / пуста;
-- ПКМ — pivot (оранжевая «P»): точка привязки к клетке и центр поворота;
-- строка 0 — верхняя.
-
-| Ассет | Display Name | Is Rotatable | W × H | Клетки сверху вниз (`P` pivot, `x` занята, `.` пусто) | Damage | Attack Speed | Range |
-|---|---|---|---|---|---|---|---|
-| `Katana` | Katana | ✔ | 1 × 3 | `x` / `P` / `x` | 30 | 1.2 | 1.5 |
-| `Bullet` | Bullet | ✔ | 1 × 1 | `P` | 5 | 0 | 0 |
-| `Pistol` | Pistol | ✔ | 2 × 2 | `P x` / `x .` | 15 | 2 | 20 |
-| `LaserTower` | Laser Tower | ✔ | 1 × 1 | `P` | 50 | 0.5 | 8 |
-| `Wall` | Wall | ✔ | 2 × 2 | `P x` / `x .` | 0 | 0 | 0 |
-
-`Id` заполняется сам (GUID ассета). Не трогать.
-
-### 2.3 Каталог — `Content/Definitions/ItemDefinitionCatalog`
-`Create → Grid System → Item Definition Catalog`. `Items` = все 5 предметов. По нему восстанавливаются сохранения.
-
-### 2.4 Merge — `Content/Definitions/MergeRules`
-`Create → Grid System → Merge Rules`, `Rules`:
-
-| # | First | Second | Result |
-|---|---|---|---|
-| 0 | Katana | Katana | Bullet |
-| 1 | Bullet | Bullet | Pistol |
-| 2 | LaserTower | LaserTower | Wall |
-
-Результат ставится в pivot целевого предмета. Он должен поместиться в клетки обоих ингредиентов плюс свободные клетки рядом.
-
-### 2.5 Размеры сеток — `Content/Grids`
-`Create → Grid System → Grid Definition`:
-
-| Ассет | Width | Height | Где |
-|---|---|---|---|
-| `MainGrid` | 6 | 4 | `MainInventory` |
-| `ChestGrid` | 4 | 4 | `OthersInventories` |
-| `HandGrid` | 6 | 2 | `OutsideParent` |
-| `WorldGrid` | 10 | 10 | `WorldPrefab` |
-
-### 2.6 Настройки — `Content/GridSystemSettings`
-`Create → Grid System → Settings`:
-- `Items` = `ItemDefinitionCatalog`;
-- `Merge Rules` = `MergeRules`;
-- `Input` = `PointerInputConfig`.
+Если сохранения от прошлых запусков мешают — `Edit → Clear All PlayerPrefs`.
 
 ---
 
-## 3. Префабы
-
-### 3.1 UI-ячейка — `Content/Prefabs/UI/UI_Cell`
-Аналог старого `UIPrefabs/GridCell`.
-```
-UI_Cell        RectTransform, Image
-```
-- `RectTransform`: Anchors `(0.5, 0.5)–(0.5, 0.5)`, Pivot `(0.5, 0.5)`. Размер, позицию и поворот выставляет поверхность.
-- `Image`: Source Image = `Art/Textures/GridBackground_2`, Color белый, `Raycast Target` выкл.
-
-### 3.2 3D-ячейка — `Content/Prefabs/World/World_Cell`
-Аналог старого `WorldPrefabs/GridItem`.
-```
-World_Cell     Transform
-└─ Quad        MeshFilter (Quad), MeshRenderer
-```
-- `World_Cell`: пустой, Position / Rotation 0, Scale 1. Позицию и поворот корня перезаписывает поверхность.
-- `Quad` (`3D Object → Quad`):
-  - Position `(0, 0.01, 0)`, Rotation `(90, 0, 0)`, Scale `(0.95, 0.95, 1)` — зазор между клетками;
-  - `MeshCollider` удалить;
-  - Material = `Art/Materials/GridCellMaterial`.
-
-### 3.3 UI-предметы — `Content/Prefabs/UI/UI_<Item>`
-По одному на каждый из 5 предметов: `UI_Katana`, `UI_Bullet`, `UI_Pistol`, `UI_LaserTower`, `UI_Wall`. Аналог старых `Items/UI/*` + `ItemsVisual/*Visual`.
-```
-UI_Pistol      RectTransform, UIItemView, PrimeTweenItemMotion, GraphicItemHighlighter
-└─ Body        RectTransform, Image
-```
-**`UI_Pistol`**
-- `RectTransform`: Anchors `(0.5, 0.5)–(0.5, 0.5)` (НЕ stretch). Размер и pivot выставляются из формы предмета.
-- `PrimeTweenItemMotion`:
-  - `Target` = `UI_Pistol`;
-  - `Move Duration` 0.15, `Rotate Duration` 0.1, `Ease` OutQuad (по умолчанию).
-  - Без PrimeTween — `InstantItemMotion`; с define `DOTWEEN` — `DOTweenItemMotion`.
-- `GraphicItemHighlighter`:
-  - `Graphic` = `Body` (Image);
-  - `Palette` по умолчанию: Normal белый, Valid зелёный, Invalid красный.
-- `UIItemView`:
-  - `Motion` = `PrimeTweenItemMotion`;
-  - `Highlighter` = `GraphicItemHighlighter`;
-  - `Body` = `Body`;
-  - `Rect` = `UI_Pistol`.
-
-**`Body`**
-- `RectTransform`: stretch.
-- `Image`: `Preserve Aspect` вкл, `Raycast Target` выкл. Спрайт рисуется в неповёрнутой ориентации формы.
-
-| Префаб | Source Image |
-|---|---|
-| `UI_Katana` | `Katana` |
-| `UI_Bullet` | `Ammo` |
-| `UI_Pistol` | `Pistol` |
-| `UI_LaserTower` | `Grenade` |
-| `UI_Wall` | `Money` |
-
-### 3.4 3D-предметы — `Content/Prefabs/World/World_<Item>`
-По одному на каждый из 5 предметов. Аналог старых `Items/World/*`.
-```
-World_Wall     Transform, WorldItemView, PrimeTweenItemMotion, RendererItemHighlighter
-└─ Model       Transform
-   ├─ Cube     MeshFilter (Cube), MeshRenderer
-   └─ ...
-```
-**Корень**
-- Пустой, Position / Rotation 0, Scale 1. Коллайдеры не нужны.
-- `PrimeTweenItemMotion`: `Target` = корень.
-- `RendererItemHighlighter`:
-  - `Renderers` = все `MeshRenderer` кубов;
-  - `Color Property` = `_Color` (Built-in; по умолчанию стоит `_BaseColor` для URP/HDRP).
-- `WorldItemView`:
-  - `Motion` = `PrimeTweenItemMotion`;
-  - `Highlighter` = `RendererItemHighlighter`;
-  - `Body` = `Model`;
-  - `Model` = `Model`.
-
-**`Model`**
-- Пустой. Его `localPosition` выставляется кодом: модель центрируется по форме.
-
-**Кубы** (`3D Object → Cube`)
-- `BoxCollider` удалить, Material = `Art/Materials/GridItemMaterial`.
-- 1 юнит = 1 клетка. Столбцы формы идут по `+X`, строки по `-Z`, центр модели — центр габаритов формы.
-
-| Префаб | Кубы: Position / Scale |
-|---|---|
-| `World_Katana` (1×3) | `(0, 0.4, 1)`, `(0, 0.4, 0)`, `(0, 0.4, -1)` / `(0.9, 0.8, 0.9)` |
-| `World_Bullet` (1×1) | `(0, 0.4, 0)` / `(0.9, 0.8, 0.9)` |
-| `World_Pistol` (2×2, `P x / x .`) | `(-0.5, 0.4, 0.5)`, `(0.5, 0.4, 0.5)`, `(-0.5, 0.4, -0.5)` / `(0.9, 0.8, 0.9)` |
-| `World_LaserTower` (1×1) | `(0, 0.8, 0)` / `(0.9, 1.6, 0.9)` |
-| `World_Wall` (2×2, `P x / x .`) | `(-0.5, 0.4, 0.5)`, `(0.5, 0.4, 0.5)`, `(-0.5, 0.4, -0.5)` / `(0.9, 0.8, 0.9)` |
-
-### 3.5 Каталоги вьюх — `Content/Catalogs`
-`Create → Grid System → Item View Catalog`:
-- `UIItemViews` → `Entries`: 5 записей `Definition` → `Prefab` (`Katana` → `UI_Katana`, …).
-- `WorldItemViews` → `Entries`: 5 записей (`Katana` → `World_Katana`, …).
-
-Предмет попадает только на поверхность, в каталоге которой он есть. Для переноса UI ↔ 3D он должен быть в обоих каталогах. Результаты merge — тоже.
-
----
-
-## 4. Как устроена сцена
+## 1. Как устроена сцена
 
 Итоговая иерархия. Имена — как в старой сцене; в скобках — что было там.
 ```
-SceneContext / SceneScope / LifetimeScope   ← объект DI, шаг 6 (было: SceneContext)
+SceneContext / SceneScope / LifetimeScope   ← объект DI, раздел 3 (было: SceneContext)
 └─ GameInstaller                            ← только Zenject (было: GameInstaller)
 GridSystem                GridSystemContext, SampleModule        (было: InteractionSystem + конфиги GameInstaller)
 Environment
@@ -269,12 +94,12 @@ PoolParent                                                         (было: Wi
 
 ---
 
-## 5. Сцена (общая для всех DI)
+## 2. Сцена (общая для всех DI)
 
-`Content/Scenes` → `Create → Scene` → `GridSystem_Common`. Позже копируется под каждый DI (шаг 6).
+`Create → Scene` → `GridSystem_Common` в папке сцен примера. Позже копируется под каждый DI (раздел 3).
 Все объекты внутри `WindowsSystem` — слой `UI`.
 
-### 5.1 Environment
+### 2.1 Environment
 1. `Environment` — пустой объект в корне, Transform по нулям.
 2. `Directional Light` (ребёнок `Environment`): Position `(0, 0, 0)`, Rotation `(30, 0, 0)`; `Light` → Type `Directional`.
 3. `Main Camera` (ребёнок `Environment`):
@@ -282,7 +107,7 @@ PoolParent                                                         (было: Wi
    - `Camera`: Projection Perspective, Field of View 60;
    - `AudioListener`.
 
-### 5.2 WorldPrefab (3D-сетка, окно `C`)
+### 2.2 WorldPrefab (3D-сетка, окно `C`)
 1. `WorldPrefab` — пустой ребёнок `Environment`, Transform по нулям.
 2. `Ground` — ребёнок `WorldPrefab`: `3D Object → Plane`, Transform по нулям, Scale `(1, 1, 1)`. `MeshCollider` удалить. Plane 10×10 юнитов = сетка 10×10 по 1 юниту.
 3. `CellsParent` — пустой ребёнок `Ground`, Transform по нулям.
@@ -302,7 +127,7 @@ PoolParent                                                         (было: Wi
 
 Сетка лежит в локальной плоскости XZ объекта, центр сетки — позиция объекта. Весь `WorldPrefab` — корень окна `World`: по `C` включается и выключается целиком, вместе с `Ground`.
 
-### 5.3 WindowsSystem (Canvas)
+### 2.3 WindowsSystem (Canvas)
 1. `GameObject → UI → Canvas`, переименовать в `WindowsSystem`. Создастся `EventSystem` — можно оставить.
 2. `Canvas`: Render Mode `Screen Space - Overlay`.
 3. `CanvasScaler`:
@@ -311,7 +136,7 @@ PoolParent                                                         (было: Wi
    - Screen Match Mode `Shrink` (как в старой сцене).
 4. `GraphicRaycaster` — оставить.
 
-### 5.4 Окна MainInventory / OthersInventories / OutsideParent
+### 2.4 Окна MainInventory / OthersInventories / OutsideParent
 Размер окна выставляет `UIGridSurface`: `клеток × 84 − 4` при Cell Size 80 и Spacing 4.
 
 | Окно | Anchors | Pivot | Pos X, Y | Размер (ставится сам) | Grid |
@@ -356,7 +181,7 @@ PoolParent                                                         (было: Wi
 
 Видимость `MainInventory`, `OthersInventories`, `WorldPrefab` переключает код по открытию поверхности. Начальное active в сцене неважно. `OutsideParent` открыт всегда.
 
-### 5.5 InventoryItemView (описание предмета)
+### 2.5 InventoryItemView (описание предмета)
 Последний ребёнок `WindowsSystem`. Показывается при наведении на предмет, иначе скрыт.
 
 1. **`InventoryItemView`**:
@@ -394,10 +219,10 @@ PoolParent                                                         (было: Wi
 
 Старые Legacy `Text` здесь не подходят: `ItemDescriptionView` пишет числа в TMP без аллокаций.
 
-### 5.6 PoolParent
+### 2.6 PoolParent
 Пустой объект в корне сцены, Transform по нулям. Сюда уходят выключенные вьюхи предметов.
 
-### 5.7 GridSystem
+### 2.7 GridSystem
 Пустой объект в корне, Transform по нулям, компоненты `GridSystemContext` и `SampleModule`.
 
 **`GridSystemContext`**
@@ -435,11 +260,11 @@ PoolParent                                                         (было: Wi
 
 ---
 
-## 6. DI
+## 3. DI
 
 Скопировать `GridSystem_Common` (`Ctrl+D`) в `GridSystem_Reflex`, `GridSystem_Zenject`, `GridSystem_VContainer`. В каждой — ровно один объект DI. Всё остальное одинаково.
 
-### 6.1 Zenject — `GridSystem_Zenject` (как в старой сцене)
+### 3.1 Zenject — `GridSystem_Zenject` (как в старой сцене)
 ```
 SceneContext       SceneContext
 └─ GameInstaller   ZenjectGridInstaller
@@ -452,7 +277,7 @@ SceneContext       SceneContext
    - `Parent Contract Names` пусто.
 4. `ProjectContext` не нужен.
 
-### 6.2 Reflex — `GridSystem_Reflex`
+### 3.2 Reflex — `GridSystem_Reflex`
 ```
 SceneScope         ContainerScope, ReflexGridInstaller
 ```
@@ -460,7 +285,7 @@ SceneScope         ContainerScope, ReflexGridInstaller
 2. `GameObject → Reflex → SceneScope` (объект с `ContainerScope`).
 3. На него `ReflexGridInstaller`: `Context` = `GridSystem`.
 
-### 6.3 VContainer — `GridSystem_VContainer`
+### 3.3 VContainer — `GridSystem_VContainer`
 ```
 LifetimeScope      GridSystemLifetimeScope
 ```
@@ -474,49 +299,49 @@ LifetimeScope      GridSystemLifetimeScope
 
 ---
 
-## 7. Если начинаешь с копии старой сцены
+## 4. Если начинаешь с копии старой сцены
 
-Скопировать `Examples/Scenes/TestInventoryScene` в `Content/Scenes/GridSystem_Zenject`.
+Скопировать `Examples/Scenes/TestInventoryScene` в папку сцен примера под именем `GridSystem_Zenject`.
 
 Подготовка:
 1. Инстансы `WindowsSystem` и `WorldPrefab` ссылаются на префабы `Examples`. Сделать `Prefab → Unpack Completely` для обоих, иначе после удаления `Examples` объекты пропадут.
 2. Вложенные `InventoryHeader` и `HelpWindow` распакуются вместе с ними.
 
-Дальше пройти по таблице: «удалить» — Remove Component / Delete, «добавить» — по разделу 5.
+Дальше пройти по таблице: «удалить» — Remove Component / Delete, «добавить» — по разделу 2.
 
 | Объект | Удалить | Добавить / изменить |
 |---|---|---|
 | `InteractionSystem` | объект целиком | — (5.7 `Windows`) |
-| `SceneContext` | — | `Mono Installers` = [`GameInstaller`] (6.1) |
-| `SceneContext/GameInstaller` | `GameInstaller` | `ZenjectGridInstaller` (6.1) |
+| `SceneContext` | — | `Mono Installers` = [`GameInstaller`] (3.1) |
+| `SceneContext/GameInstaller` | `GameInstaller` | `ZenjectGridInstaller` (3.1) |
 | `Environment/Main Camera` | `PhysicsRaycaster` | — |
-| `Environment/WorldPrefab` | `GameObjectContext`, `RootWorldInstaller`, `WorldGridView`, `MeshCollider` | `WorldGridSurface` (5.2) |
+| `Environment/WorldPrefab` | `GameObjectContext`, `RootWorldInstaller`, `WorldGridView`, `MeshCollider` | `WorldGridSurface` (2.2) |
 | `WorldPrefab/Ground` | — | проверить `MeshCollider` (удалить, если есть) |
 | `WorldPrefab/PoolParent` | объект | — |
-| `WorldPrefab` | — | ребёнок `ItemsParent` (5.2) |
-| `WindowsSystem` | `GridLayoutGroup`, `GameObjectContext`, `RootWindowInstaller`, `InventoriesView`, `ExampleSelectableSpawnSystem`, `DescriptionView` | `CanvasScaler` проверить (5.3) |
-| `MainInventory`, `OthersInventories` | `UIGridView`, `GridLayoutGroup`, `ContentSizeFitter` | ребёнок `CellsParent` над `ItemsParent`, `UIGridSurface`, RectTransform (5.4) |
-| `InventoryHeader` (оба) | `LayoutElement` | RectTransform (5.4) |
-| `OutsideParent` | `LayoutElement`, `HorizontalLayoutGroup` | `Image`, дети `CellsParent` / `ItemsParent`, `UIGridSurface`, RectTransform (5.4) |
-| `HelpWindow` | `LayoutElement` | RectTransform (5.4) |
+| `WorldPrefab` | — | ребёнок `ItemsParent` (2.2) |
+| `WindowsSystem` | `GridLayoutGroup`, `GameObjectContext`, `RootWindowInstaller`, `InventoriesView`, `ExampleSelectableSpawnSystem`, `DescriptionView` | `CanvasScaler` проверить (2.3) |
+| `MainInventory`, `OthersInventories` | `UIGridView`, `GridLayoutGroup`, `ContentSizeFitter` | ребёнок `CellsParent` над `ItemsParent`, `UIGridSurface`, RectTransform (2.4) |
+| `InventoryHeader` (оба) | `LayoutElement` | RectTransform (2.4) |
+| `OutsideParent` | `LayoutElement`, `HorizontalLayoutGroup` | `Image`, дети `CellsParent` / `ItemsParent`, `UIGridSurface`, RectTransform (2.4) |
+| `HelpWindow` | `LayoutElement` | RectTransform (2.4) |
 | `TempParent` | объект | — |
-| `WindowsSystem/PoolParent` | объект | `PoolParent` в корне сцены (5.6) |
-| `InventoryItemView` | `LayoutElement` | сделать active, переместить последним ребёнком, `ItemDescriptionView`, RectTransform и VerticalLayoutGroup (5.5) |
+| `WindowsSystem/PoolParent` | объект | `PoolParent` в корне сцены (2.6) |
+| `InventoryItemView` | `LayoutElement` | сделать active, переместить последним ребёнком, `ItemDescriptionView`, RectTransform и VerticalLayoutGroup (2.5) |
 | `InventoryItemView/BG` | — | переместить первым ребёнком |
-| `DataContainer/Description`, `DataContainer/Data` | `Text` | `TextMeshPro - Text (UI)` (5.5) |
-| `DataContainer` | — | дублировать до 4 строк (5.5) |
-| корень сцены | — | `GridSystem` (5.7), `PoolParent` (5.6) |
+| `DataContainer/Description`, `DataContainer/Data` | `Text` | `TextMeshPro - Text (UI)` (2.5) |
+| `DataContainer` | — | дублировать до 4 строк (2.5) |
+| корень сцены | — | `GridSystem` (2.7), `PoolParent` (2.6) |
 | `EventSystem` | — | оставить |
 
 После всех замен:
 - в Inspector не должно остаться `Missing (Mono Script)`;
 - не должно остаться компонентов из `Examples`.
 
-Затем копии под Reflex / VContainer — по шагу 6.
+Затем копии под Reflex / VContainer — по разделу 3.
 
 ---
 
-## 8. Проверка в Play Mode
+## 5. Проверка в Play Mode
 1. Консоль без ошибок. Внизу рука `OutsideParent` с 3 разными предметами, остальные окна закрыты.
 2. Перенос внутри руки:
    - превью зелёное — можно поставить, красное — нельзя;
@@ -531,10 +356,9 @@ LifetimeScope      GridSystemLifetimeScope
 7. Навести на предмет — справа `InventoryItemView` с параметрами. Увести — скрывается.
 8. Закрыть окно или выйти из Play Mode, снова запустить — раскладка восстановлена.
 
-## 9. Частые ошибки
+## 6. Частые ошибки
 | Симптом | Причина |
 |---|---|
-| `KeyNotFoundException` в `ItemViewCatalog` | Предмет или результат merge не добавлен в каталог вьюх поверхности, на которой он появляется |
 | Мышь ни на что не реагирует | В `PointerInputConfig` не назначены действия; `Active Input Handling` без Input System |
 | `I` / `E` / `C` не работают | В `Windows[i] → Toggle` не назначено действие `Control/...` |
 | Окно не появляется | `Root` не тот объект, или `Surface` указывает на другое окно |
@@ -542,10 +366,6 @@ LifetimeScope      GridSystemLifetimeScope
 | Предметы под ячейками | `ItemsParent` выше `CellsParent` в иерархии |
 | Описание пустое | Поля `ItemDescriptionView` указывают на `Description`, а не на `Data` |
 | Описание под окнами | `InventoryItemView` не последний ребёнок `WindowsSystem` |
-| UI-предмет смещён относительно клеток | У корня UI-префаба anchors stretch, или `Body` не растянут |
-| 3D-модель смещена | Кубы не по таблице 3.4, или масштаб не 1 юнит на клетку |
-| 3D-ячейки стоят вертикально | Поворот `(90, 0, 0)` задан корню `World_Cell`, а не `Quad` |
-| 3D-предмет не подсвечивается | `Color Property` не `_Color` (Built-in) |
 | Клик по окну попадает в 3D-сетку | `Priority` UI-поверхности не больше, чем у `WorldPrefab` |
-| `NullReferenceException` при старте | Пустое поле в `GridSystemContext`, `SampleModule`, поверхности или префабе |
-| Объекты пропали после удаления `Examples` | Инстансы не распакованы (шаг 7.1) или ассеты не скопированы (шаг 1) |
+| `NullReferenceException` при старте | Пустое поле в `GridSystemContext`, `SampleModule`, `ItemDescriptionView` или поверхности |
+| Объекты пропали после удаления `Examples` | Инстансы `WindowsSystem` / `WorldPrefab` не распакованы (раздел 4) |
