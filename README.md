@@ -7,7 +7,7 @@
 
 ### Description
 - A Unity plugin for inventories and any other systems that need a grid and irregularly shaped items.
-- Version 2 lives in `Assets/GridSystem/New`. The old implementation in `Assets/GridSystem/Examples` is kept as a reference example.
+- Version 2 lives in `Assets/GridSystem/New`. Sample scenes and their assets are in `Assets/GridSystem/New/Samples/Content`, migrated from the old example.
 - Technology stack: MessagePipe, UniTask, R3, Unity Input System, PrimeTween or DOTween (optional). DI agnostic core plus one integration package: Zenject, VContainer or Reflex.
 
 ### Unity versions
