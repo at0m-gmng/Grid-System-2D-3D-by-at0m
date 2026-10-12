@@ -38,8 +38,7 @@ namespace GridSystem.Runtime.Persistence
         }
 
         /// <summary>
-        /// Replaces inventory content with stored items. Returns false when nothing is stored or the save does not match current definitions
-        /// and grid; such a save is deleted and the inventory is left empty.
+        /// Replaces inventory content with stored items. Returns false and keeps content when nothing is stored.
         /// </summary>
         public bool TryLoad(GridInventory inventory)
         {
@@ -49,23 +48,22 @@ namespace GridSystem.Runtime.Persistence
                 inventory.Clear();
                 _snapshot.Items.Clear();
                 JsonUtility.FromJsonOverwrite(json, _snapshot);
-                for (int i = 0; result && i < _snapshot.Items.Count; i++)
+                for (int i = 0; i < _snapshot.Items.Count; i++)
                 {
                     ItemSnapshot snapshot = _snapshot.Items[i];
-                    result = _catalog.TryGet(snapshot.DefinitionId, out IGridItemDefinition definition)
-                        && inventory.TryAdd(_factory.Create(definition), snapshot.Origin, snapshot.Rotation);
-                }
-
-                if (!result)
-                {
-                    inventory.Clear();
-                    _storage.Delete(inventory.Key);
+                    if (_catalog.TryGet(snapshot.DefinitionId, out IGridItemDefinition definition))
+                    {
+                        inventory.TryAdd(_factory.Create(definition), snapshot.Origin, snapshot.Rotation);
+                    }
                 }
             }
 
             return result;
         }
 
+        /// <summary>
+        /// Removes stored content.
+        /// </summary>
         public void Delete(GridInventory inventory) => _storage.Delete(inventory.Key);
     }
 }
