@@ -15,7 +15,7 @@
 
 Гайд описывает только сцены: иерархию объектов и компоненты на них. Создание данных (определения предметов, сетки, каталоги, настройки) и префабов (ячейки, вьюхи предметов) сюда не входит.
 
-Раздел 1 — итоговая иерархия. Раздел 2 — общая часть сцены. Раздел 3 — объект DI, единственное отличие сцен Reflex / Zenject / VContainer. Раздел 4 — если начинаешь с копии старой сцены.
+Раздел 1 — итоговая иерархия, 1.1 — что на что меняется, 1.2 — все поля новых компонентов. Раздел 2 — общая часть сцены. Раздел 3 — объект DI, единственное отличие сцен Reflex / Zenject / VContainer. Раздел 4 — если начинаешь с копии старой сцены.
 
 Обозначения:
 - Поля называются так, как их показывает Inspector.
@@ -91,6 +91,160 @@ PoolParent                                                         (было: Wi
 - `MeshCollider`, `PhysicsRaycaster` → указатель переводится в клетку математически, без физики.
 
 Порядок детей в `WindowsSystem` = порядок отрисовки: `InventoryItemView` последним, поверх окон. В старой сцене он был первым и рисовался под окнами.
+
+---
+
+## 1.1 Справочник: старый компонент → новый, поле → поле
+
+Каждый старый компонент сцены, чем он заменяется и куда переезжает каждое его поле. Ниже — каждый новый компонент со всеми полями.
+
+### GameInstaller (Zenject, объект `SceneContext/GameInstaller`)
+Удаляется. Сам объект `GameInstaller` остаётся, на него ставится `ZenjectGridInstaller`. Конфиги переезжают:
+
+| Старое поле | Новое место |
+|---|---|
+| `Input Config` | ассет `GridSystemSettings → Input` (`PointerInputConfig`: перенос и поворот). Клавиши I / E / C → `SampleModule → Data → Windows[i] → Toggle` |
+| `Inventory Config` (`MainInventory`) | `SampleModule → Data → Windows[0] → Inventory → Definition` (`GridDefinition` 6×4) |
+| `Merge Config` | ассет `GridSystemSettings → Merge Rules` |
+| `Selectable Item Config` | `SampleModule → Data → Hand Spawn Pool`, `Hand Spawn Count` |
+| `World Overlap Config` | не нужен: клетка под курсором вычисляется без физики |
+| `Inventories Config` | `SampleModule → Data → Hand` и `Windows[i] → Inventory` (ключ сохранения, размер, поверхность) |
+| `Ui Items Data` | ассет `UIItemViews` → поле `Views` у `UIGridSurface`; описания предметов → ассет `GridSystemSettings → Items` |
+| `World Items Data` | ассет `WorldItemViews` → поле `Views` у `WorldGridSurface` |
+
+### ExampleInteractionSystem ×3 (объект `InteractionSystem`)
+Удаляются. Каждый становится элементом `SampleModule → Data → Windows`:
+
+| Старое поле | Новое поле `Windows[i]` |
+|---|---|
+| `Inventory Type` (Main / Others / World) | `Inventory` → `Key`, `Definition`, `Surface` |
+| `Action Reference` (`Control/Inventory`, `Interaction`, `SLWorld`) | `Toggle` |
+| `Is Open After Creating` | `Is Opened On Start` |
+| — (раньше `InventoriesView`) | `Root` — объект, который показывается / скрывается |
+| — (раньше `InventoriesConfig`) | `Start Items` |
+
+### UIGridView (`MainInventory`, `OthersInventories`)
+Удаляется вместе с `GridLayoutGroup` и `ContentSizeFitter`. Заменяется на `UIGridSurface`:
+
+| Старое поле | Новое поле `UIGridSurface` |
+|---|---|
+| `Item Parent` | `Items Root` |
+| `Outside Parent` | — (перенос между окнами работает сам) |
+| `Inventory Type` | — (окно связывается с инвентарём через `SampleModule → Surface`) |
+| `Cell Prefab` | `Cell Prefab` |
+| `Grid Layout` (`GridLayoutGroup.Cell Size / Spacing`) | `Cell Size`, `Spacing` |
+| — | `Cells Root`, `Views`, `Priority`, `Rect`, `Event Camera` |
+
+### WorldGridView (`WorldPrefab`)
+Удаляется вместе с `MeshCollider`. Заменяется на `WorldGridSurface`:
+
+| Старое поле | Новое поле `WorldGridSurface` |
+|---|---|
+| `Item Parent` | `Items Root` |
+| `Outside Parent` | — |
+| `Inventory Type` | — (через `SampleModule → Windows[2] → Surface`) |
+| `Cell Prefab` | `Cell Prefab` |
+| `Cells Parent` | `Cells Root` |
+| `Spacing` | `Spacing` (+ `Cell Size`) |
+| — | `Views`, `Priority`, `Camera` |
+
+### RootWindowInstaller / RootWorldInstaller + GameObjectContext
+Удаляются. `Pool Paretn` → `GridSystemContext → Pool Root`. `Temporaty Transform` (`TempParent`) не нужен. `Item View Prefab` → каталоги вьюх `UIItemViews` / `WorldItemViews`.
+
+### InventoriesView (`WindowsSystem`)
+Удаляется. `Target Inventories` (тип → объект) → `SampleModule → Data → Windows[i] → Root`.
+
+### ExampleSelectableSpawnSystem (`WindowsSystem`)
+Удаляется. `Selectable Spawn Transform` + `Layout Group` → рука `OutsideParent` с `UIGridSurface`, наполнение — `Hand Spawn Pool` / `Hand Spawn Count`.
+
+### DescriptionView (`WindowsSystem`)
+Удаляется. Заменяется на `ItemDescriptionView` на объекте `InventoryItemView`:
+
+| Старое поле | Новое поле `ItemDescriptionView` |
+|---|---|
+| `Item Pop Up` | `Root` |
+| `Pop Up Rect` | — (позиция окна фиксированная) |
+| `Name Value` (Text) | `Name` (TMP) |
+| `Damage Value` (Text) | `Damage` (TMP) |
+| `Atack Speed Value` (Text) | `Attack Speed` (TMP) |
+| `Range Value` (Text) | `Range` (TMP) |
+
+---
+
+## 1.2 Новые компоненты: все поля
+
+### ZenjectGridInstaller / ReflexGridInstaller / GridSystemLifetimeScope
+Мост между DI и плагином. Одно поле:
+
+| Поле | Что ставить |
+|---|---|
+| `Context` | объект, на котором висит `GridSystemContext` |
+
+У `GridSystemLifetimeScope` дополнительно стандартные поля VContainer: `Parent` пусто, `Auto Run` ✔.
+
+### GridSystemContext
+Точка входа плагина в сцене. Не зависит от DI: один и тот же объект подключается в Zenject, Reflex или VContainer.
+
+| Поле | Тип | Что ставить | Зачем |
+|---|---|---|---|
+| `Settings` | ассет `GridSystemSettings` | `GridSystemSettings` | каталог предметов (`Items`), правила merge (`Merge Rules`), ввод (`Input`) |
+| `Pool Root` | Transform | `PoolParent` | сюда убираются выключенные вьюхи предметов |
+| `Modules` | список `GridModule` | ровно 1 элемент: компонент `SampleModule` | модули игры. `SampleModule` — логика примера: окна, рука, описание |
+
+`Modules` — список компонентов, а не ассетов: перетащить в элемент заголовок компонента `SampleModule` (или объект, на котором он висит). Пустых элементов быть не должно.
+
+### SampleModule
+Логика примера: какие инвентари есть, где они показываются, какие клавиши их открывают, что лежит на старте.
+
+| Поле | Что ставить |
+|---|---|
+| `Description` | объект `InventoryItemView` (компонент `ItemDescriptionView`) |
+| `Data → Hand` | рука, всегда открыта (см. «Инвентарь» ниже): Key `Hand`, Definition `HandGrid`, Surface `OutsideParent` |
+| `Data → Hand Spawn Pool` | из каких предметов набрать руку при первом запуске |
+| `Data → Hand Spawn Count` | сколько разных предметов положить |
+| `Data → Windows` | окна, открываемые клавишами (см. «Окно» ниже), 3 элемента |
+
+**Инвентарь** (`Hand` и `Windows[i] → Inventory`):
+
+| Поле | Что это |
+|---|---|
+| `Key` | ключ сохранения в PlayerPrefs. Уникальный: `Hand`, `Main`, `Chest`, `World` |
+| `Definition` | ассет `GridDefinition` — размер сетки |
+| `Surface` | компонент `UIGridSurface` / `WorldGridSurface` на сцене, где инвентарь рисуется |
+
+**Окно** (`Windows[i]`):
+
+| Поле | Что это |
+|---|---|
+| `Inventory` | инвентарь окна (таблица выше) |
+| `Root` | объект, который включается при открытии и выключается при закрытии |
+| `Toggle` | действие ввода (вложенный ассет под `GameInput`), по которому окно открывается и закрывается |
+| `Is Opened On Start` | открыто ли окно сразу. В старой сцене все выкл |
+| `Start Items` | предметы при отсутствии сохранения: `Definition` — предмет, `Origin` — клетка pivot (x — столбец, y — строка сверху), `Rotation` — 0..3 (×90°) |
+
+### UIGridSurface / WorldGridSurface
+Рисуют сетку и предметы инвентаря и переводят курсор в клетку.
+
+| Поле | Что это |
+|---|---|
+| `Views` | ассет `ItemViewCatalog`: какой префаб рисует какой предмет. UI → `UIItemViews`, мир → `WorldItemViews` |
+| `Items Root` | куда кладутся вьюхи предметов |
+| `Cells Root` | куда создаются ячейки. Выше `Items Root` в иерархии |
+| `Cell Prefab` | префаб ячейки: UI → `UI_Cell`, мир → `World_Cell` |
+| `Cell Size` | размер клетки: UI в пикселях (80, 80), мир в юнитах (1, 1) |
+| `Spacing` | зазор между клетками |
+| `Priority` | кто ловит курсор при наложении: UI 10, мир 0 |
+| `Rect` (только UI) | RectTransform сетки — обычно сам объект. Его размер выставляется автоматически |
+| `Event Camera` (только UI) | камера Canvas. Пусто для Screen Space - Overlay |
+| `Camera` (только мир) | камера, из которой бросается луч на плоскость сетки — `Main Camera` |
+
+### ItemDescriptionView
+Панель описания предмета под курсором.
+
+| Поле | Что это |
+|---|---|
+| `Root` | объект, который показывается / скрывается (`InventoryItemView`) |
+| `Name`, `Damage`, `Attack Speed`, `Range` | TMP-тексты значений (`Data` в строках `DataContainer`) |
 
 ---
 
@@ -269,13 +423,12 @@ PoolParent                                                         (было: Wi
 SceneContext       SceneContext
 └─ GameInstaller   ZenjectGridInstaller
 ```
-1. `GameObject → Zenject → Scene Context` → `SceneContext`.
-2. Дочерний пустой `GameInstaller`, на него `ZenjectGridInstaller`: `Context` = `GridSystem`.
-3. `SceneContext`:
-   - `Mono Installers` = [`GameInstaller`];
-   - `Scriptable Object Installers`, `Installer Prefabs` пусто;
-   - `Parent Contract Names` пусто.
+1. `GameObject → Zenject → Scene Context` → `SceneContext` (или старый `SceneContext`).
+2. Дочерний `GameInstaller`: старый компонент `Game Installer (Script)` удалить, добавить `ZenjectGridInstaller`, `Context` = объект с `GridSystemContext` (`GridSystem`).
+3. `SceneContext`: `Mono Installers` = [`GameInstaller`]; `Scriptable Object Installers`, `Installer Prefabs` пусто.
 4. `ProjectContext` не нужен.
+
+Вариант «всё на одном объекте»: `GridSystemContext` и `SampleModule` можно повесить прямо на `GameInstaller` вместо отдельного `GridSystem`. Тогда `ZenjectGridInstaller → Context` = сам `GameInstaller`, `GridSystemContext → Modules` = [`SampleModule` с `GameInstaller`]. В сценах Reflex / VContainer эти два компонента тогда переносятся на их объект DI.
 
 ### 3.2 Reflex — `GridSystem_Reflex`
 ```
