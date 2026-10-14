@@ -7,7 +7,8 @@ namespace GridSystem.Runtime.Persistence
     using UnityEngine;
 
     /// <summary>
-    /// JSON inventory persistence. Unknown or not fitting items are skipped on load.
+    /// JSON inventory persistence. A save is restored as a whole: when any stored item is unknown
+    /// or no longer fits, the inventory is left empty and the save is dropped, so the caller refills defaults.
     /// </summary>
     public sealed class InventoryPersistence : IInventoryPersistence
     {

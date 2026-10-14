@@ -57,10 +57,11 @@ A project installs the core plus exactly one integration. `DOTWEEN` define enabl
 ## 3. Architecture
 
 ### Core (`GridSystem.Core`)
-- `GridShapeData`: serialized width, height, `bool[]` cells, pivot. `GridShape` precomputes 4 rotations as pivot-relative offsets; clockwise `(x, y) → (-y, x)`.
+- `GridShapeData`: serialized width, height, `bool[]` cells, pivot. `GridShape` precomputes 4 rotations as pivot-relative offsets; clockwise `(x, y) → (-y, x)`. It also precomputes `GetColumns(rotation)` — one offset per occupied column, all on row zero.
 - `GridModel`: flat `int[]` occupancy of owner ids. `Fill` / `Clear` are internal; `CanPlace(span, origin, ignoredA, ignoredB)`.
-- `GridItem`: `Id`, `Definition`, `InventoryId`, `Origin`, `Rotation` (setters internal), `Cells`.
+- `GridItem`: `Id`, `Definition`, `InventoryId`, `Origin`, `Rotation` (setters internal). It has no `Cells`: the footprint depends on the inventory, not on the item.
 - `GridInventory`:
+  - `IsBar` (`Model.Height == 1`) makes a single row inventory behave as a hotbar: an item occupies one cell per column and its shape rows are ignored, so an item of any height fits into the row. `GridSurface.IsBar` mirrors the rule on the view side, where `UIItemView` centres items by their own bounds. There is no separate flag, the rule is derived from the height;
   - `TryAdd` requires `InventoryId == EMPTY`;
   - `TryMove` / `TryRemove` check ownership; `TryTransfer` is atomic between inventories;
   - `TryFindPlacement` tries all rotations;
@@ -181,14 +182,21 @@ Present this to the user and get a decision before migrating scenes.
 
 1. Agree with the user on point 6.
 2. Fix the issues from section 5 in code, then confirm that it compiles with Unity (console clean).
-3. Adapt the sample code to the old scene behaviour:
-   - three toggled windows: Main `I`, Chest `E`, World `C`, all closed on start;
-   - the hand is always open;
-   - a description panel with 4 rows.
-4. Plan the asset reuse:
-   - move the reusable `Examples` assets with their `.meta` into `New/Samples/Content`;
-   - convert them to v2 types;
-   - list what gets deleted.
+3. Done. The Zenject sample scene now reproduces the v1 scene: three toggled windows (Main `I`, Chest `E`, World `C`, closed on start), the hand always open as a 5×1 bar, merge rules `Bullet+Bullet → Pistol`, `Katana+Katana → Bullet`, `LaserTower+LaserTower → Wall`.
+   The description panel has **2 rows**, not 4: v1 declares four `Text` fields but `DescriptionView` only ever assigns `NameValue` and `DamageValue`, so attack speed and range were never shown.
+4. Plan the asset reuse. **Blocking: `New/` currently depends on `Examples/` in 10 files, so deleting `Examples` breaks the sample.**
+
+   | file in `New/Samples` | depends on `Examples/` |
+   |---|---|
+   | `Data/PointerInputConfig.asset` | `Scripts/InputSystem/GameInput.inputactions` — losing this kills all input |
+   | `Prefabs/Items/UI/BulletView,KatanaView,PistolView.prefab` | variants of `Prefabs/Items/UI/*` |
+   | `Prefabs/Items/UI/GrenadeView,MedkitView.prefab` | `Textures/Items/*.psd` |
+   | `Prefabs/Items/World/LaserTowerArt,WallArt.prefab` | variants of `Prefabs/Items/World/*` |
+   | `Prefabs/UICell.prefab` | `Textures/Grid/GridBackground_2.psd` |
+   | `Prefabs/WorldCell.prefab` | `Materials/GridCellMaterial.mat` |
+
+   Move these sources with their `.meta` into `New/Samples/Content` to keep GUIDs, pulling in their own
+   dependencies (materials and textures of the world prefabs). Moving does not break the v1 scene; only deleting does.
    Get approval, then do it in the editor via MCP.
 5. Ask before touching scenes or prefabs. Then migrate `TestInventoryScene` into the Zenject sample scene and derive the Reflex and VContainer scenes. The scenes differ only by the DI object.
 6. Update `Samples/SETUP.md` and `README.md`. Give the user a Play Mode checklist. Commit only after the user confirms.

@@ -5,6 +5,12 @@
 
 Все новые ассеты кладём в `Assets/GridSystem/New/Samples/Content/` (дальше — `Content/`).
 
+> **Сцена в репозитории собрана не по этой инструкции.** `Examples/Scenes/TestInventoryScene_Zenject.unity`
+> воспроизводит сцену v1 один в один и поэтому переиспользует её префаб `WindowsSystem` и другие числа:
+> рука 5×1 (лента) с 4 предметами, клетка 100 px, инвентарь и сундук 3×3, тултип в две строки.
+> Инструкция ниже собирает независимое демо автора v2 — она о том, **как связывать систему**,
+> а не о том, что лежит в репозитории.
+
 ---
 
 ## 0. Предусловия
@@ -72,6 +78,16 @@
 | `MainGrid` | 6 | 4 |
 | `HandGrid` | 6 | 2 |
 | `WorldGrid` | 10 | 10 |
+
+Инвентарь высотой **1 ряд — это лента** (hotbar), а не сетка:
+
+- предмет занимает по одной клетке на каждую свою колонку, ряды формы игнорируются,
+  поэтому в один ряд помещается предмет любой высоты;
+- вьюха центрируется по собственным габаритам, а не по пивот-клетке, поэтому предметы
+  разной высоты стоят на одной линии и не смещаются при добавлении новых форм.
+
+Отдельного флага нет: признак выводится из `Height == 1` (`GridInventory.IsBar`, `GridSurface.IsBar`).
+Сетка из двух и более рядов ведёт себя как обычно.
 
 ### 2.5 Настройки
 `Content` → `Create → Grid System → Settings` → `GridSystemSettings`:
@@ -165,7 +181,7 @@ Canvas               Canvas (Screen Space - Overlay), CanvasScaler (Scale With S
 2. `MainGrid` → `UIGridSurface`: `Rect` = `MainGrid`, `Event Camera` = пусто (Overlay), `Views` = `UIItemViews`, `Items Root` = `MainGrid/Items`, `Cells Root` = `MainGrid/Cells`, `Cell Prefab` = `UI_Cell`, `Cell Size` = `(80, 80)`, `Spacing` = `(4, 4)`, `Priority` = `10`.
 3. `HandGrid` → `UIGridSurface`: то же, но свои `Items`/`Cells`, `Priority` = `10`.
 4. Размер `MainGrid`/`HandGrid` выставляется сам по размеру сетки.
-5. `Tooltip` → `ItemTooltipView`: `Root` = `Panel`, `Panel` = `Panel`, `Name`/`Damage`/`Attack Speed`/`Range` = тексты.
+5. `Tooltip` → `ItemTooltipView`: `Root` = `Panel`, `Panel` = `Panel`, `Name`/`Damage` = тексты значений (не подписей).
 6. EventSystem для работы плагина не нужен (пикинг математический, без рейкастов). Нужен только если в сцене есть кнопки.
 
 `UIGridSurface` с priority 10 перекрывает 3D-сетку под UI: клик по инвентарю не попадёт в мир.
@@ -180,11 +196,13 @@ GridSystem           GridSystemContext, SampleModule
 1. `GridSystemContext`: `Settings` = `GridSystemSettings`, `Pool Root` = `Pool`, `Modules` = [`SampleModule` с этого же объекта].
 2. `SampleModule` → `Data`:
    - `Main`: Key `Main`, Definition `MainGrid`, Surface `MainGrid` (UIGridSurface).
+   - `Chest`: Key `Chest`, Definition `ChestGrid`, Surface `ChestGrid`.
    - `Hand`: Key `Hand`, Definition `HandGrid`, Surface `HandGrid`.
    - `World`: Key `World`, Definition `WorldGrid`, Surface `WorldGrid`.
-   - `Main Window` = `MainWindow`, `Toggle Main Window` = `Grid/ToggleInventory`, `Is Main Window Opened` = выкл.
-   - `World Start Items`: `LaserTower (2, 2) rot 0`, `Wall (5, 5) rot 0`, `LaserTower (7, 3) rot 0`.
-   - `Hand Spawn Pool` = Katana, Bullet, Pistol; `Hand Spawn Count` = 3.
+   - `Main Window` = `MainWindow`, `Chest Window` = `ChestWindow`.
+   - `Toggle Main` / `Toggle Chest` / `Toggle World` — действия открытия поверхностей.
+   - `Main Start Items`, `World Start Items`, `Hand Start Items` — списки `Definition + Origin + Rotation`,
+     раскладываются только при первом запуске, когда сохранения ещё нет.
 3. `SampleModule` → `Tooltip` = `Tooltip`.
 
 Окно `MainWindow` включается/выключается само по открытию поверхности, начальное состояние в сцене неважно.
