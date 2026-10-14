@@ -38,27 +38,38 @@ namespace GridSystem.Runtime.Persistence
         }
 
         /// <summary>
-        /// Replaces inventory content with stored items. Returns false and keeps content when nothing is stored.
+        /// Replaces inventory content with stored items. Returns false and clears storage when nothing is stored
+        /// or when any snapshot item cannot be restored (unknown definition or does not fit).
         /// </summary>
         public bool TryLoad(GridInventory inventory)
         {
-            bool result = _storage.TryRead(inventory.Key, out string json);
-            if (result)
+            if (!_storage.TryRead(inventory.Key, out string json))
             {
-                inventory.Clear();
-                _snapshot.Items.Clear();
-                JsonUtility.FromJsonOverwrite(json, _snapshot);
-                for (int i = 0; i < _snapshot.Items.Count; i++)
+                return false;
+            }
+
+            inventory.Clear();
+            _snapshot.Items.Clear();
+            JsonUtility.FromJsonOverwrite(json, _snapshot);
+            bool allPlaced = true;
+            for (int i = 0; i < _snapshot.Items.Count; i++)
+            {
+                ItemSnapshot snapshot = _snapshot.Items[i];
+                if (!_catalog.TryGet(snapshot.DefinitionId, out IGridItemDefinition definition)
+                    || !inventory.TryAdd(_factory.Create(definition), snapshot.Origin, snapshot.Rotation))
                 {
-                    ItemSnapshot snapshot = _snapshot.Items[i];
-                    if (_catalog.TryGet(snapshot.DefinitionId, out IGridItemDefinition definition))
-                    {
-                        inventory.TryAdd(_factory.Create(definition), snapshot.Origin, snapshot.Rotation);
-                    }
+                    allPlaced = false;
                 }
             }
 
-            return result;
+            if (!allPlaced)
+            {
+                inventory.Clear();
+                _storage.Delete(inventory.Key);
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

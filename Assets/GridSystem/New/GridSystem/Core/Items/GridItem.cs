@@ -1,6 +1,5 @@
 namespace GridSystem.Core.Items
 {
-    using System;
     using UnityEngine;
 
     /// <summary>
@@ -38,10 +37,5 @@ namespace GridSystem.Core.Items
         /// Clockwise quarter turns in range [0, 3].
         /// </summary>
         public int Rotation { get; internal set; }
-
-        /// <summary>
-        /// Pivot-relative occupied cells for the current rotation.
-        /// </summary>
-        public ReadOnlySpan<Vector2Int> Cells => Definition.Shape.GetCells(Rotation);
     }
 }

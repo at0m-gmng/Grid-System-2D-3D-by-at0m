@@ -1,7 +1,6 @@
 namespace GridSystem.Samples.Bootstrap
 {
     using System;
-    using Runtime.Definitions;
     using UnityEngine;
     using UnityEngine.InputSystem;
 
@@ -16,35 +15,50 @@ namespace GridSystem.Samples.Bootstrap
         private SampleInventory _main;
 
         [SerializeField]
+        private SampleInventory _chest;
+
+        [SerializeField]
         private SampleInventory _hand;
 
         [SerializeField]
         private SampleInventory _world;
 
-        [Header("Main window")]
+        [Header("UI Windows")]
         [SerializeField]
         private GameObject _mainWindow;
 
         [SerializeField]
-        private InputActionReference _toggleMainWindow;
+        private GameObject _chestWindow;
+
+        [Header("Toggle Actions")]
+        [SerializeField]
+        private InputActionReference _toggleMain;
 
         [SerializeField]
-        private bool _isMainWindowOpened;
+        private InputActionReference _toggleChest;
+
+        [SerializeField]
+        private InputActionReference _toggleWorld;
 
         [Header("Content")]
+        [SerializeField]
+        private SampleStartItem[] _mainStartItems;
+
         [SerializeField]
         private SampleStartItem[] _worldStartItems;
 
         [SerializeField]
-        private ItemDefinition[] _handSpawnPool;
-
-        [SerializeField, Min(0)]
-        private int _handSpawnCount = 3;
+        private SampleStartItem[] _handStartItems;
 
         /// <summary>
-        /// Toggleable main inventory.
+        /// Toggleable main inventory (I).
         /// </summary>
         public SampleInventory Main => _main;
+
+        /// <summary>
+        /// Toggleable chest inventory (E).
+        /// </summary>
+        public SampleInventory Chest => _chest;
 
         /// <summary>
         /// Always visible hand inventory with spawned items.
@@ -52,24 +66,39 @@ namespace GridSystem.Samples.Bootstrap
         public SampleInventory Hand => _hand;
 
         /// <summary>
-        /// World grid inventory.
+        /// Toggleable world grid inventory (C).
         /// </summary>
         public SampleInventory World => _world;
 
         /// <summary>
-        /// Root of the main inventory window.
+        /// Root of the main inventory UI window.
         /// </summary>
         public GameObject MainWindow => _mainWindow;
 
         /// <summary>
-        /// Action toggling the main window.
+        /// Root of the chest inventory UI window.
         /// </summary>
-        public InputAction ToggleMainWindow => _toggleMainWindow.action;
+        public GameObject ChestWindow => _chestWindow;
 
         /// <summary>
-        /// Main window state on start.
+        /// Action toggling the main window.
         /// </summary>
-        public bool IsMainWindowOpened => _isMainWindowOpened;
+        public InputAction ToggleMain => _toggleMain.action;
+
+        /// <summary>
+        /// Action toggling the chest window.
+        /// </summary>
+        public InputAction ToggleChest => _toggleChest.action;
+
+        /// <summary>
+        /// Action toggling the world inventory.
+        /// </summary>
+        public InputAction ToggleWorld => _toggleWorld.action;
+
+        /// <summary>
+        /// Items placed into the main inventory on the first launch.
+        /// </summary>
+        public SampleStartItem[] MainStartItems => _mainStartItems;
 
         /// <summary>
         /// Items placed into the world inventory on the first launch.
@@ -77,13 +106,8 @@ namespace GridSystem.Samples.Bootstrap
         public SampleStartItem[] WorldStartItems => _worldStartItems;
 
         /// <summary>
-        /// Definitions spawned into the hand on the first launch, without repeats.
+        /// Items placed into the hand inventory on the first launch.
         /// </summary>
-        public ItemDefinition[] HandSpawnPool => _handSpawnPool;
-
-        /// <summary>
-        /// Amount of spawned hand items.
-        /// </summary>
-        public int HandSpawnCount => _handSpawnCount;
+        public SampleStartItem[] HandStartItems => _handStartItems;
     }
 }

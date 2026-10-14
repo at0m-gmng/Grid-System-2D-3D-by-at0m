@@ -9,12 +9,13 @@ namespace GridSystem.Core.Shapes
     /// </summary>
     public sealed class GridShape
     {
-        private GridShape(int width, int height, Vector2Int pivot, Vector2Int[][] rotations)
+        private GridShape(int width, int height, Vector2Int pivot, Vector2Int[][] rotations, Vector2Int[][] columns)
         {
             Width = width;
             Height = height;
             Pivot = pivot;
             _rotations = rotations;
+            _columns = columns;
         }
 
         /// <summary>
@@ -25,6 +26,7 @@ namespace GridSystem.Core.Shapes
         private const int ROTATION_MASK = ROTATION_COUNT - 1;
 
         private readonly Vector2Int[][] _rotations;
+        private readonly Vector2Int[][] _columns;
 
         /// <summary>
         /// Columns count of the bounding rectangle without rotation.
@@ -52,6 +54,12 @@ namespace GridSystem.Core.Shapes
         public ReadOnlySpan<Vector2Int> GetCells(int rotation) => _rotations[NormalizeRotation(rotation)];
 
         /// <summary>
+        /// Returns one pivot-relative offset per occupied column, all on row zero.
+        /// Used by single row inventories where rows carry no meaning.
+        /// </summary>
+        public ReadOnlySpan<Vector2Int> GetColumns(int rotation) => _columns[NormalizeRotation(rotation)];
+
+        /// <summary>
         /// Builds runtime shape from serialized data.
         /// </summary>
         public static GridShape Create(in GridShapeData data)
@@ -63,7 +71,13 @@ namespace GridSystem.Core.Shapes
                 rotations[i] = RotateClockwise(rotations[i - 1]);
             }
 
-            return new GridShape(data.Width, data.Height, data.Pivot, rotations);
+            Vector2Int[][] columns = new Vector2Int[ROTATION_COUNT][];
+            for (int i = 0; i < ROTATION_COUNT; i++)
+            {
+                columns[i] = CollectColumns(rotations[i]);
+            }
+
+            return new GridShape(data.Width, data.Height, data.Pivot, rotations, columns);
         }
 
         private static Vector2Int[] CollectCells(in GridShapeData data)
@@ -95,6 +109,30 @@ namespace GridSystem.Core.Shapes
             }
 
             return cells;
+        }
+
+        private static Vector2Int[] CollectColumns(Vector2Int[] cells)
+        {
+            Vector2Int[] buffer = new Vector2Int[cells.Length];
+            int count = 0;
+            for (int i = 0; i < cells.Length; i++)
+            {
+                bool isKnown = false;
+                for (int k = 0; !isKnown && k < count; k++)
+                {
+                    isKnown = buffer[k].x == cells[i].x;
+                }
+
+                if (!isKnown)
+                {
+                    buffer[count] = new Vector2Int(cells[i].x, 0);
+                    count++;
+                }
+            }
+
+            Vector2Int[] columns = new Vector2Int[count];
+            Array.Copy(buffer, columns, count);
+            return columns;
         }
 
         private static Vector2Int[] RotateClockwise(Vector2Int[] source)

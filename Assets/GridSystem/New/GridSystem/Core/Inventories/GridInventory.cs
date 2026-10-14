@@ -67,6 +67,12 @@ namespace GridSystem.Core.Inventories
         public int Count => _items.Count;
 
         /// <summary>
+        /// True for single row inventories. They behave as a bar: an item occupies one cell per column
+        /// of its shape and its rows are ignored, so items of any height fit into the row.
+        /// </summary>
+        public bool IsBar => Model.Height == 1;
+
+        /// <summary>
         /// Finds placed item by id.
         /// </summary>
         public bool TryGetItem(int id, out GridItem item) => _items.TryGetValue(id, out item);
@@ -85,7 +91,7 @@ namespace GridSystem.Core.Inventories
         /// Checks placement of the definition, cells of ignored ids are treated as free.
         /// </summary>
         public bool CanPlace(IGridItemDefinition definition, Vector2Int origin, int rotation, int ignoredA, int ignoredB)
-            => Model.CanPlace(definition.Shape.GetCells(ResolveRotation(definition, rotation)), origin, ignoredA, ignoredB);
+            => Model.CanPlace(GetCells(definition, ResolveRotation(definition, rotation)), origin, ignoredA, ignoredB);
 
         /// <summary>
         /// Checks placement of the item, its own cells are treated as free.
@@ -103,7 +109,7 @@ namespace GridSystem.Core.Inventories
             int rotations = definition.IsRotatable ? GridShape.ROTATION_COUNT : 1;
             for (int r = 0; !isFound && r < rotations; r++)
             {
-                ReadOnlySpan<Vector2Int> cells = definition.Shape.GetCells(r);
+                ReadOnlySpan<Vector2Int> cells = GetCells(definition, r);
                 for (int y = 0; !isFound && y < Model.Height; y++)
                 {
                     for (int x = 0; !isFound && x < Model.Width; x++)
@@ -129,13 +135,13 @@ namespace GridSystem.Core.Inventories
         {
             int resolvedRotation = ResolveRotation(item.Definition, rotation);
             bool result = item.InventoryId == GridModel.EMPTY
-                && Model.CanPlace(item.Definition.Shape.GetCells(resolvedRotation), origin, GridModel.EMPTY, GridModel.EMPTY);
+                && Model.CanPlace(GetCells(item.Definition, resolvedRotation), origin, GridModel.EMPTY, GridModel.EMPTY);
             if (result)
             {
                 item.InventoryId = Id;
                 item.Origin = origin;
                 item.Rotation = resolvedRotation;
-                Model.Fill(item.Cells, origin, item.Id);
+                Model.Fill(GetCells(item.Definition, resolvedRotation), origin, item.Id);
                 _items.Add(item.Id, item);
                 _added.OnNext(item);
             }
@@ -159,15 +165,15 @@ namespace GridSystem.Core.Inventories
         {
             int resolvedRotation = ResolveRotation(item.Definition, rotation);
             bool result = item.InventoryId == Id
-                && Model.CanPlace(item.Definition.Shape.GetCells(resolvedRotation), origin, item.Id, GridModel.EMPTY);
+                && Model.CanPlace(GetCells(item.Definition, resolvedRotation), origin, item.Id, GridModel.EMPTY);
             if (result)
             {
                 Vector2Int previousOrigin = item.Origin;
                 int previousRotation = item.Rotation;
-                Model.Fill(item.Cells, previousOrigin, GridModel.EMPTY);
+                Model.Fill(GetCells(item.Definition, previousRotation), previousOrigin, GridModel.EMPTY);
                 item.Origin = origin;
                 item.Rotation = resolvedRotation;
-                Model.Fill(item.Cells, origin, item.Id);
+                Model.Fill(GetCells(item.Definition, resolvedRotation), origin, item.Id);
                 _moved.OnNext(new ItemMovement(item, previousOrigin, previousRotation));
             }
 
@@ -183,7 +189,7 @@ namespace GridSystem.Core.Inventories
             if (result)
             {
                 _items.Remove(item.Id);
-                Model.Fill(item.Cells, item.Origin, GridModel.EMPTY);
+                Model.Fill(GetCells(item.Definition, item.Rotation), item.Origin, GridModel.EMPTY);
                 item.InventoryId = GridModel.EMPTY;
                 _removed.OnNext(item);
             }
@@ -248,5 +254,8 @@ namespace GridSystem.Core.Inventories
         }
 
         private static int ResolveRotation(IGridItemDefinition definition, int rotation) => definition.IsRotatable ? GridShape.NormalizeRotation(rotation) : 0;
+
+        private ReadOnlySpan<Vector2Int> GetCells(IGridItemDefinition definition, int rotation)
+            => IsBar ? definition.Shape.GetColumns(rotation) : definition.Shape.GetCells(rotation);
     }
 }

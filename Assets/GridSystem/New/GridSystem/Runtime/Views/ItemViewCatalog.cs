@@ -19,22 +19,42 @@ namespace GridSystem.Runtime.Views
         private ItemViewEntry[] _entries = Array.Empty<ItemViewEntry>();
 
         private readonly Dictionary<IGridItemDefinition, ItemView> _lookup = new();
+        private bool _dirty = true;
 
         /// <summary>
         /// Returns view prefab of the definition.
         /// </summary>
-        public ItemView GetPrefab(IGridItemDefinition definition) => _lookup[definition];
+        public ItemView GetPrefab(IGridItemDefinition definition)
+        {
+            EnsureBuilt();
+            return _lookup[definition];
+        }
 
         /// <summary>
         /// Returns true when the definition has a view prefab.
         /// </summary>
-        public bool Contains(IGridItemDefinition definition) => _lookup.ContainsKey(definition);
+        public bool Contains(IGridItemDefinition definition)
+        {
+            EnsureBuilt();
+            return _lookup.ContainsKey(definition);
+        }
 
-        private void OnEnable() => BuildLookup();
+        private void OnEnable() => _dirty = true;
 
 #if UNITY_EDITOR
-        private void OnValidate() => BuildLookup();
+        private void OnValidate() => _dirty = true;
 #endif
+
+        private void EnsureBuilt()
+        {
+            if (!_dirty)
+            {
+                return;
+            }
+
+            _dirty = false;
+            BuildLookup();
+        }
 
         private void BuildLookup()
         {

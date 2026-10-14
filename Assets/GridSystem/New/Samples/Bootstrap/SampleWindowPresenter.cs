@@ -7,12 +7,12 @@ namespace GridSystem.Samples.Bootstrap
     using Runtime.Surfaces;
 
     /// <summary>
-    /// Shows the main window while its surface is opened.
+    /// Shows UI windows while their surfaces are open. Handles main and chest windows.
     /// </summary>
     public sealed class SampleWindowPresenter : IGridInitializable, IDisposable
     {
-        public SampleWindowPresenter(SampleSceneData data, ISurfaceService surfaces, ISubscriber<SurfaceOpenedMessage> openedSubscriber,
-            ISubscriber<SurfaceClosedMessage> closedSubscriber)
+        public SampleWindowPresenter(SampleSceneData data, ISurfaceService surfaces,
+            ISubscriber<SurfaceOpenedMessage> openedSubscriber, ISubscriber<SurfaceClosedMessage> closedSubscriber)
         {
             _data = data;
             _surfaces = surfaces;
@@ -27,11 +27,12 @@ namespace GridSystem.Samples.Bootstrap
         private IDisposable _subscriptions;
 
         /// <summary>
-        /// Syncs window state and subscribes to surface messages.
+        /// Syncs window states and subscribes to surface messages.
         /// </summary>
         public void Initialize()
         {
             _data.MainWindow.SetActive(_surfaces.IsOpen(_data.Main.Surface));
+            _data.ChestWindow.SetActive(_surfaces.IsOpen(_data.Chest.Surface));
             _subscriptions = DisposableBag.Create(
                 _openedSubscriber.Subscribe(OnOpened),
                 _closedSubscriber.Subscribe(OnClosed));
@@ -48,6 +49,10 @@ namespace GridSystem.Samples.Bootstrap
             {
                 _data.MainWindow.SetActive(true);
             }
+            else if (message.Surface == _data.Chest.Surface)
+            {
+                _data.ChestWindow.SetActive(true);
+            }
         }
 
         private void OnClosed(SurfaceClosedMessage message)
@@ -55,6 +60,10 @@ namespace GridSystem.Samples.Bootstrap
             if (message.Surface == _data.Main.Surface)
             {
                 _data.MainWindow.SetActive(false);
+            }
+            else if (message.Surface == _data.Chest.Surface)
+            {
+                _data.ChestWindow.SetActive(false);
             }
         }
     }

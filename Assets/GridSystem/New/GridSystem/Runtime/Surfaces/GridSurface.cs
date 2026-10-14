@@ -83,6 +83,13 @@ namespace GridSystem.Runtime.Surfaces
         public Vector2 Size => new Vector2(Width * Pitch.x - _spacing.x, Height * Pitch.y - _spacing.y);
 
         /// <summary>
+        /// True for single row surfaces. They lay items out as a bar: an item is centered across the row
+        /// by its own bounds instead of being aligned to its pivot cell, so items of any height
+        /// keep the same center line. Matches <see cref="Core.Inventories.GridInventory.IsBar"/>.
+        /// </summary>
+        public bool IsBar => Height == 1;
+
+        /// <summary>
         /// Builds cell visuals reusing existing instances.
         /// </summary>
         public void Build(int width, int height)

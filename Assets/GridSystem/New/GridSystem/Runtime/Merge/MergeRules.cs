@@ -19,18 +19,33 @@ namespace GridSystem.Runtime.Merge
         private MergeRule[] _rules = Array.Empty<MergeRule>();
 
         private readonly Dictionary<(IGridItemDefinition, IGridItemDefinition), IGridItemDefinition> _lookup = new();
+        private bool _dirty = true;
 
         /// <summary>
         /// Finds merge result for the pair in any order.
         /// </summary>
         public bool TryGetResult(IGridItemDefinition first, IGridItemDefinition second, out IGridItemDefinition result)
-            => _lookup.TryGetValue((first, second), out result);
+        {
+            EnsureBuilt();
+            return _lookup.TryGetValue((first, second), out result);
+        }
 
-        private void OnEnable() => BuildLookup();
+        private void OnEnable() => _dirty = true;
 
 #if UNITY_EDITOR
-        private void OnValidate() => BuildLookup();
+        private void OnValidate() => _dirty = true;
 #endif
+
+        private void EnsureBuilt()
+        {
+            if (!_dirty)
+            {
+                return;
+            }
+
+            _dirty = false;
+            BuildLookup();
+        }
 
         private void BuildLookup()
         {

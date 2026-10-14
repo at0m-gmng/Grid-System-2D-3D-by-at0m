@@ -18,17 +18,33 @@ namespace GridSystem.Runtime.Definitions
         private ItemDefinition[] _items = Array.Empty<ItemDefinition>();
 
         private readonly Dictionary<string, IGridItemDefinition> _lookup = new();
+        private bool _dirty = true;
 
         /// <summary>
         /// Finds definition by persistent id.
         /// </summary>
-        public bool TryGet(string id, out IGridItemDefinition definition) => _lookup.TryGetValue(id, out definition);
+        public bool TryGet(string id, out IGridItemDefinition definition)
+        {
+            EnsureBuilt();
+            return _lookup.TryGetValue(id, out definition);
+        }
 
-        private void OnEnable() => BuildLookup();
+        private void OnEnable() => _dirty = true;
 
 #if UNITY_EDITOR
-        private void OnValidate() => BuildLookup();
+        private void OnValidate() => _dirty = true;
 #endif
+
+        private void EnsureBuilt()
+        {
+            if (!_dirty)
+            {
+                return;
+            }
+
+            _dirty = false;
+            BuildLookup();
+        }
 
         private void BuildLookup()
         {

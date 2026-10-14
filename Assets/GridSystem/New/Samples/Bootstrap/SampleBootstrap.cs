@@ -6,25 +6,25 @@ namespace GridSystem.Samples.Bootstrap
     using Runtime.Inventories;
     using Runtime.Persistence;
     using Runtime.Surfaces;
-    using UnityEngine;
     using UnityEngine.InputSystem;
-    using Random = UnityEngine.Random;
 
     /// <summary>
-    /// Creates sample inventories, restores saves, fills hand and world on the first launch and toggles the main surface.
-    /// Window visibility and saving react to surface messages in separate classes.
+    /// Creates sample inventories, restores saves, fills hand and world on the first launch.
+    /// Toggles main, chest and world surfaces on input. Hand is always open.
     /// </summary>
     public sealed class SampleBootstrap : IGridInitializable, IDisposable
     {
-        public SampleBootstrap(SampleSceneData data, IInventoryService inventories, ISurfaceService surfaces, IInventoryPersistence persistence,
-            IGridItemFactory factory)
+        public SampleBootstrap(SampleSceneData data, IInventoryService inventories, ISurfaceService surfaces,
+            IInventoryPersistence persistence, IGridItemFactory factory)
         {
             _data = data;
             _inventories = inventories;
             _surfaces = surfaces;
             _persistence = persistence;
             _factory = factory;
-            _onToggle = OnToggle;
+            _onToggleMain = _ => Toggle(_data.Main.Surface, _main);
+            _onToggleChest = _ => Toggle(_data.Chest.Surface, _chest);
+            _onToggleWorld = _ => Toggle(_data.World.Surface, _world);
         }
 
         private readonly SampleSceneData _data;
@@ -32,79 +32,83 @@ namespace GridSystem.Samples.Bootstrap
         private readonly ISurfaceService _surfaces;
         private readonly IInventoryPersistence _persistence;
         private readonly IGridItemFactory _factory;
-        private readonly Action<InputAction.CallbackContext> _onToggle;
+        private readonly Action<InputAction.CallbackContext> _onToggleMain;
+        private readonly Action<InputAction.CallbackContext> _onToggleChest;
+        private readonly Action<InputAction.CallbackContext> _onToggleWorld;
         private GridInventory _main;
+        private GridInventory _chest;
         private GridInventory _hand;
         private GridInventory _world;
 
         /// <summary>
-        /// Builds sample state.
+        /// Builds sample state: creates inventories, restores saves, opens hand surface, subscribes to toggles.
         /// </summary>
         public void Initialize()
         {
             _main = _inventories.Create(_data.Main.Definition, _data.Main.Key);
+            _chest = _inventories.Create(_data.Chest.Definition, _data.Chest.Key);
             _hand = _inventories.Create(_data.Hand.Definition, _data.Hand.Key);
             _world = _inventories.Create(_data.World.Definition, _data.World.Key);
-            _persistence.TryLoad(_main);
+
+            if (!_persistence.TryLoad(_main))
+            {
+                Fill(_main, _data.MainStartItems);
+            }
+
+            _persistence.TryLoad(_chest);
+
             if (!_persistence.TryLoad(_hand))
             {
-                FillHand();
+                Fill(_hand, _data.HandStartItems);
             }
 
             if (!_persistence.TryLoad(_world))
             {
-                FillWorld();
+                Fill(_world, _data.WorldStartItems);
             }
 
             _surfaces.Open(_data.Hand.Surface, _hand);
-            _surfaces.Open(_data.World.Surface, _world);
-            SetMainWindowOpened(_data.IsMainWindowOpened);
-            _data.ToggleMainWindow.performed += _onToggle;
-            _data.ToggleMainWindow.Enable();
+
+            _data.ToggleMain.performed += _onToggleMain;
+            _data.ToggleChest.performed += _onToggleChest;
+            _data.ToggleWorld.performed += _onToggleWorld;
+            _data.ToggleMain.Enable();
+            _data.ToggleChest.Enable();
+            _data.ToggleWorld.Enable();
         }
 
         /// <summary>
-        /// Saves inventories and unsubscribes.
+        /// Saves all inventories and unsubscribes from toggles.
         /// </summary>
         public void Dispose()
         {
-            _data.ToggleMainWindow.performed -= _onToggle;
+            _data.ToggleMain.performed -= _onToggleMain;
+            _data.ToggleChest.performed -= _onToggleChest;
+            _data.ToggleWorld.performed -= _onToggleWorld;
             _persistence.Save(_main);
+            _persistence.Save(_chest);
             _persistence.Save(_hand);
             _persistence.Save(_world);
         }
 
-        private void FillWorld()
+        private void Toggle(GridSurface surface, GridInventory inventory)
         {
-            for (int i = 0; i < _data.WorldStartItems.Length; i++)
+            if (_surfaces.IsOpen(surface))
             {
-                SampleStartItem item = _data.WorldStartItems[i];
-                _world.TryAdd(_factory.Create(item.Definition), item.Origin, item.Rotation);
-            }
-        }
-
-        private void FillHand()
-        {
-            int poolLength = _data.HandSpawnPool.Length;
-            int count = Mathf.Min(_data.HandSpawnCount, poolLength);
-            int start = Random.Range(0, poolLength);
-            for (int i = 0; i < count; i++)
-            {
-                _hand.TryAdd(_factory.Create(_data.HandSpawnPool[(start + i) % poolLength]));
-            }
-        }
-
-        private void OnToggle(InputAction.CallbackContext context) => SetMainWindowOpened(!_surfaces.IsOpen(_data.Main.Surface));
-
-        private void SetMainWindowOpened(bool isOpened)
-        {
-            if (isOpened)
-            {
-                _surfaces.Open(_data.Main.Surface, _main);
+                _surfaces.Close(surface);
             }
             else
             {
-                _surfaces.Close(_data.Main.Surface);
+                _surfaces.Open(surface, inventory);
+            }
+        }
+
+        private void Fill(GridInventory inventory, SampleStartItem[] items)
+        {
+            for (int i = 0; i < items.Length; i++)
+            {
+                SampleStartItem item = items[i];
+                inventory.TryAdd(_factory.Create(item.Definition), item.Origin, item.Rotation);
             }
         }
     }

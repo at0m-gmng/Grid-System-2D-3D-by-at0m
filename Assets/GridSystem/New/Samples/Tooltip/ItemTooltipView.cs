@@ -9,7 +9,7 @@ namespace GridSystem.Samples.Tooltip
     /// </summary>
     public sealed class ItemTooltipView : MonoBehaviour
     {
-        private const string VALUE_FORMAT = "{0:2}";
+        private const string VALUE_FORMAT = "{0:0}";
 
         [SerializeField]
         private GameObject _root;
@@ -23,12 +23,6 @@ namespace GridSystem.Samples.Tooltip
         [SerializeField]
         private TMP_Text _damage;
 
-        [SerializeField]
-        private TMP_Text _attackSpeed;
-
-        [SerializeField]
-        private TMP_Text _range;
-
         /// <summary>
         /// Shows description near the screen point.
         /// </summary>
@@ -36,8 +30,6 @@ namespace GridSystem.Samples.Tooltip
         {
             _name.SetText(description.DisplayName);
             _damage.SetText(VALUE_FORMAT, description.Damage);
-            _attackSpeed.SetText(VALUE_FORMAT, description.AttackSpeed);
-            _range.SetText(VALUE_FORMAT, description.Range);
             _panel.position = screenPosition;
             _root.SetActive(true);
         }
