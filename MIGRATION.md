@@ -184,19 +184,19 @@ Present this to the user and get a decision before migrating scenes.
 2. Fix the issues from section 5 in code, then confirm that it compiles with Unity (console clean).
 3. Done. The Zenject sample scene now reproduces the v1 scene: three toggled windows (Main `I`, Chest `E`, World `C`, closed on start), the hand always open as a 5×1 bar, merge rules `Bullet+Bullet → Pistol`, `Katana+Katana → Bullet`, `LaserTower+LaserTower → Wall`.
    The description panel has **2 rows**, not 4: v1 declares four `Text` fields but `DescriptionView` only ever assigns `NameValue` and `DamageValue`, so attack speed and range were never shown.
-4. Plan the asset reuse. **Blocking: `New/` currently depends on `Examples/` in 10 files, so deleting `Examples` breaks the sample.**
-
-   | file in `New/Samples` | depends on `Examples/` |
-   |---|---|
-   | `Data/PointerInputConfig.asset` | `Scripts/InputSystem/GameInput.inputactions` — losing this kills all input |
-   | `Prefabs/Items/UI/BulletView,KatanaView,PistolView.prefab` | variants of `Prefabs/Items/UI/*` |
-   | `Prefabs/Items/UI/GrenadeView,MedkitView.prefab` | `Textures/Items/*.psd` |
-   | `Prefabs/Items/World/LaserTowerArt,WallArt.prefab` | variants of `Prefabs/Items/World/*` |
-   | `Prefabs/UICell.prefab` | `Textures/Grid/GridBackground_2.psd` |
-   | `Prefabs/WorldCell.prefab` | `Materials/GridCellMaterial.mat` |
-
-   Move these sources with their `.meta` into `New/Samples/Content` to keep GUIDs, pulling in their own
-   dependencies (materials and textures of the world prefabs). Moving does not break the v1 scene; only deleting does.
-   Get approval, then do it in the editor via MCP.
-5. Ask before touching scenes or prefabs. Then migrate `TestInventoryScene` into the Zenject sample scene and derive the Reflex and VContainer scenes. The scenes differ only by the DI object.
+4. Done. `New/` and the Zenject scene no longer reference `Examples/` at all, so `Examples` can be deleted.
+   - Art moved with its `.meta`, so GUIDs and the v1 scene survive: `GameInput.inputactions` into `Samples/Data`,
+     textures, materials and the `*Visual` prefabs into `Samples/Art`.
+   - The item views were variants of v1 prefabs, which dragged in v1 scripts (`UIDraggableObject`,
+     `WorldColorizeProvider`) through the base. They were unpacked in place, keeping their GUIDs.
+   - `WindowsSystem` and `WorldPrefab` instances were unpacked in the scene and saved as
+     `Samples/Prefabs/SampleWindowsSystem.prefab` and `SampleWorldGrid.prefab`.
+     `GridSystemContext` and `SampleModule` moved from the DI object into the UI prefab, so the whole
+     sample configuration lives in the prefab instead of in scene overrides.
+5. The Zenject scene is done. To derive the Reflex and VContainer scenes, copy it, swap the DI object and rewire
+   three references, since everything else now lives inside the two prefabs:
+   - the installer's `_context` → `SampleWindowsSystem/GridSystem`;
+   - `SampleModule` → `Data/World/Surface` → the `SampleWorldGrid` instance;
+   - `WorldGridSurface/Camera` → the scene camera.
+   Nothing else is per scene. The scene file itself still lives in `Examples/Scenes`, move it to `New/Samples` when `Examples` goes away.
 6. Update `Samples/SETUP.md` and `README.md`. Give the user a Play Mode checklist. Commit only after the user confirms.
