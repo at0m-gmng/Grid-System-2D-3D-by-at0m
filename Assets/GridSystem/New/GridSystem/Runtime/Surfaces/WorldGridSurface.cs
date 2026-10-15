@@ -15,6 +15,12 @@ namespace GridSystem.Runtime.Surfaces
         private Camera _camera;
 
         /// <summary>
+        /// Assigns the camera used for picking. Scene surfaces have it serialized,
+        /// surfaces spawned at runtime receive it from whoever created them.
+        /// </summary>
+        public void SetCamera(Camera camera) => _camera = camera;
+
+        /// <summary>
         /// World rotation for clockwise quarter turns.
         /// </summary>
         public override Quaternion GetRotation(int rotation) => transform.rotation * Quaternion.Euler(0f, QUARTER_TURN * rotation, 0f);

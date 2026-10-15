@@ -1532,53 +1532,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db34af3af04fa174abec75d4c6eac4a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: GridSystem.Samples::GridSystem.Samples.SampleModule
-  _data:
-    _main:
-      _key: '"main"'
-      _definition: {fileID: 11400000, guid: 27cd5eef41107a94e8b5afaa51d7831d, type: 2}
-      _surface: {fileID: 8985674842785251655}
-    _chest:
-      _key: '"chest"'
-      _definition: {fileID: 11400000, guid: 154104d477824484daa9def51a89f489, type: 2}
-      _surface: {fileID: 7441764543068055542}
-    _hand:
-      _key: '"hand"'
-      _definition: {fileID: 11400000, guid: ae9424910db58c345a8214f2a3c80074, type: 2}
-      _surface: {fileID: 2858558938491818569}
-    _world:
-      _key: '"world"'
-      _definition: {fileID: 11400000, guid: cd24b44ca20b283439ae342e7989ee55, type: 2}
-      _surface: {fileID: 0}
-    _mainWindow: {fileID: 6924349701169464637}
-    _chestWindow: {fileID: 6175165571223790842}
-    _toggleMain: {fileID: -9049296856450799424, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}
-    _toggleChest: {fileID: 495850564039557309, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}
-    _toggleWorld: {fileID: 1265092184673311471, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}
-    _mainStartItems: []
-    _worldStartItems:
-    - Definition: {fileID: 11400000, guid: d7f3fa7d14f2da14cb4b9ade6447c93b, type: 2}
-      Origin: {x: 0, y: 0}
-      Rotation: 0
-    - Definition: {fileID: 11400000, guid: eb548a7ee90dc024db38541122ab6925, type: 2}
-      Origin: {x: 1, y: 0}
-      Rotation: 0
-    - Definition: {fileID: 11400000, guid: d7f3fa7d14f2da14cb4b9ade6447c93b, type: 2}
-      Origin: {x: 4, y: 4}
-      Rotation: 0
-    _handStartItems:
-    - Definition: {fileID: 11400000, guid: a4579909bd543db459fe78b986f81974, type: 2}
-      Origin: {x: 0, y: 0}
-      Rotation: 0
-    - Definition: {fileID: 11400000, guid: 69de8ab99a31d2e48a7e5872398f72ea, type: 2}
-      Origin: {x: 1, y: 0}
-      Rotation: 0
-    - Definition: {fileID: 11400000, guid: 3b7fc526fa6edf648afd278347053d53, type: 2}
-      Origin: {x: 2, y: 0}
-      Rotation: 0
-    - Definition: {fileID: 11400000, guid: a4579909bd543db459fe78b986f81974, type: 2}
-      Origin: {x: 4, y: 0}
-      Rotation: 0
-  _tooltip: {fileID: 4851330978553849429}
+  _config: {fileID: 0}
+  _camera: {fileID: 0}
 --- !u!1 &7133123224821334898
 GameObject:
   m_ObjectHideFlags: 0
@@ -2016,6 +1971,7 @@ GameObject:
   - component: {fileID: 4145144198646425001}
   - component: {fileID: 1950458528184724862}
   - component: {fileID: 291209064556565020}
+  - component: {fileID: 6145372617992568580}
   m_Layer: 5
   m_Name: SampleWindowsSystem
   m_TagString: Untagged
@@ -2136,3 +2092,21 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &6145372617992568580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9173292077871024056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98336c60cb54ec64790f6cb979c35b0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GridSystem.Samples::GridSystem.Samples.Bootstrap.SampleSceneRoot
+  _main: {fileID: 8985674842785251655}
+  _chest: {fileID: 7441764543068055542}
+  _hand: {fileID: 2858558938491818569}
+  _mainWindow: {fileID: 6924349701169464637}
+  _chestWindow: {fileID: 6175165571223790842}
+  _tooltip: {fileID: 4851330978553849429}

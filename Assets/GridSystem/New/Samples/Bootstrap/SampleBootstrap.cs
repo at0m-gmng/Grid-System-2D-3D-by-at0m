@@ -14,20 +14,22 @@ namespace GridSystem.Samples.Bootstrap
     /// </summary>
     public sealed class SampleBootstrap : IGridInitializable, IDisposable
     {
-        public SampleBootstrap(SampleSceneData data, IInventoryService inventories, ISurfaceService surfaces,
-            IInventoryPersistence persistence, IGridItemFactory factory)
+        public SampleBootstrap(SampleSceneConfig config, SampleContent content, IInventoryService inventories,
+            ISurfaceService surfaces, IInventoryPersistence persistence, IGridItemFactory factory)
         {
-            _data = data;
+            _config = config;
+            _content = content;
             _inventories = inventories;
             _surfaces = surfaces;
             _persistence = persistence;
             _factory = factory;
-            _onToggleMain = _ => Toggle(_data.Main.Surface, _main);
-            _onToggleChest = _ => Toggle(_data.Chest.Surface, _chest);
-            _onToggleWorld = _ => Toggle(_data.World.Surface, _world);
+            _onToggleMain = _ => Toggle(_content.Ui.Main, _main);
+            _onToggleChest = _ => Toggle(_content.Ui.Chest, _chest);
+            _onToggleWorld = _ => Toggle(_content.World, _world);
         }
 
-        private readonly SampleSceneData _data;
+        private readonly SampleSceneConfig _config;
+        private readonly SampleContent _content;
         private readonly IInventoryService _inventories;
         private readonly ISurfaceService _surfaces;
         private readonly IInventoryPersistence _persistence;
@@ -45,36 +47,36 @@ namespace GridSystem.Samples.Bootstrap
         /// </summary>
         public void Initialize()
         {
-            _main = _inventories.Create(_data.Main.Definition, _data.Main.Key);
-            _chest = _inventories.Create(_data.Chest.Definition, _data.Chest.Key);
-            _hand = _inventories.Create(_data.Hand.Definition, _data.Hand.Key);
-            _world = _inventories.Create(_data.World.Definition, _data.World.Key);
+            _main = _inventories.Create(_config.Main.Definition, _config.Main.Key);
+            _chest = _inventories.Create(_config.Chest.Definition, _config.Chest.Key);
+            _hand = _inventories.Create(_config.Hand.Definition, _config.Hand.Key);
+            _world = _inventories.Create(_config.World.Definition, _config.World.Key);
 
             if (!_persistence.TryLoad(_main))
             {
-                Fill(_main, _data.MainStartItems);
+                Fill(_main, _config.MainStartItems);
             }
 
             _persistence.TryLoad(_chest);
 
             if (!_persistence.TryLoad(_hand))
             {
-                Fill(_hand, _data.HandStartItems);
+                Fill(_hand, _config.HandStartItems);
             }
 
             if (!_persistence.TryLoad(_world))
             {
-                Fill(_world, _data.WorldStartItems);
+                Fill(_world, _config.WorldStartItems);
             }
 
-            _surfaces.Open(_data.Hand.Surface, _hand);
+            _surfaces.Open(_content.Ui.Hand, _hand);
 
-            _data.ToggleMain.performed += _onToggleMain;
-            _data.ToggleChest.performed += _onToggleChest;
-            _data.ToggleWorld.performed += _onToggleWorld;
-            _data.ToggleMain.Enable();
-            _data.ToggleChest.Enable();
-            _data.ToggleWorld.Enable();
+            _config.ToggleMain.performed += _onToggleMain;
+            _config.ToggleChest.performed += _onToggleChest;
+            _config.ToggleWorld.performed += _onToggleWorld;
+            _config.ToggleMain.Enable();
+            _config.ToggleChest.Enable();
+            _config.ToggleWorld.Enable();
         }
 
         /// <summary>
@@ -82,9 +84,9 @@ namespace GridSystem.Samples.Bootstrap
         /// </summary>
         public void Dispose()
         {
-            _data.ToggleMain.performed -= _onToggleMain;
-            _data.ToggleChest.performed -= _onToggleChest;
-            _data.ToggleWorld.performed -= _onToggleWorld;
+            _config.ToggleMain.performed -= _onToggleMain;
+            _config.ToggleChest.performed -= _onToggleChest;
+            _config.ToggleWorld.performed -= _onToggleWorld;
             _persistence.Save(_main);
             _persistence.Save(_chest);
             _persistence.Save(_hand);

@@ -7,22 +7,24 @@ namespace GridSystem.Samples
 
     /// <summary>
     /// Registers sample services. Add it to <see cref="GridSystemContext"/> modules.
+    /// Everything except the camera comes from the config asset, so container scenes share one setup.
     /// </summary>
     public sealed class SampleModule : GridModule
     {
         [SerializeField]
-        private SampleSceneData _data;
+        private SampleSceneConfig _config;
 
         [SerializeField]
-        private ItemTooltipView _tooltip;
+        private Camera _camera;
 
         /// <summary>
         /// Adds sample bindings.
         /// </summary>
         public override void Install(IGridRegistrar registrar)
         {
-            registrar.RegisterInstance(_data);
-            registrar.RegisterInstance(_tooltip);
+            registrar.RegisterInstance(_config);
+            registrar.RegisterInstance(_camera);
+            registrar.Register<SampleContent>();
             registrar.Register<SampleWindowPresenter>();
             registrar.Register<SampleAutoSave>();
             registrar.Register<SampleBootstrap>();

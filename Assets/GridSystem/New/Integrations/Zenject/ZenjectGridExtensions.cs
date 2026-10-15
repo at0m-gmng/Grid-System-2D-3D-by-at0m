@@ -13,6 +13,7 @@ namespace GridSystem.Integrations.Zenject
         /// </summary>
         public static void InstallGridSystem(this DiContainer container, GridSystemContext context)
         {
+            container.Bind<IGridObjectFactory>().To<ZenjectGridObjectFactory>().AsSingle();
             context.Install(new ZenjectGridRegistrar(container));
             container.BindInterfacesTo<ZenjectGridEntryPoint>().AsSingle();
         }

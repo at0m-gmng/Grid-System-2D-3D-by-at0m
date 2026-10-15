@@ -11,16 +11,16 @@ namespace GridSystem.Samples.Bootstrap
     /// </summary>
     public sealed class SampleWindowPresenter : IGridInitializable, IDisposable
     {
-        public SampleWindowPresenter(SampleSceneData data, ISurfaceService surfaces,
+        public SampleWindowPresenter(SampleContent content, ISurfaceService surfaces,
             ISubscriber<SurfaceOpenedMessage> openedSubscriber, ISubscriber<SurfaceClosedMessage> closedSubscriber)
         {
-            _data = data;
+            _content = content;
             _surfaces = surfaces;
             _openedSubscriber = openedSubscriber;
             _closedSubscriber = closedSubscriber;
         }
 
-        private readonly SampleSceneData _data;
+        private readonly SampleContent _content;
         private readonly ISurfaceService _surfaces;
         private readonly ISubscriber<SurfaceOpenedMessage> _openedSubscriber;
         private readonly ISubscriber<SurfaceClosedMessage> _closedSubscriber;
@@ -31,8 +31,8 @@ namespace GridSystem.Samples.Bootstrap
         /// </summary>
         public void Initialize()
         {
-            _data.MainWindow.SetActive(_surfaces.IsOpen(_data.Main.Surface));
-            _data.ChestWindow.SetActive(_surfaces.IsOpen(_data.Chest.Surface));
+            _content.Ui.MainWindow.SetActive(_surfaces.IsOpen(_content.Ui.Main));
+            _content.Ui.ChestWindow.SetActive(_surfaces.IsOpen(_content.Ui.Chest));
             _subscriptions = DisposableBag.Create(
                 _openedSubscriber.Subscribe(OnOpened),
                 _closedSubscriber.Subscribe(OnClosed));
@@ -45,25 +45,25 @@ namespace GridSystem.Samples.Bootstrap
 
         private void OnOpened(SurfaceOpenedMessage message)
         {
-            if (message.Surface == _data.Main.Surface)
+            if (message.Surface == _content.Ui.Main)
             {
-                _data.MainWindow.SetActive(true);
+                _content.Ui.MainWindow.SetActive(true);
             }
-            else if (message.Surface == _data.Chest.Surface)
+            else if (message.Surface == _content.Ui.Chest)
             {
-                _data.ChestWindow.SetActive(true);
+                _content.Ui.ChestWindow.SetActive(true);
             }
         }
 
         private void OnClosed(SurfaceClosedMessage message)
         {
-            if (message.Surface == _data.Main.Surface)
+            if (message.Surface == _content.Ui.Main)
             {
-                _data.MainWindow.SetActive(false);
+                _content.Ui.MainWindow.SetActive(false);
             }
-            else if (message.Surface == _data.Chest.Surface)
+            else if (message.Surface == _content.Ui.Chest)
             {
-                _data.ChestWindow.SetActive(false);
+                _content.Ui.ChestWindow.SetActive(false);
             }
         }
     }

@@ -1,15 +1,26 @@
 namespace GridSystem.Samples.Bootstrap
 {
-    using System;
+    using Runtime.Surfaces;
     using UnityEngine;
     using UnityEngine.InputSystem;
 
     /// <summary>
-    /// Scene references and settings of the sample.
+    /// Everything the sample needs that is not a scene reference: content prefabs, inventories,
+    /// start items and input. Lives in an asset, so every container scene shares one configuration.
     /// </summary>
-    [Serializable]
-    public sealed class SampleSceneData
+    [CreateAssetMenu(menuName = MENU_NAME, fileName = FILE_NAME)]
+    public sealed class SampleSceneConfig : ScriptableObject
     {
+        private const string MENU_NAME = "Grid System/Sample Scene Config";
+        private const string FILE_NAME = "SampleSceneConfig";
+
+        [Header("Content")]
+        [SerializeField]
+        private SampleSceneRoot _uiPrefab;
+
+        [SerializeField]
+        private GridSurface _worldPrefab;
+
         [Header("Inventories")]
         [SerializeField]
         private SampleInventory _main;
@@ -23,13 +34,6 @@ namespace GridSystem.Samples.Bootstrap
         [SerializeField]
         private SampleInventory _world;
 
-        [Header("UI Windows")]
-        [SerializeField]
-        private GameObject _mainWindow;
-
-        [SerializeField]
-        private GameObject _chestWindow;
-
         [Header("Toggle Actions")]
         [SerializeField]
         private InputActionReference _toggleMain;
@@ -40,7 +44,7 @@ namespace GridSystem.Samples.Bootstrap
         [SerializeField]
         private InputActionReference _toggleWorld;
 
-        [Header("Content")]
+        [Header("Start Items")]
         [SerializeField]
         private SampleStartItem[] _mainStartItems;
 
@@ -49,6 +53,16 @@ namespace GridSystem.Samples.Bootstrap
 
         [SerializeField]
         private SampleStartItem[] _handStartItems;
+
+        /// <summary>
+        /// UI prefab spawned at startup.
+        /// </summary>
+        public SampleSceneRoot UiPrefab => _uiPrefab;
+
+        /// <summary>
+        /// World grid prefab spawned at startup.
+        /// </summary>
+        public GridSurface WorldPrefab => _worldPrefab;
 
         /// <summary>
         /// Toggleable main inventory (I).
@@ -61,7 +75,7 @@ namespace GridSystem.Samples.Bootstrap
         public SampleInventory Chest => _chest;
 
         /// <summary>
-        /// Always visible hand inventory with spawned items.
+        /// Always visible hand bar.
         /// </summary>
         public SampleInventory Hand => _hand;
 
@@ -69,16 +83,6 @@ namespace GridSystem.Samples.Bootstrap
         /// Toggleable world grid inventory (C).
         /// </summary>
         public SampleInventory World => _world;
-
-        /// <summary>
-        /// Root of the main inventory UI window.
-        /// </summary>
-        public GameObject MainWindow => _mainWindow;
-
-        /// <summary>
-        /// Root of the chest inventory UI window.
-        /// </summary>
-        public GameObject ChestWindow => _chestWindow;
 
         /// <summary>
         /// Action toggling the main window.

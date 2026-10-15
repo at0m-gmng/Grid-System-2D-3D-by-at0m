@@ -14,6 +14,7 @@ namespace GridSystem.Integrations.Reflex
         /// </summary>
         public static void InstallGridSystem(this ContainerBuilder builder, GridSystemContext context)
         {
+            builder.RegisterType(typeof(ReflexGridObjectFactory), new[] { typeof(IGridObjectFactory) }, Lifetime.Singleton, Resolution.Lazy);
             context.Install(new ReflexGridRegistrar(builder));
             builder.RegisterType(typeof(ReflexGridEntryPoint), new[] { typeof(ReflexGridEntryPoint) }, Lifetime.Singleton, Resolution.Eager);
         }

@@ -14,6 +14,7 @@ namespace GridSystem.Integrations.VContainer
         /// </summary>
         public static void InstallGridSystem(this IContainerBuilder builder, GridSystemContext context)
         {
+            builder.Register<VContainerGridObjectFactory>(Lifetime.Singleton).As<IGridObjectFactory>();
             context.Install(new VContainerGridRegistrar(builder));
             builder.RegisterEntryPoint<VContainerGridEntryPoint>();
         }

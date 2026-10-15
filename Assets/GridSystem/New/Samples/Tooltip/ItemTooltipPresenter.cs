@@ -11,13 +11,13 @@ namespace GridSystem.Samples.Tooltip
     /// </summary>
     public sealed class ItemTooltipPresenter : IGridInitializable, IDisposable
     {
-        public ItemTooltipPresenter(ItemTooltipView view, ISubscriber<ItemHoverMessage> hoverSubscriber)
+        public ItemTooltipPresenter(Bootstrap.SampleContent content, ISubscriber<ItemHoverMessage> hoverSubscriber)
         {
-            _view = view;
+            _content = content;
             _hoverSubscriber = hoverSubscriber;
         }
 
-        private readonly ItemTooltipView _view;
+        private readonly Bootstrap.SampleContent _content;
         private readonly ISubscriber<ItemHoverMessage> _hoverSubscriber;
         private IDisposable _subscription;
 
@@ -26,7 +26,7 @@ namespace GridSystem.Samples.Tooltip
         /// </summary>
         public void Initialize()
         {
-            _view.Hide();
+            _content.Ui.Tooltip.Hide();
             _subscription = _hoverSubscriber.Subscribe(OnHover);
         }
 
@@ -39,11 +39,11 @@ namespace GridSystem.Samples.Tooltip
         {
             if (message.Item != null && message.Item.Definition is IItemDescription description)
             {
-                _view.Show(description, message.ScreenPosition);
+                _content.Ui.Tooltip.Show(description, message.ScreenPosition);
             }
             else
             {
-                _view.Hide();
+                _content.Ui.Tooltip.Hide();
             }
         }
     }

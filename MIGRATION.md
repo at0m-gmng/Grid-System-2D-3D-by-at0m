@@ -193,10 +193,9 @@ Present this to the user and get a decision before migrating scenes.
      `Samples/Prefabs/SampleWindowsSystem.prefab` and `SampleWorldGrid.prefab`.
      `GridSystemContext` and `SampleModule` moved from the DI object into the UI prefab, so the whole
      sample configuration lives in the prefab instead of in scene overrides.
-5. The Zenject scene is done. To derive the Reflex and VContainer scenes, copy it, swap the DI object and rewire
-   three references, since everything else now lives inside the two prefabs:
-   - the installer's `_context` → `SampleWindowsSystem/GridSystem`;
-   - `SampleModule` → `Data/World/Surface` → the `SampleWorldGrid` instance;
-   - `WorldGridSurface/Camera` → the scene camera.
-   Nothing else is per scene. The scene file itself still lives in `Examples/Scenes`, move it to `New/Samples` when `Examples` goes away.
+5. The Zenject scene is done and holds no content at all: `EventSystem`, `SceneContext` and `Environment`.
+   The UI and the world grid are spawned at startup through `IGridObjectFactory`, so the container injects
+   them exactly like scene objects. A Reflex or VContainer scene is the same three objects with a different
+   DI component; only `_context`, `_config` and `_camera` are wired per scene.
+   The scene file still lives in `Examples/Scenes`, move it to `New/Samples` when `Examples` goes away.
 6. Update `Samples/SETUP.md` and `README.md`. Give the user a Play Mode checklist. Commit only after the user confirms.
