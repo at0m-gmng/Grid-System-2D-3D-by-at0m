@@ -79,17 +79,19 @@ namespace GridSystem.Editor
 
             float cellSize = CellSize;
             float top = row.y + line + SPACING;
+            float gridWidth = newWidth * (cellSize + CELL_GAP) - CELL_GAP;
+            float left = position.x + (position.width - gridWidth) * HALF;
             for (int y = 0; y < newHeight; y++)
             {
                 for (int x = 0; x < newWidth; x++)
                 {
-                    Rect cellRect = new Rect(position.x + x * (cellSize + CELL_GAP), top + y * (cellSize + CELL_GAP), cellSize, cellSize);
+                    Rect cellRect = new Rect(left + x * (cellSize + CELL_GAP), top + y * (cellSize + CELL_GAP), cellSize, cellSize);
                     DrawCell(cellRect, cells.GetArrayElementAtIndex(y * newWidth + x), pivot, new Vector2Int(x, y));
                 }
             }
 
             Rect helpRect = new Rect(position.x, top + newHeight * (cellSize + CELL_GAP), position.width, line);
-            EditorGUI.LabelField(helpRect, HELP, EditorStyles.miniLabel);
+            EditorGUI.LabelField(helpRect, HELP, EditorStyles.centeredGreyMiniLabel);
             EditorGUI.EndProperty();
         }
 
