@@ -19,7 +19,7 @@ MonoBehaviour:
     _height: 2
     _cells: 01010100
     _pivot: {x: 0, y: 0}
-  _displayName: Wall
+  _displayName: AngleWall
   _damage: 0
   _attackSpeed: 0
   _range: 0

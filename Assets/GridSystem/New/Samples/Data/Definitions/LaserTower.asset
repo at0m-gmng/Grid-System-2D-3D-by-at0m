@@ -20,6 +20,6 @@ MonoBehaviour:
     _cells: 01
     _pivot: {x: 0, y: 0}
   _displayName: LaserTower
-  _damage: 0
+  _damage: 1
   _attackSpeed: 10
   _range: 10

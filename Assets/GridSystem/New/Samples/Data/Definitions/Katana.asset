@@ -18,8 +18,8 @@ MonoBehaviour:
     _width: 1
     _height: 3
     _cells: 010101
-    _pivot: {x: 0, y: 0}
-  _displayName: Katana
-  _damage: 3
-  _attackSpeed: 0.5
-  _range: 1
+    _pivot: {x: 0, y: 1}
+  _displayName: KATANA
+  _damage: 2
+  _attackSpeed: 1
+  _range: 3

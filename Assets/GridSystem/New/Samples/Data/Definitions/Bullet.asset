@@ -19,7 +19,7 @@ MonoBehaviour:
     _height: 1
     _cells: 01
     _pivot: {x: 0, y: 0}
-  _displayName: Bullet
-  _damage: 1
-  _attackSpeed: 2
-  _range: 5
+  _displayName: BULLET
+  _damage: 2
+  _attackSpeed: 1
+  _range: 3

@@ -19,7 +19,7 @@ MonoBehaviour:
     _height: 2
     _cells: 01010100
     _pivot: {x: 0, y: 0}
-  _displayName: Pistol
+  _displayName: PISTOL
   _damage: 2
   _attackSpeed: 1
   _range: 3

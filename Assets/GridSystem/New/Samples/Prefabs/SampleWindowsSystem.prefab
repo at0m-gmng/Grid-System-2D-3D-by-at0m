@@ -1471,69 +1471,6 @@ MonoBehaviour:
   _priority: 10
   _rect: {fileID: 2214402815285757465}
   _eventCamera: {fileID: 0}
---- !u!1 &7044943595264907980
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5565604156749446501}
-  - component: {fileID: 7469846187180782660}
-  - component: {fileID: 7735675643543288792}
-  m_Layer: 0
-  m_Name: GridSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5565604156749446501
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7044943595264907980}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 7285598169245290417}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7469846187180782660
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7044943595264907980}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b0ed7fe2a1358ba47b63925240e94e9c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: GridSystem.Runtime::GridSystem.Runtime.Composition.GridSystemContext
-  _settings: {fileID: 11400000, guid: 28679e72f2e631e44a6a87649bedd075, type: 2}
-  _poolRoot: {fileID: 5659893456512825814}
-  _modules:
-  - {fileID: 7735675643543288792}
---- !u!114 &7735675643543288792
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7044943595264907980}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db34af3af04fa174abec75d4c6eac4a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: GridSystem.Samples::GridSystem.Samples.SampleModule
-  _config: {fileID: 0}
-  _camera: {fileID: 0}
 --- !u!1 &7133123224821334898
 GameObject:
   m_ObjectHideFlags: 0
@@ -1997,7 +1934,6 @@ RectTransform:
   - {fileID: 8266845749451210331}
   - {fileID: 5659893456512825814}
   - {fileID: 209460026058469875}
-  - {fileID: 5565604156749446501}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
