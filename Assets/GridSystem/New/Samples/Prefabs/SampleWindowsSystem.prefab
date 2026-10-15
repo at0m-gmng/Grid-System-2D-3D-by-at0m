@@ -73,7 +73,7 @@ MonoBehaviour:
   _views: {fileID: 11400000, guid: c954989c836f333469b7bbc12b6bab8c, type: 2}
   _itemsRoot: {fileID: 8941762674031580775}
   _cellsRoot: {fileID: 8941762674031580775}
-  _cellPrefab: {fileID: 200200000, guid: a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5, type: 3}
+  _cellPrefab: {fileID: 3446612443401970617, guid: a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5, type: 3}
   _cellSize: {x: 100, y: 100}
   _spacing: {x: 0, y: 0}
   _priority: 10

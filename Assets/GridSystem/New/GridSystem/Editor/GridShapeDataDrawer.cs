@@ -20,6 +20,7 @@ namespace GridSystem.Editor
         private const string PIVOT_MARK = "P";
         private const float CELL_SIZE = 22f;
         private const float CELL_GAP = 2f;
+        private const float CELL_BORDER = 1f;
         private const float SPACING = 2f;
         private const float HALF = 0.5f;
         private const int MIN_SIZE = 1;
@@ -27,9 +28,10 @@ namespace GridSystem.Editor
         private const int RIGHT_BUTTON = 1;
         private const int LINES = 3;
 
-        private static readonly Color EMPTY_COLOR = new Color(0.22f, 0.22f, 0.22f);
+        private static readonly Color EMPTY_COLOR = new Color(0.13f, 0.13f, 0.13f);
         private static readonly Color FILLED_COLOR = new Color(0.3f, 0.6f, 0.9f);
         private static readonly Color PIVOT_COLOR = new Color(0.95f, 0.6f, 0.2f);
+        private static readonly Color BORDER_COLOR = new Color(0.45f, 0.45f, 0.45f);
 
         /// <summary>
         /// Total drawer height.
@@ -84,7 +86,8 @@ namespace GridSystem.Editor
         {
             bool isPivot = pivot.vector2IntValue == coordinates;
             Color color = isPivot ? PIVOT_COLOR : cell.boolValue ? FILLED_COLOR : EMPTY_COLOR;
-            EditorGUI.DrawRect(rect, color);
+            EditorGUI.DrawRect(rect, BORDER_COLOR);
+            EditorGUI.DrawRect(new Rect(rect.x + CELL_BORDER, rect.y + CELL_BORDER, rect.width - CELL_BORDER * 2f, rect.height - CELL_BORDER * 2f), color);
             if (isPivot)
             {
                 GUI.Label(rect, PIVOT_MARK, EditorStyles.centeredGreyMiniLabel);
