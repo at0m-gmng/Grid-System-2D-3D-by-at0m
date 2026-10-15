@@ -76,7 +76,7 @@ MonoBehaviour:
   _cellPrefab: {fileID: 200200000, guid: a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5, type: 3}
   _cellSize: {x: 100, y: 100}
   _spacing: {x: 0, y: 0}
-  _priority: 0
+  _priority: 10
   _rect: {fileID: 8941762674031580775}
   _eventCamera: {fileID: 0}
 --- !u!1 &788654711243061808
@@ -1245,7 +1245,7 @@ MonoBehaviour:
   _cellPrefab: {fileID: 3890978106122865572, guid: ddc600e91f83c634b99110617be491a9, type: 3}
   _cellSize: {x: 100, y: 100}
   _spacing: {x: 0, y: 0}
-  _priority: 0
+  _priority: 10
   _rect: {fileID: 3247249062811471524}
   _eventCamera: {fileID: 0}
 --- !u!1 &6565209820324644623
@@ -1468,7 +1468,7 @@ MonoBehaviour:
   _cellPrefab: {fileID: 3890978106122865572, guid: ddc600e91f83c634b99110617be491a9, type: 3}
   _cellSize: {x: 100, y: 100}
   _spacing: {x: 0, y: 0}
-  _priority: 0
+  _priority: 10
   _rect: {fileID: 2214402815285757465}
   _eventCamera: {fileID: 0}
 --- !u!1 &7044943595264907980
