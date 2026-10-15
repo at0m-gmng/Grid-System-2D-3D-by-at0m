@@ -5,7 +5,7 @@ namespace GridSystem.Editor
     using UnityEngine;
 
     /// <summary>
-    /// Inspector editor of item shape: size fields and clickable cells matrix.
+    /// Inspector editor of item shape: size fields, display scale and clickable cells matrix.
     /// </summary>
     [CustomPropertyDrawer(typeof(GridShapeData))]
     public sealed class GridShapeDataDrawer : PropertyDrawer
@@ -16,22 +16,24 @@ namespace GridSystem.Editor
         private const string PIVOT = "_pivot";
         private const string WIDTH_LABEL = "Width";
         private const string HEIGHT_LABEL = "Height";
+        private const string CELL_SIZE_LABEL = "Cell Size";
+        private const string CENTER_LABEL = "Center";
+        private const string BUSY_LABEL = "Busy";
+        private const string EMPTY_LABEL = "Empty";
         private const string HELP = "LMB: toggle cell. RMB: set pivot.";
-        private const string PIVOT_MARK = "P";
-        private const float CELL_SIZE = 22f;
+        private const string CELL_SIZE_KEY = "GridSystem.Editor.ShapeCellSize";
         private const float CELL_GAP = 2f;
-        private const float CELL_BORDER = 1f;
         private const float SPACING = 2f;
         private const float HALF = 0.5f;
+        private const float MIN_CELL_SIZE = 24f;
+        private const float MAX_CELL_SIZE = 72f;
+        private const float DEFAULT_CELL_SIZE = 46f;
         private const int MIN_SIZE = 1;
         private const int MAX_SIZE = 16;
         private const int RIGHT_BUTTON = 1;
-        private const int LINES = 3;
+        private const int LINES = 4;
 
-        private static readonly Color EMPTY_COLOR = new Color(0.13f, 0.13f, 0.13f);
-        private static readonly Color FILLED_COLOR = new Color(0.3f, 0.6f, 0.9f);
-        private static readonly Color PIVOT_COLOR = new Color(0.95f, 0.6f, 0.2f);
-        private static readonly Color BORDER_COLOR = new Color(0.45f, 0.45f, 0.45f);
+        private static float CellSize => EditorPrefs.GetFloat(CELL_SIZE_KEY, DEFAULT_CELL_SIZE);
 
         /// <summary>
         /// Total drawer height.
@@ -39,11 +41,11 @@ namespace GridSystem.Editor
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             int height = Mathf.Max(MIN_SIZE, property.FindPropertyRelative(HEIGHT).intValue);
-            return (EditorGUIUtility.singleLineHeight + SPACING) * LINES + height * (CELL_SIZE + CELL_GAP);
+            return (EditorGUIUtility.singleLineHeight + SPACING) * LINES + height * (CellSize + CELL_GAP);
         }
 
         /// <summary>
-        /// Draws size fields, cells and hint.
+        /// Draws size fields, display scale, cells and hint.
         /// </summary>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -67,17 +69,26 @@ namespace GridSystem.Editor
                 Resize(width, height, cells, pivot, newWidth, newHeight);
             }
 
+            row.y += line + SPACING;
+            Rect sizeRect = new Rect(row.x, row.y, row.width, line);
+            float newCellSize = EditorGUI.Slider(sizeRect, CELL_SIZE_LABEL, CellSize, MIN_CELL_SIZE, MAX_CELL_SIZE);
+            if (!Mathf.Approximately(newCellSize, CellSize))
+            {
+                EditorPrefs.SetFloat(CELL_SIZE_KEY, newCellSize);
+            }
+
+            float cellSize = CellSize;
             float top = row.y + line + SPACING;
             for (int y = 0; y < newHeight; y++)
             {
                 for (int x = 0; x < newWidth; x++)
                 {
-                    Rect cellRect = new Rect(position.x + x * (CELL_SIZE + CELL_GAP), top + y * (CELL_SIZE + CELL_GAP), CELL_SIZE, CELL_SIZE);
+                    Rect cellRect = new Rect(position.x + x * (cellSize + CELL_GAP), top + y * (cellSize + CELL_GAP), cellSize, cellSize);
                     DrawCell(cellRect, cells.GetArrayElementAtIndex(y * newWidth + x), pivot, new Vector2Int(x, y));
                 }
             }
 
-            Rect helpRect = new Rect(position.x, top + newHeight * (CELL_SIZE + CELL_GAP), position.width, line);
+            Rect helpRect = new Rect(position.x, top + newHeight * (cellSize + CELL_GAP), position.width, line);
             EditorGUI.LabelField(helpRect, HELP, EditorStyles.miniLabel);
             EditorGUI.EndProperty();
         }
@@ -85,29 +96,23 @@ namespace GridSystem.Editor
         private static void DrawCell(Rect rect, SerializedProperty cell, SerializedProperty pivot, Vector2Int coordinates)
         {
             bool isPivot = pivot.vector2IntValue == coordinates;
-            Color color = isPivot ? PIVOT_COLOR : cell.boolValue ? FILLED_COLOR : EMPTY_COLOR;
-            EditorGUI.DrawRect(rect, BORDER_COLOR);
-            EditorGUI.DrawRect(new Rect(rect.x + CELL_BORDER, rect.y + CELL_BORDER, rect.width - CELL_BORDER * 2f, rect.height - CELL_BORDER * 2f), color);
-            if (isPivot)
-            {
-                GUI.Label(rect, PIVOT_MARK, EditorStyles.centeredGreyMiniLabel);
-            }
-
             Event current = Event.current;
-            if (current.type == EventType.MouseDown && rect.Contains(current.mousePosition))
+            if (current.type == EventType.MouseDown && current.button == RIGHT_BUTTON && rect.Contains(current.mousePosition))
             {
-                if (current.button == RIGHT_BUTTON)
-                {
-                    pivot.vector2IntValue = coordinates;
-                    cell.boolValue = true;
-                }
-                else if (!isPivot)
-                {
-                    cell.boolValue = !cell.boolValue;
-                }
-
+                pivot.vector2IntValue = coordinates;
+                cell.boolValue = true;
                 current.Use();
             }
+
+            Color previous = GUI.color;
+            GUI.color = isPivot ? Color.yellow : cell.boolValue ? Color.red : Color.green;
+            string caption = isPivot ? CENTER_LABEL : cell.boolValue ? BUSY_LABEL : EMPTY_LABEL;
+            if (GUI.Button(rect, caption) && !isPivot)
+            {
+                cell.boolValue = !cell.boolValue;
+            }
+
+            GUI.color = previous;
         }
 
         private static void Resize(SerializedProperty width, SerializedProperty height, SerializedProperty cells, SerializedProperty pivot,
