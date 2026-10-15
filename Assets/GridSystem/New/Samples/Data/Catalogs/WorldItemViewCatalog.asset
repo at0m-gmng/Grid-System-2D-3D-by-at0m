@@ -13,16 +13,6 @@ MonoBehaviour:
   m_Name: WorldItemViewCatalog
   m_EditorClassIdentifier: GridSystem.Runtime::GridSystem.Runtime.Views.ItemViewCatalog
   _entries:
-  - Definition: {fileID: 11400000, guid: 3b7fc526fa6edf648afd278347053d53, type: 2}
-    Prefab: {fileID: 8337825832866253643, guid: 4f16d25a89aa79c49a714122fb091e68, type: 3}
-  - Definition: {fileID: 11400000, guid: 69de8ab99a31d2e48a7e5872398f72ea, type: 2}
-    Prefab: {fileID: 2340707005517092418, guid: 53df28ab042baa6488388b242697c6c1, type: 3}
-  - Definition: {fileID: 11400000, guid: a4579909bd543db459fe78b986f81974, type: 2}
-    Prefab: {fileID: 4942435183270104470, guid: 1b281f633895e5d4eb36f67655f29bf4, type: 3}
-  - Definition: {fileID: 11400000, guid: 4eea954cadc0d504abbbb688e8feb201, type: 2}
-    Prefab: {fileID: 2861476462406927866, guid: dca7c68eb70611049ae36e7702975ccd, type: 3}
-  - Definition: {fileID: 11400000, guid: c3ccd01a2700bc144ae0dde1592f375c, type: 2}
-    Prefab: {fileID: 8918732379662352477, guid: e1eeaac1512964849b8c93e4348dfacc, type: 3}
   - Definition: {fileID: 11400000, guid: d7f3fa7d14f2da14cb4b9ade6447c93b, type: 2}
     Prefab: {fileID: 4226007393608630177, guid: dcfc78f36a2eeb84fbc35604e8f6d75d, type: 3}
   - Definition: {fileID: 11400000, guid: eb548a7ee90dc024db38541122ab6925, type: 2}
