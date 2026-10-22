@@ -199,5 +199,9 @@ Present this to the user and get a decision before migrating scenes.
    The UI and the world grid are spawned at startup through `IGridObjectFactory`, so the container injects
    them exactly like scene objects. A Reflex or VContainer scene is the same three objects with a different
    DI component; only `_context`, `_config` and `_camera` are wired per scene.
-   The scene file still lives in `Examples/Scenes`, move it to `New/Samples` when `Examples` goes away.
-6. Update `Samples/SETUP.md` and `README.md`. Give the user a Play Mode checklist. Commit only after the user confirms.
+   The scene now lives at `New/Samples/TestInventoryScene_Zenject.unity`.
+6. Done. `Samples/SETUP.md` matches the code and documents the validation; `README.md` describes v2.
+7. Open. Only the Zenject scene exists, so the Reflex and VContainer integrations are compiled but never run.
+   Build the other two scenes from `SETUP.md` §6 and repeat the §7 Play Mode checklist on each.
+8. Open. `Examples` can be deleted: none of its 177 asset GUIDs is referenced from `New`. `EditorBuildSettings`
+   still lists `Examples/Scenes/MainScene.unity`, which no longer exists.
