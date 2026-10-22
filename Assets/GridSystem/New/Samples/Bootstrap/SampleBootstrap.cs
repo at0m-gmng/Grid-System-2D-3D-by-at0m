@@ -62,13 +62,17 @@ namespace GridSystem.Samples.Bootstrap
         }
 
         /// <summary>
-        /// Saves all inventories and unsubscribes from toggles.
+        /// Saves all inventories, unsubscribes from toggles and disables the actions it enabled.
+        /// The actions live in an asset, so leaving them enabled leaks into the next session.
         /// </summary>
         public void Dispose()
         {
             _config.ToggleMain.performed -= _onToggleMain;
             _config.ToggleChest.performed -= _onToggleChest;
             _config.ToggleWorld.performed -= _onToggleWorld;
+            _config.ToggleMain.Disable();
+            _config.ToggleChest.Disable();
+            _config.ToggleWorld.Disable();
             _persistence.Save(_main);
             _persistence.Save(_chest);
             _persistence.Save(_hand);
