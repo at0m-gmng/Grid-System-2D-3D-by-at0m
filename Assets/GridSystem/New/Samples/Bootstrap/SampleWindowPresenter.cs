@@ -41,7 +41,7 @@ namespace GridSystem.Samples.Bootstrap
         /// <summary>
         /// Unsubscribes.
         /// </summary>
-        public void Dispose() => _subscriptions.Dispose();
+        public void Dispose() => _subscriptions?.Dispose();
 
         private void OnOpened(SurfaceOpenedMessage message)
         {

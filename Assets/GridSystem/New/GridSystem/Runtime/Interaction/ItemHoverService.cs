@@ -52,7 +52,7 @@ namespace GridSystem.Runtime.Interaction
         /// <summary>
         /// Unsubscribes.
         /// </summary>
-        public void Dispose() => _subscriptions.Dispose();
+        public void Dispose() => _subscriptions?.Dispose();
 
         private void OnMoved(PointerMovedMessage message)
         {

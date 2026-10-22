@@ -33,7 +33,7 @@ namespace GridSystem.Samples.Tooltip
         /// <summary>
         /// Unsubscribes.
         /// </summary>
-        public void Dispose() => _subscription.Dispose();
+        public void Dispose() => _subscription?.Dispose();
 
         private void OnHover(ItemHoverMessage message)
         {

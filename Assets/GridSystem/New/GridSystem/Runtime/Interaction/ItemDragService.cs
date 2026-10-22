@@ -78,7 +78,7 @@ namespace GridSystem.Runtime.Interaction
         /// <summary>
         /// Unsubscribes.
         /// </summary>
-        public void Dispose() => _subscriptions.Dispose();
+        public void Dispose() => _subscriptions?.Dispose();
 
         private void OnButton(PointerButtonMessage message)
         {
@@ -153,7 +153,7 @@ namespace GridSystem.Runtime.Interaction
             {
                 _surface = hit.Surface;
                 _target = hit;
-                _context = new DropContext(_item, _source, hit.Inventory, hit.Cell, _rotation, hit.Item);
+                _context = new DropContext(_item, _source, hit.Inventory, hit.Surface, hit.Cell, _rotation, hit.Item);
                 _handler = FindHandler(_context);
             }
             else if (!hasHit)

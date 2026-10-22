@@ -29,7 +29,7 @@ namespace GridSystem.Samples.Bootstrap
         /// <summary>
         /// Unsubscribes.
         /// </summary>
-        public void Dispose() => _subscription.Dispose();
+        public void Dispose() => _subscription?.Dispose();
 
         private void OnClosed(SurfaceClosedMessage message) => _persistence.Save(message.Inventory);
     }

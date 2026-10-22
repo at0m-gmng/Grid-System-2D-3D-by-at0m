@@ -28,7 +28,9 @@ namespace GridSystem.Runtime.Interaction.Drop
         public int Order => DropHandlerOrder.MERGE;
 
         /// <summary>
-        /// Checks that both ingredients are still placed, the recipe exists and the result fits into their cells.
+        /// Checks that both ingredients are still placed, the recipe exists, the surface can display the result
+        /// and it fits into their cells. Without the display check the ingredients would be consumed before
+        /// the view of the result is requested.
         /// </summary>
         public bool CanHandle(in DropContext context)
         {
@@ -38,6 +40,7 @@ namespace GridSystem.Runtime.Interaction.Drop
                 && context.Item.InventoryId == context.Source.Id
                 && target.InventoryId == context.Target.Id
                 && _rules.TryGetResult(context.Item.Definition, target.Definition, out IGridItemDefinition definition)
+                && context.Surface.CanDisplay(definition)
                 && context.Target.CanPlace(definition, target.Origin, target.Rotation, context.Item.Id, target.Id);
             return result;
         }

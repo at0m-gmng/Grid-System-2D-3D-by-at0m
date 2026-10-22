@@ -98,7 +98,7 @@ namespace GridSystem.Runtime.Surfaces
         /// </summary>
         public void Dispose()
         {
-            _subscription.Dispose();
+            _subscription?.Dispose();
             for (int i = 0; i < _presenters.Count; i++)
             {
                 _presenters[i].Unbind();

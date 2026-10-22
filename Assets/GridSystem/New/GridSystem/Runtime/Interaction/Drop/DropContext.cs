@@ -2,6 +2,7 @@ namespace GridSystem.Runtime.Interaction.Drop
 {
     using Core.Inventories;
     using Core.Items;
+    using Surfaces;
     using UnityEngine;
 
     /// <summary>
@@ -9,11 +10,13 @@ namespace GridSystem.Runtime.Interaction.Drop
     /// </summary>
     public readonly struct DropContext
     {
-        public DropContext(GridItem item, GridInventory source, GridInventory target, Vector2Int cell, int rotation, GridItem targetItem)
+        public DropContext(GridItem item, GridInventory source, GridInventory target, GridSurface surface, Vector2Int cell, int rotation,
+            GridItem targetItem)
         {
             Item = item;
             Source = source;
             Target = target;
+            Surface = surface;
             Cell = cell;
             Rotation = rotation;
             TargetItem = targetItem;
@@ -33,6 +36,11 @@ namespace GridSystem.Runtime.Interaction.Drop
         /// Inventory under the pointer.
         /// </summary>
         public readonly GridInventory Target;
+
+        /// <summary>
+        /// Surface showing the target inventory. Decides whether a definition can be displayed there.
+        /// </summary>
+        public readonly GridSurface Surface;
 
         /// <summary>
         /// Cell under the pointer, desired pivot position.
