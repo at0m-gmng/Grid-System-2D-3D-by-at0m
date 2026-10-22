@@ -46,11 +46,12 @@ Read this file, `README.md` and the code before doing anything. Reply to the use
 |---|---|---|---|
 | `GridSystem/Core` | `com.at0m.gridsystem` | `GridSystem.Core` | — (pure C#, no Unity objects except math types) |
 | `GridSystem/Runtime` | same | `GridSystem.Runtime` | Core, MessagePipe, UniTask, Unity.InputSystem, UnityEngine.UI, PrimeTween.Runtime (versionDefine `GRID_SYSTEM_PRIMETWEEN`) |
-| `GridSystem/Editor` | same | `GridSystem.Editor` | Core, Runtime (shape drawer: LMB toggles cell, RMB sets pivot) |
+| `GridSystem/Editor` | same | `GridSystem.Editor` | Core, Runtime (shape drawer: LMB toggles cell, RMB sets pivot; `Validation/`: report types, `GridValidatedEditor` base inspector, `GridContentValidator` checks, settings inspector) |
 | `Integrations/Zenject` | `com.at0m.gridsystem.zenject` | `GridSystem.Integrations.Zenject` | Core, Runtime, Zenject |
 | `Integrations/Reflex` | `com.at0m.gridsystem.reflex` | `GridSystem.Integrations.Reflex` | Core, Runtime, Reflex |
 | `Integrations/VContainer` | `com.at0m.gridsystem.vcontainer` | `GridSystem.Integrations.VContainer` | Core, Runtime, VContainer |
 | `Samples` | not packaged | `GridSystem.Samples` (autoReferenced false) | Core, Runtime, MessagePipe, UniTask, Input System, UGUI, TMP |
+| `Samples/Editor` | not packaged | `GridSystem.Samples.Editor` | Core, Runtime, Editor, Samples, Input System (sample config inspector) |
 
 A project installs the core plus exactly one integration. `DOTWEEN` define enables `DOTweenItemMotion`. MessagePipe for Unity exposes UniTask types, so every assembly using MessagePipe must reference `UniTask` (CS0012 otherwise).
 
@@ -108,10 +109,11 @@ Ready components:
 All three have one field, `_context`.
 
 ### Samples (`GridSystem.Samples`, demo only)
-- `SampleModule : GridModule` (`_data`, `_tooltip`). It registers `SampleSceneData`, `ItemTooltipView`, `SampleWindowPresenter`, `SampleAutoSave`, `SampleBootstrap`, `ItemTooltipPresenter`.
-- `SampleSceneData`: `_main`, `_hand`, `_world` (`SampleInventory`: key, `GridDefinition`, surface), `_mainWindow`, `_toggleMainWindow`, `_isMainWindowOpened`, `_worldStartItems`, `_handSpawnPool`, `_handSpawnCount`.
+- `SampleModule : GridModule` (`_config`, `_camera`). It registers the config, the camera, `SampleContent`, `SampleWindowPresenter`, `SampleAutoSave`, `SampleBootstrap`, `ItemTooltipPresenter`.
+- `SampleSceneConfig` (asset): `_uiPrefab`, `_worldPrefab`, four `SampleInventory` (key, `GridDefinition`, start items), three `InputActionReference`. Holds no scene reference, so all three container scenes share it.
+- `SampleContent` spawns the UI and world prefabs through `IGridObjectFactory` on first use, so nothing depends on initialization order. `SampleSceneRoot` on the UI prefab exposes its surfaces, windows and tooltip.
 - `SampleItemDefinition : ItemDefinition, IItemDescription` (display name, damage, attack speed, range).
-- `Samples/SETUP.md` is the manual scene setup guide for this sample state (Main / Hand / World + tooltip). It does not mirror the old scene yet.
+- `Samples/SETUP.md` is the manual setup guide reproducing the v1 scene.
 
 ## 4. Old implementation (`Examples`) — what exists and how it maps
 

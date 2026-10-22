@@ -17,39 +17,40 @@ MonoBehaviour:
   _main:
     _key: '"main"'
     _definition: {fileID: 11400000, guid: 27cd5eef41107a94e8b5afaa51d7831d, type: 2}
+    _startItems: []
   _chest:
     _key: '"chest"'
     _definition: {fileID: 11400000, guid: 154104d477824484daa9def51a89f489, type: 2}
+    _startItems: []
   _hand:
     _key: '"hand"'
     _definition: {fileID: 11400000, guid: ae9424910db58c345a8214f2a3c80074, type: 2}
+    _startItems:
+    - Definition: {fileID: 11400000, guid: a4579909bd543db459fe78b986f81974, type: 2}
+      Origin: {x: 0, y: 0}
+      Rotation: 0
+    - Definition: {fileID: 11400000, guid: 69de8ab99a31d2e48a7e5872398f72ea, type: 2}
+      Origin: {x: 1, y: 0}
+      Rotation: 0
+    - Definition: {fileID: 11400000, guid: 3b7fc526fa6edf648afd278347053d53, type: 2}
+      Origin: {x: 2, y: 0}
+      Rotation: 0
+    - Definition: {fileID: 11400000, guid: a4579909bd543db459fe78b986f81974, type: 2}
+      Origin: {x: 4, y: 0}
+      Rotation: 0
   _world:
     _key: '"world"'
     _definition: {fileID: 11400000, guid: cd24b44ca20b283439ae342e7989ee55, type: 2}
+    _startItems:
+    - Definition: {fileID: 11400000, guid: d7f3fa7d14f2da14cb4b9ade6447c93b, type: 2}
+      Origin: {x: 0, y: 0}
+      Rotation: 0
+    - Definition: {fileID: 11400000, guid: eb548a7ee90dc024db38541122ab6925, type: 2}
+      Origin: {x: 1, y: 0}
+      Rotation: 0
+    - Definition: {fileID: 11400000, guid: d7f3fa7d14f2da14cb4b9ade6447c93b, type: 2}
+      Origin: {x: 4, y: 4}
+      Rotation: 0
   _toggleMain: {fileID: -9049296856450799424, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}
   _toggleChest: {fileID: 495850564039557309, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}
   _toggleWorld: {fileID: 1265092184673311471, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}
-  _mainStartItems: []
-  _worldStartItems:
-  - Definition: {fileID: 11400000, guid: d7f3fa7d14f2da14cb4b9ade6447c93b, type: 2}
-    Origin: {x: 0, y: 0}
-    Rotation: 0
-  - Definition: {fileID: 11400000, guid: eb548a7ee90dc024db38541122ab6925, type: 2}
-    Origin: {x: 1, y: 0}
-    Rotation: 0
-  - Definition: {fileID: 11400000, guid: d7f3fa7d14f2da14cb4b9ade6447c93b, type: 2}
-    Origin: {x: 4, y: 4}
-    Rotation: 0
-  _handStartItems:
-  - Definition: {fileID: 11400000, guid: a4579909bd543db459fe78b986f81974, type: 2}
-    Origin: {x: 0, y: 0}
-    Rotation: 0
-  - Definition: {fileID: 11400000, guid: 69de8ab99a31d2e48a7e5872398f72ea, type: 2}
-    Origin: {x: 1, y: 0}
-    Rotation: 0
-  - Definition: {fileID: 11400000, guid: 3b7fc526fa6edf648afd278347053d53, type: 2}
-    Origin: {x: 2, y: 0}
-    Rotation: 0
-  - Definition: {fileID: 11400000, guid: a4579909bd543db459fe78b986f81974, type: 2}
-    Origin: {x: 4, y: 0}
-    Rotation: 0

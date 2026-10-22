@@ -194,18 +194,20 @@ Canvas               Canvas (Screen Space - Overlay), CanvasScaler (Scale With S
 GridSystem           GridSystemContext, SampleModule
 ```
 1. `GridSystemContext`: `Settings` = `GridSystemSettings`, `Pool Root` = `Pool`, `Modules` = [`SampleModule` с этого же объекта].
-2. `SampleModule` → `Data`:
-   - `Main`: Key `Main`, Definition `MainGrid`, Surface `MainGrid` (UIGridSurface).
-   - `Chest`: Key `Chest`, Definition `ChestGrid`, Surface `ChestGrid`.
-   - `Hand`: Key `Hand`, Definition `HandGrid`, Surface `HandGrid`.
-   - `World`: Key `World`, Definition `WorldGrid`, Surface `WorldGrid`.
-   - `Main Window` = `MainWindow`, `Chest Window` = `ChestWindow`.
-   - `Toggle Main` / `Toggle Chest` / `Toggle World` — действия открытия поверхностей.
-   - `Main Start Items`, `World Start Items`, `Hand Start Items` — списки `Definition + Origin + Rotation`,
+2. `SampleModule`: `Config` = `SampleSceneConfig`, `Camera` = камера сцены. Больше на сцене ничего нет: UI и 3D-сетка
+   создаются из префабов конфига через контейнер, поэтому три DI-сцены отличаются только установщиком.
+3. `SampleSceneConfig` (ассет `Create → Grid System → Sample Scene Config`):
+   - `Ui Prefab` = `SampleWindowsSystem`, `World Prefab` = `SampleWorldGrid`.
+   - `Main` / `Chest` / `Hand` / `World` — по инвентарю: `Key` (ключ сохранения, уникальный),
+     `Definition` (размер сетки) и `Start Items` (`Definition + Origin + Rotation`), которые
      раскладываются только при первом запуске, когда сохранения ещё нет.
-3. `SampleModule` → `Tooltip` = `Tooltip`.
+   - `Toggle Main` / `Toggle Chest` / `Toggle World` — действия открытия поверхностей.
 
-Окно `MainWindow` включается/выключается само по открытию поверхности, начальное состояние в сцене неважно.
+Поверхности, окна и тултип отдаёт `SampleSceneRoot` на UI-префабе. Окна включаются/выключаются сами по открытию
+поверхности, начальное состояние в префабе неважно.
+
+Инспектор `SampleSceneConfig` и `GridSystemSettings` сам проверяет конфигурацию и показывает дефекты списком —
+см. раздел 8.
 
 ---
 
@@ -248,6 +250,27 @@ GridSystem           GridSystemContext, SampleModule
 7. Закрыть Main (`I`) или выйти из Play Mode, снова запустить — раскладка восстановлена.
 
 ## 8. Частые ошибки
+
+Большинство из них видно до запуска: инспекторы `SampleSceneConfig` и `GridSystemSettings` показывают блок
+`Validation` со списком дефектов. Проверка идёт при открытии инспектора и после каждой правки; клик по сообщению
+подсвечивает виновный ассет в Project. Красное — упадёт или потеряет данные, жёлтое — работает, но, возможно, не то,
+что задумано. Проверяется:
+
+| Что | Чем это кончится в рантайме |
+|---|---|
+| Стартовый предмет отсутствует в каталоге вьюх своей поверхности | `KeyNotFoundException` при открытии поверхности, то есть на старте |
+| Стартовый предмет не влезает в сетку или налезает на другой | `TryAdd` молча вернёт false, предмета просто не будет |
+| Два инвентаря с одинаковым `Key` | Сохранения перетирают друг друга |
+| Поверхность UI не приоритетнее мировой | Бросок над UI может уйти в 3D-мир |
+| Запись каталога без определения или без префаба | Пустая клетка или падение при показе |
+| Два определения с одним `Id` | Сохранение восстановит не тот предмет |
+| Одна пара даёт два разных результата merge | Побеждает последнее правило |
+| Ингредиент или результат merge не лежит в `ItemDefinitionCatalog` | Сохранение инвентаря с этим предметом будет сброшено при загрузке |
+| Результат merge недостижим в каталоге вьюх (жёлтое) | Merge на этой поверхности будет отклонён |
+
+Проверка стартовых раскладок прогоняется через настоящий `GridInventory.TryAdd`, а не через копию правил, поэтому
+не может разойтись с рантаймом — включая правило бара для сеток высотой 1.
+
 | Симптом | Причина |
 |---|---|
 | `KeyNotFoundException` в `ItemViewCatalog.GetPrefab` | Предмет (или результат merge) не добавлен в каталог вьюх поверхности, на которой он появляется |

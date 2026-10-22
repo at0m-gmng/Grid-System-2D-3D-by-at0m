@@ -47,28 +47,10 @@ namespace GridSystem.Samples.Bootstrap
         /// </summary>
         public void Initialize()
         {
-            _main = _inventories.Create(_config.Main.Definition, _config.Main.Key);
-            _chest = _inventories.Create(_config.Chest.Definition, _config.Chest.Key);
-            _hand = _inventories.Create(_config.Hand.Definition, _config.Hand.Key);
-            _world = _inventories.Create(_config.World.Definition, _config.World.Key);
-
-            if (!_persistence.TryLoad(_main))
-            {
-                Fill(_main, _config.MainStartItems);
-            }
-
-            _persistence.TryLoad(_chest);
-
-            if (!_persistence.TryLoad(_hand))
-            {
-                Fill(_hand, _config.HandStartItems);
-            }
-
-            if (!_persistence.TryLoad(_world))
-            {
-                Fill(_world, _config.WorldStartItems);
-            }
-
+            _main = Restore(_config.Main);
+            _chest = Restore(_config.Chest);
+            _hand = Restore(_config.Hand);
+            _world = Restore(_config.World);
             _surfaces.Open(_content.Ui.Hand, _hand);
 
             _config.ToggleMain.performed += _onToggleMain;
@@ -103,6 +85,17 @@ namespace GridSystem.Samples.Bootstrap
             {
                 _surfaces.Open(surface, inventory);
             }
+        }
+
+        private GridInventory Restore(SampleInventory source)
+        {
+            GridInventory inventory = _inventories.Create(source.Definition, source.Key);
+            if (!_persistence.TryLoad(inventory))
+            {
+                Fill(inventory, source.StartItems);
+            }
+
+            return inventory;
         }
 
         private void Fill(GridInventory inventory, SampleStartItem[] items)

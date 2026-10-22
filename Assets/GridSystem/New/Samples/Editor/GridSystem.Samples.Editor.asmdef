@@ -1,0 +1,22 @@
+{
+    "name": "GridSystem.Samples.Editor",
+    "rootNamespace": "GridSystem.Samples.Editor",
+    "references": [
+        "GridSystem.Core",
+        "GridSystem.Runtime",
+        "GridSystem.Editor",
+        "GridSystem.Samples",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

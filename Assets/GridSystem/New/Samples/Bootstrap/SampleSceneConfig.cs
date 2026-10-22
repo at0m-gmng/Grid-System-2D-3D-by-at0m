@@ -44,16 +44,6 @@ namespace GridSystem.Samples.Bootstrap
         [SerializeField]
         private InputActionReference _toggleWorld;
 
-        [Header("Start Items")]
-        [SerializeField]
-        private SampleStartItem[] _mainStartItems;
-
-        [SerializeField]
-        private SampleStartItem[] _worldStartItems;
-
-        [SerializeField]
-        private SampleStartItem[] _handStartItems;
-
         /// <summary>
         /// UI prefab spawned at startup.
         /// </summary>
@@ -98,20 +88,5 @@ namespace GridSystem.Samples.Bootstrap
         /// Action toggling the world inventory.
         /// </summary>
         public InputAction ToggleWorld => _toggleWorld.action;
-
-        /// <summary>
-        /// Items placed into the main inventory on the first launch.
-        /// </summary>
-        public SampleStartItem[] MainStartItems => _mainStartItems;
-
-        /// <summary>
-        /// Items placed into the world inventory on the first launch.
-        /// </summary>
-        public SampleStartItem[] WorldStartItems => _worldStartItems;
-
-        /// <summary>
-        /// Items placed into the hand inventory on the first launch.
-        /// </summary>
-        public SampleStartItem[] HandStartItems => _handStartItems;
     }
 }

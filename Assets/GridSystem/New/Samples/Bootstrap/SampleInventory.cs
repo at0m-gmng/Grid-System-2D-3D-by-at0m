@@ -17,6 +17,9 @@ namespace GridSystem.Samples.Bootstrap
         [SerializeField]
         private GridDefinition _definition;
 
+        [SerializeField]
+        private SampleStartItem[] _startItems = Array.Empty<SampleStartItem>();
+
         /// <summary>
         /// Persistent save key.
         /// </summary>
@@ -26,5 +29,10 @@ namespace GridSystem.Samples.Bootstrap
         /// Grid size.
         /// </summary>
         public GridDefinition Definition => _definition;
+
+        /// <summary>
+        /// Items placed into the inventory on the first launch.
+        /// </summary>
+        public SampleStartItem[] StartItems => _startItems;
     }
 }
