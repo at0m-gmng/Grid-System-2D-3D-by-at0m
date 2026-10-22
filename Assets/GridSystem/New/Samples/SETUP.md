@@ -212,24 +212,30 @@ GridSystem           GridSystemContext, SampleModule
 ---
 
 ## 5. Сохранить общую сцену
-Дальше сцену копируем (`Ctrl+D` в Project) в три: `GridSystem_Reflex`, `GridSystem_Zenject`, `GridSystem_VContainer`. В каждой — ровно один DI из шага 6.
+Дальше сцену копируем (`Ctrl+D` в Project) в три: `TestInventoryScene_Zenject`, `TestInventoryScene_Reflex`,
+`TestInventoryScene_VContainer`. В каждой — ровно один DI из шага 6, остальные компоненты DI снять.
+Две и более корневые точки DI в одной сцене дадут двойную регистрацию.
+
+Содержимое сцены при этом не копируется: UI и 3D-сетка спавнятся из префабов конфига. Все три сцены — это
+`EventSystem`, `Environment` (камера и свет) и один объект DI, на дочернем объекте которого висят
+`GridSystemContext` + `SampleModule`, а под ним пустой выключенный `Pool`.
 
 ---
 
 ## 6. DI
 
-### 6.1 Reflex — `GridSystem_Reflex`
+### 6.1 Reflex — `TestInventoryScene_Reflex`
 1. Один раз на проект: создать `Assets/Resources`, в нём `Create → Reflex → Settings` (`ReflexSettings` строго в корне `Resources`). `Root Scopes` можно оставить пустым.
 2. В сцене: `GameObject → Reflex → SceneScope` — корневой объект с `ContainerScope`.
 3. На `SceneScope` (или его дочерний объект) добавить `ReflexGridInstaller`, `Context` = объект `GridSystem`.
 
-### 6.2 Zenject — `GridSystem_Zenject`
+### 6.2 Zenject — `TestInventoryScene_Zenject`
 1. `GameObject → Zenject → Scene Context`.
 2. На `SceneContext` добавить `ZenjectGridInstaller`, `Context` = `GridSystem`.
 3. `SceneContext → Mono Installers` → `+` → перетащить `ZenjectGridInstaller`.
 4. `ProjectContext` не нужен.
 
-### 6.3 VContainer — `GridSystem_VContainer`
+### 6.3 VContainer — `TestInventoryScene_VContainer`
 1. Пустой объект `LifetimeScope` в корне, добавить `GridSystemLifetimeScope`.
 2. `Context` = `GridSystem`, `Parent` пусто, `Auto Run` вкл.
 

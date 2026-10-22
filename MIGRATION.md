@@ -201,7 +201,10 @@ Present this to the user and get a decision before migrating scenes.
    DI component; only `_context`, `_config` and `_camera` are wired per scene.
    The scene now lives at `New/Samples/TestInventoryScene_Zenject.unity`.
 6. Done. `Samples/SETUP.md` matches the code and documents the validation; `README.md` describes v2.
-7. Open. Only the Zenject scene exists, so the Reflex and VContainer integrations are compiled but never run.
-   Build the other two scenes from `SETUP.md` §6 and repeat the §7 Play Mode checklist on each.
+7. Done. All three scenes exist and all three integrations have been run. Reflex and VContainer needed no code
+   change: `IGridObjectFactory` resolves to the container's own factory, the entry point fires, MessagePipe
+   delivers, and drag, transfer, merge and persistence match the Zenject results with an empty console.
+   Device level input (`InputSystemPointerInput`) was not exercised on the new scenes: the checks drove the
+   pointer by publishing `PointerMovedMessage` and `PointerButtonMessage` through each container.
 8. Open. `Examples` can be deleted: none of its 177 asset GUIDs is referenced from `New`. `EditorBuildSettings`
    still lists `Examples/Scenes/MainScene.unity`, which no longer exists.
