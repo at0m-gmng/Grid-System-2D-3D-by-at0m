@@ -14,6 +14,8 @@ namespace GridSystem.Runtime.Views
     {
         private const string MENU_NAME = "Grid System/Item View Catalog";
         private const string FILE_NAME = "ItemViewCatalog";
+        private const string WITHOUT_VIEW = "Catalog '{0}' has no view for '{1}'. Either add the entry or keep the item out of inventories shown by surfaces using this catalog.";
+        private const string WITHOUT_PREFAB = "Catalog '{0}' has an entry for '{1}' without a view prefab.";
 
         [SerializeField]
         private ItemViewEntry[] _entries = Array.Empty<ItemViewEntry>();
@@ -22,12 +24,23 @@ namespace GridSystem.Runtime.Views
         private bool _dirty = true;
 
         /// <summary>
-        /// Returns view prefab of the definition.
+        /// Returns view prefab of the definition. Throws when the catalog cannot show it: ask
+        /// <see cref="Contains"/> first, a surface refuses what it cannot display.
         /// </summary>
         public ItemView GetPrefab(IGridItemDefinition definition)
         {
             EnsureBuilt();
-            return _lookup[definition];
+            if (!_lookup.TryGetValue(definition, out ItemView prefab))
+            {
+                throw new KeyNotFoundException(string.Format(WITHOUT_VIEW, name, definition));
+            }
+
+            if (prefab == null)
+            {
+                throw new InvalidOperationException(string.Format(WITHOUT_PREFAB, name, definition));
+            }
+
+            return prefab;
         }
 
         /// <summary>

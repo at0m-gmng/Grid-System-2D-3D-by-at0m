@@ -26,6 +26,12 @@ namespace GridSystem.Editor.Validation
         protected override void Validate(GridValidationReport report)
         {
             GridSystemSettings settings = (GridSystemSettings)target;
+            GridContentValidator.CollectViewCatalogs(_catalogs);
+            for (int i = 0; i < _catalogs.Count; i++)
+            {
+                GridContentValidator.ValidateViews(_catalogs[i], report);
+            }
+
             if (settings.Items == null)
             {
                 report.AddError(WITHOUT_ITEMS, settings);
@@ -33,6 +39,7 @@ namespace GridSystem.Editor.Validation
             else
             {
                 GridContentValidator.ValidateDefinitions(settings.Items, report);
+                GridContentValidator.ValidateReachability(settings.Items, _catalogs, report);
             }
 
             if (settings.Input == null)
@@ -58,10 +65,8 @@ namespace GridSystem.Editor.Validation
                 GridContentValidator.ValidateRuleDefinitions(rules, definitions, report);
             }
 
-            GridContentValidator.CollectViewCatalogs(_catalogs);
             for (int i = 0; i < _catalogs.Count; i++)
             {
-                GridContentValidator.ValidateViews(_catalogs[i], report);
                 GridContentValidator.ValidateMergeResults(rules, _catalogs[i], report);
             }
         }

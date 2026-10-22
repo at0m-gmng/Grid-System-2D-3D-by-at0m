@@ -32,6 +32,7 @@ namespace GridSystem.Editor.Validation
         private const string CONFLICTING_RULE = "{0}: '{1}' with '{2}' produces both '{3}' and '{4}', so the last rule wins.";
         private const string UNKNOWN_DEFINITION = "{0}: '{1}' is missing from '{2}', so every save holding it is dropped on load.";
         private const string UNREACHABLE_RESULT = "{0}: merging '{1}' with '{2}' produces '{3}', which has no view here, so the merge is refused.";
+        private const string WITHOUT_ANY_VIEW = "{0}: '{1}' has no view in any catalog, so it can never appear on a surface.";
 
         /// <summary>
         /// Reports definitions that saves cannot restore: empty slots, missing and shared ids.
@@ -164,6 +165,26 @@ namespace GridSystem.Editor.Validation
         }
 
         /// <summary>
+        /// Reports definitions no catalog can show, so they can never appear on any surface.
+        /// A definition present in a single catalog is normal: that is how a surface refuses foreign items.
+        /// </summary>
+        public static void ValidateReachability(ItemDefinitionCatalog definitions, IReadOnlyList<ItemViewCatalog> views, GridValidationReport report)
+        {
+            using (SerializedObject serialized = new SerializedObject(definitions))
+            {
+                SerializedProperty items = serialized.FindProperty(ITEMS_FIELD);
+                for (int i = 0; i < items.arraySize; i++)
+                {
+                    ItemDefinition definition = items.GetArrayElementAtIndex(i).objectReferenceValue as ItemDefinition;
+                    if (definition != null && !IsDisplayable(definition, views))
+                    {
+                        report.AddError(string.Format(WITHOUT_ANY_VIEW, definitions.name, definition.name), definition);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Fills the list with definitions the catalog can show.
         /// </summary>
         public static void CollectDefinitions(ItemViewCatalog views, List<ItemDefinition> definitions)
@@ -194,6 +215,17 @@ namespace GridSystem.Editor.Validation
             {
                 catalogs.Add(AssetDatabase.LoadAssetAtPath<ItemViewCatalog>(AssetDatabase.GUIDToAssetPath(guids[i])));
             }
+        }
+
+        private static bool IsDisplayable(ItemDefinition definition, IReadOnlyList<ItemViewCatalog> views)
+        {
+            bool result = false;
+            for (int i = 0; !result && i < views.Count; i++)
+            {
+                result = views[i].Contains(definition);
+            }
+
+            return result;
         }
 
         private static ItemDefinition GetDefinition(SerializedProperty rule, string field)
