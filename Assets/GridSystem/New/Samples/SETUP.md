@@ -5,7 +5,7 @@
 
 Все новые ассеты кладём в `Assets/GridSystem/New/Samples/Content/` (дальше — `Content/`).
 
-> **Сцена в репозитории собрана не по этой инструкции.** `Examples/Scenes/TestInventoryScene_Zenject.unity`
+> **Сцена в репозитории собрана не по этой инструкции.** `New/Samples/TestInventoryScene_Zenject.unity`
 > воспроизводит сцену v1 один в один и поэтому переиспользует её префаб `WindowsSystem` и другие числа:
 > рука 5×1 (лента) с 4 предметами, клетка 100 px, инвентарь и сундук 3×3, тултип в две строки.
 > Инструкция ниже собирает независимое демо автора v2 — она о том, **как связывать систему**,
@@ -102,12 +102,12 @@
 
 ### 3.1 UI-ячейка `Content/Prefabs/UI/UI_Cell`
 1. Объект с `RectTransform`: anchors `(0.5, 0.5)`–`(0.5, 0.5)`, pivot `(0.5, 0.5)`.
-2. `Image`: Sprite = `Examples/Textures/Grid/GridBackground`, `Raycast Target` выкл.
+2. `Image`: Sprite = `Samples/Art/Textures/GridBackground_2`, `Raycast Target` выкл.
 3. Размер выставит поверхность (Cell Size), позицию и поворот тоже.
 
 ### 3.2 3D-ячейка `Content/Prefabs/World/World_Cell`
 1. Пустой корень `World_Cell` (поворот корня перезаписывает поверхность).
-2. Дочерний `Quad`: Position `(0, 0.001, 0)`, Rotation `(90, 0, 0)`, Scale `(1, 1, 1)`, материал `Examples/Materials/GridCellMaterial`, `MeshCollider` удалить.
+2. Дочерний `Quad`: Position `(0, 0.001, 0)`, Rotation `(90, 0, 0)`, Scale `(1, 1, 1)`, материал `Samples/Art/Materials/GridCellMaterial`, `MeshCollider` удалить.
 
 ### 3.3 UI-вьюха предмета `Content/Prefabs/UI/UI_<Item>` (для каждого из 5)
 ```
@@ -115,7 +115,7 @@ UI_Pistol            RectTransform, UIItemView, PrimeTweenItemMotion, GraphicIte
 └─ Body              RectTransform, Image
 ```
 1. `UI_Pistol` → `RectTransform`: anchors `(0.5, 0.5)`–`(0.5, 0.5)` (НЕ stretch). Размер и pivot считаются из формы автоматически.
-2. `Body` → `RectTransform`: anchors `(0, 0)`–`(1, 1)`, Left/Right/Top/Bottom = 0. `Image`: Sprite из `Examples/Textures/Items` (Katana, Ammo для Bullet, Pistol; для LaserTower/Wall — любой спрайт), `Preserve Aspect` вкл, `Raycast Target` выкл. Спрайт рисуется в неповёрнутой ориентации формы.
+2. `Body` → `RectTransform`: anchors `(0, 0)`–`(1, 1)`, Left/Right/Top/Bottom = 0. `Image`: Sprite из `Samples/Art/Textures` (Katana, Ammo для Bullet, Pistol; для LaserTower/Wall — любой спрайт), `Preserve Aspect` вкл, `Raycast Target` выкл. Спрайт рисуется в неповёрнутой ориентации формы.
 3. `PrimeTweenItemMotion`: `Target` = `UI_Pistol`. Без PrimeTween — `InstantItemMotion` (или `DOTweenItemMotion` при `DOTWEEN`).
 4. `GraphicItemHighlighter`: `Graphic` = `Body` (Image). Palette по умолчанию: белый / зелёный / красный.
 5. `UIItemView`: `Motion` = `PrimeTweenItemMotion`, `Highlighter` = `GraphicItemHighlighter`, `Body` = `Body`, `Rect` = `UI_Pistol`.
@@ -131,7 +131,7 @@ World_Wall           Transform, WorldItemView, PrimeTweenItemMotion, RendererIte
    - Katana (1×3): `(0, 0.4, 1)`, `(0, 0.4, 0)`, `(0, 0.4, -1)`.
    - Bullet, LaserTower (1×1): `(0, 0.4, 0)` (LaserTower выше: Scale Y = 1.6, Y = 0.8).
    - Pistol, Wall (2×2, клетки `P x / x .`): `(-0.5, 0.4, 0.5)`, `(0.5, 0.4, 0.5)`, `(-0.5, 0.4, -0.5)`.
-3. Материал кубов — любой Standard (например `Examples/Materials/GridItemMaterial`).
+3. Материал кубов — любой Standard (например `Samples/Art/Materials/GridItemMaterial`).
 4. `PrimeTweenItemMotion`: `Target` = корень.
 5. `RendererItemHighlighter`: `Renderers` = все MeshRenderer кубов, `Color Property` = `_Color` (Built-in).
 6. `WorldItemView`: `Motion`, `Highlighter`, `Body` = `Model`, `Model` = `Model`.

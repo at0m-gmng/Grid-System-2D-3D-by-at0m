@@ -36,9 +36,11 @@ Read this file, `README.md` and the code before doing anything. Reply to the use
   - `Assets/TextMesh Pro`;
   - `Assets/Resources/ReflexSettings.asset`, required by Reflex;
   - `.meta` files.
-- `Assets/GridSystem/Examples` — the old implementation and its scene `Examples/Scenes/TestInventoryScene.unity`. It is the reference to migrate and will be deleted later.
-- `Assets/GridSystem/Core` (`Grid`, `ColumnList`, `CellType`) — old core, used only by `Examples`.
-- `Assets/GridSystem/New` — v2. Not verified in Play Mode yet. Only compilation was checked, outside Unity.
+- `Assets/GridSystem/Examples` and `Assets/GridSystem/Core` — **deleted.** They held v1: the old implementation,
+  its scene `TestInventoryScene.unity` and the old core (`Grid`, `ColumnList`, `CellType`) that only `Examples`
+  used. Removed after v2 reproduced the behaviour; nothing outside referenced any of their 177 asset GUIDs.
+  Section 4 below and section 5a stay as the written record of what v1 did — the code itself is in the git history.
+- `Assets/GridSystem/New` — v2, the only implementation. All three sample scenes verified in Play Mode.
 
 ## 2. Packages and assemblies (`Assets/GridSystem/New`)
 
@@ -235,5 +237,6 @@ Present this to the user and get a decision before migrating scenes.
    delivers, and drag, transfer, merge and persistence match the Zenject results with an empty console.
    Device level input (`InputSystemPointerInput`) was not exercised on the new scenes: the checks drove the
    pointer by publishing `PointerMovedMessage` and `PointerButtonMessage` through each container.
-8. Open. `Examples` can be deleted: none of its 177 asset GUIDs is referenced from `New`. `EditorBuildSettings`
-   still lists `Examples/Scenes/MainScene.unity`, which no longer exists.
+8. Done. `Examples` and the old `Core` are deleted and the stale `EditorBuildSettings` entry pointing at
+   `Examples/Scenes/MainScene.unity` is gone. All three scenes were reopened and run afterwards: empty console,
+   and the 17 compiler warnings that came from v1 code disappeared with it.
