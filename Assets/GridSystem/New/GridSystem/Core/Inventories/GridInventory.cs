@@ -99,23 +99,30 @@ namespace GridSystem.Core.Inventories
         public bool CanPlace(GridItem item, Vector2Int origin, int rotation) => CanPlace(item.Definition, origin, rotation, item.Id, GridModel.EMPTY);
 
         /// <summary>
-        /// Finds the first free placement scanning rotations, rows and columns.
+        /// Finds the first free placement scanning rows, columns and then rotations,
+        /// so the earliest cell wins even when it requires a turn.
         /// </summary>
         public bool TryFindPlacement(IGridItemDefinition definition, out Vector2Int origin, out int rotation)
+            => TryFindPlacement(definition, GridModel.EMPTY, GridModel.EMPTY, out origin, out rotation);
+
+        /// <summary>
+        /// Finds the first free placement treating cells of ignored ids as free,
+        /// so a placement can be planned before the ignored items are removed.
+        /// </summary>
+        public bool TryFindPlacement(IGridItemDefinition definition, int ignoredA, int ignoredB, out Vector2Int origin, out int rotation)
         {
             bool isFound = false;
             origin = default;
             rotation = 0;
             int rotations = definition.IsRotatable ? GridShape.ROTATION_COUNT : 1;
-            for (int r = 0; !isFound && r < rotations; r++)
+            for (int y = 0; !isFound && y < Model.Height; y++)
             {
-                ReadOnlySpan<Vector2Int> cells = GetCells(definition, r);
-                for (int y = 0; !isFound && y < Model.Height; y++)
+                for (int x = 0; !isFound && x < Model.Width; x++)
                 {
-                    for (int x = 0; !isFound && x < Model.Width; x++)
+                    for (int r = 0; !isFound && r < rotations; r++)
                     {
                         Vector2Int candidate = new Vector2Int(x, y);
-                        if (Model.CanPlace(cells, candidate, GridModel.EMPTY, GridModel.EMPTY))
+                        if (Model.CanPlace(GetCells(definition, r), candidate, ignoredA, ignoredB))
                         {
                             isFound = true;
                             origin = candidate;
