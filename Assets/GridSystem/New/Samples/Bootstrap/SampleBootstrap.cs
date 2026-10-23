@@ -62,7 +62,7 @@ namespace GridSystem.Samples.Bootstrap
         }
 
         /// <summary>
-        /// Saves all inventories, unsubscribes from toggles and disables the actions it enabled.
+        /// Saves persistent inventories, unsubscribes from toggles and disables the actions it enabled.
         /// The actions live in an asset, so leaving them enabled leaks into the next session.
         /// </summary>
         public void Dispose()
@@ -73,10 +73,10 @@ namespace GridSystem.Samples.Bootstrap
             _config.ToggleMain.Disable();
             _config.ToggleChest.Disable();
             _config.ToggleWorld.Disable();
-            _persistence.Save(_main);
-            _persistence.Save(_chest);
-            _persistence.Save(_hand);
-            _persistence.Save(_world);
+            Save(_config.Main, _main);
+            Save(_config.Chest, _chest);
+            Save(_config.Hand, _hand);
+            Save(_config.World, _world);
         }
 
         private void Toggle(GridSurface surface, GridInventory inventory)
@@ -94,12 +94,20 @@ namespace GridSystem.Samples.Bootstrap
         private GridInventory Restore(SampleInventory source)
         {
             GridInventory inventory = _inventories.Create(source.Definition, source.Key);
-            if (!_persistence.TryLoad(inventory))
+            if (!source.IsPersistent || !_persistence.TryLoad(inventory))
             {
                 Fill(inventory, source.StartItems);
             }
 
             return inventory;
+        }
+
+        private void Save(SampleInventory source, GridInventory inventory)
+        {
+            if (source.IsPersistent)
+            {
+                _persistence.Save(inventory);
+            }
         }
 
         private void Fill(GridInventory inventory, SampleStartItem[] items)

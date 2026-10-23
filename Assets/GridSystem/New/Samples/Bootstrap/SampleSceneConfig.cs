@@ -88,5 +88,14 @@ namespace GridSystem.Samples.Bootstrap
         /// Action toggling the world inventory.
         /// </summary>
         public InputAction ToggleWorld => _toggleWorld.action;
+
+        /// <summary>
+        /// Returns true when the inventory saved under this key keeps its content between sessions.
+        /// Unknown keys are treated as transient, so nothing outside the sample is stored by accident.
+        /// </summary>
+        public bool IsPersistent(string key)
+            => IsPersistent(_main, key) || IsPersistent(_chest, key) || IsPersistent(_hand, key) || IsPersistent(_world, key);
+
+        private static bool IsPersistent(SampleInventory inventory, string key) => inventory.Key == key && inventory.IsPersistent;
     }
 }

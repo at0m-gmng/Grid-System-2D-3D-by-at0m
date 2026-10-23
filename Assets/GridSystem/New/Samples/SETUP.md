@@ -202,8 +202,12 @@ GridSystem           GridSystemContext, SampleModule
 3. `SampleSceneConfig` (ассет `Create → Grid System → Sample Scene Config`):
    - `Ui Prefab` = `SampleWindowsSystem`, `World Prefab` = `SampleWorldGrid`.
    - `Main` / `Chest` / `Hand` / `World` — по инвентарю: `Key` (ключ сохранения, уникальный),
-     `Definition` (размер сетки) и `Start Items` (`Definition + Origin + Rotation`), которые
-     раскладываются только при первом запуске, когда сохранения ещё нет.
+     `Definition` (размер сетки), `Start Items` (`Definition + Origin + Rotation`) и `Is Persistent`.
+     При включённом `Is Persistent` содержимое сохраняется и восстанавливается, а `Start Items`
+     раскладываются только при первом запуске, пока сохранения нет. При выключенном инвентарь
+     не сохраняется и не восстанавливается вовсе — он наполняется из `Start Items` **каждый запуск**.
+     У руки `Is Persistent` выключен: в v1 лента раздавалась заново при каждом старте и была
+     бесконечным источником предметов.
    - `Toggle Main` / `Toggle Chest` / `Toggle World` — действия открытия поверхностей.
 
 Поверхности, окна и тултип отдаёт `SampleSceneRoot` на UI-префабе. Окна включаются/выключаются сами по открытию
@@ -256,7 +260,8 @@ GridSystem           GridSystemContext, SampleModule
 4. Перенести предмет из UI на 3D-сетку: над сеткой превью становится 3D-моделью, после отпускания предмет в мире. И обратно.
 5. Бросить Katana на Katana → Bullet; Bullet на Bullet → Pistol; LaserTower на LaserTower → Wall.
 6. Навести на предмет — тултип с параметрами.
-7. Закрыть Main (`I`) или выйти из Play Mode, снова запустить — раскладка восстановлена.
+7. Закрыть Main (`I`) или выйти из Play Mode, снова запустить — раскладка инвентаря, сундука и мира
+   восстановлена, а рука снова полная, даже если предметы из неё вытащили.
 
 ## 8. Частые ошибки
 

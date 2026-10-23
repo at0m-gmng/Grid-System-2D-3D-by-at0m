@@ -20,10 +20,20 @@ namespace GridSystem.Samples.Bootstrap
         [SerializeField]
         private SampleStartItem[] _startItems = Array.Empty<SampleStartItem>();
 
+        [Tooltip("Off for a bar that is refilled from start items on every launch instead of being restored.")]
+        [SerializeField]
+        private bool _isPersistent = true;
+
         /// <summary>
         /// Persistent save key.
         /// </summary>
         public string Key => _key;
+
+        /// <summary>
+        /// Keeps the content between sessions. When off the inventory is never stored and never restored,
+        /// so it starts from its start items every launch.
+        /// </summary>
+        public bool IsPersistent => _isPersistent;
 
         /// <summary>
         /// Grid size.

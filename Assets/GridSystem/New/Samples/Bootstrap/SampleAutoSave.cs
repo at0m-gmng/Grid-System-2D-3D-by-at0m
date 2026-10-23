@@ -7,16 +7,19 @@ namespace GridSystem.Samples.Bootstrap
     using Runtime.Persistence;
 
     /// <summary>
-    /// Saves an inventory when its surface is closed.
+    /// Saves a persistent inventory when its surface is closed. Transient ones are skipped,
+    /// so a bar refilled on every launch leaves no stale save behind.
     /// </summary>
     public sealed class SampleAutoSave : IGridInitializable, IDisposable
     {
-        public SampleAutoSave(IInventoryPersistence persistence, ISubscriber<SurfaceClosedMessage> closedSubscriber)
+        public SampleAutoSave(SampleSceneConfig config, IInventoryPersistence persistence, ISubscriber<SurfaceClosedMessage> closedSubscriber)
         {
+            _config = config;
             _persistence = persistence;
             _closedSubscriber = closedSubscriber;
         }
 
+        private readonly SampleSceneConfig _config;
         private readonly IInventoryPersistence _persistence;
         private readonly ISubscriber<SurfaceClosedMessage> _closedSubscriber;
         private IDisposable _subscription;
@@ -31,6 +34,12 @@ namespace GridSystem.Samples.Bootstrap
         /// </summary>
         public void Dispose() => _subscription?.Dispose();
 
-        private void OnClosed(SurfaceClosedMessage message) => _persistence.Save(message.Inventory);
+        private void OnClosed(SurfaceClosedMessage message)
+        {
+            if (_config.IsPersistent(message.Inventory.Key))
+            {
+                _persistence.Save(message.Inventory);
+            }
+        }
     }
 }

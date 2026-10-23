@@ -18,10 +18,12 @@ MonoBehaviour:
     _key: '"main"'
     _definition: {fileID: 11400000, guid: 27cd5eef41107a94e8b5afaa51d7831d, type: 2}
     _startItems: []
+    _isPersistent: 1
   _chest:
     _key: '"chest"'
     _definition: {fileID: 11400000, guid: 154104d477824484daa9def51a89f489, type: 2}
     _startItems: []
+    _isPersistent: 1
   _hand:
     _key: '"hand"'
     _definition: {fileID: 11400000, guid: ae9424910db58c345a8214f2a3c80074, type: 2}
@@ -38,6 +40,7 @@ MonoBehaviour:
     - Definition: {fileID: 11400000, guid: a4579909bd543db459fe78b986f81974, type: 2}
       Origin: {x: 4, y: 0}
       Rotation: 0
+    _isPersistent: 0
   _world:
     _key: '"world"'
     _definition: {fileID: 11400000, guid: cd24b44ca20b283439ae342e7989ee55, type: 2}
@@ -51,6 +54,7 @@ MonoBehaviour:
     - Definition: {fileID: 11400000, guid: d7f3fa7d14f2da14cb4b9ade6447c93b, type: 2}
       Origin: {x: 4, y: 4}
       Rotation: 0
+    _isPersistent: 1
   _toggleMain: {fileID: -9049296856450799424, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}
   _toggleChest: {fileID: 495850564039557309, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}
   _toggleWorld: {fileID: 1265092184673311471, guid: 4d96bcdcb95ab3544bfc98fa16bea483, type: 3}

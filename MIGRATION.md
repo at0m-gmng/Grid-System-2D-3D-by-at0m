@@ -165,6 +165,35 @@ Input asset: `Examples/Scripts/InputSystem/GameInput.inputactions`:
 5. Pool root under the Canvas works for UI views. World views must not depend on canvas layout.
 6. Use the TMP template serialization from Unity if TMP components are needed. Font asset can stay empty (TMP default).
 
+## 5a. Behaviour parity with v1 (verified against the v1 sources)
+
+The overriding rule is that v2 behaves exactly like v1. Everything below was read out of `Examples/Scripts`,
+not guessed. Two regressions were found this way and fixed; three divergences remain on purpose and must not be
+"fixed" silently in either direction.
+
+Same in both: how the dragged view follows the pointer; rotation (clockwise, `& 3`, reverted on a failed drop);
+auto placement (rows, then columns, then rotations, first fit); merge triggering and placement; the save trigger
+(on surface close); the tooltip (name and damage only — v1 declares four text fields but `DescriptionView`
+assigns only `NameValue` and `DamageValue`, and hides the popup while dragging); windows closed on start;
+item removal (v1 `DestroySystem` only destroys merge ingredients, v2 pools their views); the main inventory
+starting empty (`MainInventory.BaseItems` holds three items in v1 but no v1 code ever reads them).
+
+Fixed regressions:
+- Merge demanded that the result fit at the target cell. v1 never checked and auto placed the result anywhere.
+- The hand was a persistent inventory. v1 refills it from `SelectableItemConfig` on every `Start` and never saves
+  it (`InventoryType` covers `Grid`, `MainInventory`, `ChestInventory` only), so it is an endless item source.
+  `SampleInventory.IsPersistent` now carries this, and it is off for the hand.
+
+Deliberate divergences:
+- **Picking.** v1 grabs by visible sprite pixels (`alphaHitTestMinimumThreshold = 0.1`) and by physics colliders
+  in 3D. v2 picks by the cell under the pointer. Reproducing v1 would mean splitting pick and drop cell resolution
+  and adding a graphic raycast pass.
+- **Drop tolerance.** v1 accepts a drop only within `0.025 * (cellW² + cellH²)` of a cell centre, about 22 px on a
+  100 px cell; outside it the item returns. v2 accepts anywhere inside the cell. The pivot to cell mapping is
+  identical and v2 accepts a superset, so nothing v1 allowed is refused.
+- **World start items.** v1 has none in data: the world grid filled only from a save. v2 ships three so the 3D grid
+  is not empty on a clean launch. One field in `SampleSceneConfig` clears it.
+
 ## 6. Open architectural question (ask the user before acting)
 
 The user dislikes MonoBehaviour plumbing in DI. Today:
